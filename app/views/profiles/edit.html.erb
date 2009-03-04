@@ -1,0 +1,7 @@
+<% set_page_title "Panda - Edit #{@profile.title}"%>
+<h1>Edit <%= @profile.title %></h1>
+
+<%= form_for(@profile, :action => "/profiles/#{@profile.id}") do %>
+	<%= hidden_field :name => '_method', :value => 'put' %>
+	<%= partial :form, :profile => @profile %>
+<% end =%>

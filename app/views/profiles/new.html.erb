@@ -1,0 +1,5 @@
+<h1>New Profile</h1>
+
+<%= form_for(@profile, :action => resource(:profiles)) do %>
+	<%= partial :form, :profile => @profile %>
+<% end =%>

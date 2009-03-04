@@ -26,4 +26,20 @@ class Profile
     # exist. It doesn't. So rescue everything.
     Merb.logger.info "PANDA WARNING: Profile SimpleDB domain or MySQL table does not exist. Please check that you have created all the required domains/tables (see the getting started guide for more details)."
   end
+  
+  def self.all
+    Profile.query
+  end
+  
+  def self.containers
+    ['mp4','flv']
+  end
+  
+  def self.audio_codecs
+    ['aac']
+  end
+  
+  def self.players
+    ['flash']
+  end
 end

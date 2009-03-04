@@ -21,6 +21,7 @@
 
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do |r|
+  r.resources :profiles
   r.resources :videos, :member => {:form => :get, :upload => :post, :done => :get, :state => :get, :add_to_queue => :get }, :collection => {:exp => :get} do |video|
     video.resource :thumbnail, :controller => "thumbnail"
     # Using get requests right now for create and update
@@ -33,7 +34,7 @@ Merb::Router.prepare do |r|
   r.match("/logout").to(:controller => "auth", :action => "logout")
   
   # This is the default route for /:controller/:action/:id
-  # This is fine for most cases.  If you're heavily using resource-based
+  # This is fine for most cases.  If you're heavily using resource-based˝
   # routes, you may want to comment/remove this line to prevent
   # clients from calling your create or destroy actions with a GET
   # r.default_routes

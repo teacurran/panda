@@ -1,5 +1,5 @@
 module Merb
-    module ProfilesHelper
+  module ProfilesHelper
 
-    end
-end
+  end
+end # Merb

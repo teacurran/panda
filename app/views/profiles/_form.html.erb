@@ -1,0 +1,13 @@
+	<%= text_field :title, :label => 'Title' %>
+	<%= select :player, :label => 'Player', :collection => Profile.players %>
+	<%= select :container, :label => 'Container', :collection => Profile.containers %>
+	<%= text_field :width, :label => 'Width' %>
+	<%= text_field :height, :label => 'Height' %>
+	<%= text_field :video_codec, :label => 'Video Codec' %>
+	<%= text_field :video_bitrate, :label => 'Video Bitrate' %>
+	<%= text_field :fps, :label => 'fps' %>
+	<%= select :audio_codec, :label => 'Audio Codec', :collection => Profile.audio_codecs %>
+	<%= text_field :audio_bitrate, :label => 'Audio Bitrate' %>
+	<%= text_field :audio_sample_rate, :label => 'Audio Sample Rate' %>
+	<%= text_field :position, :label => 'Position' %>
+	<p><%= submit "Create new Profile" %></p>

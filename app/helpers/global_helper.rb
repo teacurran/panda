@@ -18,5 +18,13 @@ module Merb
     def message
       %(<div class="notice">#{request.message[:notice]}</div>) if request.message[:notice]
     end
+    
+    def set_page_title(title)
+      throw_content :title, title
+    end
+    
+    def page_title
+      catch_content(:title) || "Panda"
+    end
   end
 end    
