@@ -46,7 +46,7 @@ class Clipping
     height = constrain_to_height
     width = (@video.width.to_f/@video.height.to_f) * height
     
-    GDResize.new.resize \
+    MagickResize.resample \
       tmp_path(:screenshot),
       tmp_path(:thumbnail),
       [width.to_i, height.to_i]
