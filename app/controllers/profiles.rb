@@ -1,5 +1,6 @@
 class Profiles < Application
   before :require_login
+  before :set_profile, :only => [:show, :edit, :update, :destroy]
   
   # GET /profiles
   def index
@@ -11,7 +12,7 @@ class Profiles < Application
   # GET /profiles/:id
   def show
     provides :html, :xml, :yaml
-    @profile = Profile.find(params[:id])
+    @profile = Profile[params[:id]]
     display @profile
   end
 
@@ -23,19 +24,13 @@ class Profiles < Application
 
   # GET /profiles/:id/edit
   def edit
-    @profile = Profile.find(params[:id])
-    render
-  end
-
-  # GET /profiles/:id/delete
-  def delete
-    @profile = Profile.find(params[:id])
+    @profile = Profile[params[:id]]
     render
   end
 
   # POST /profiles
   def create
-    @profile = Profile.new(nil,params[:profile])
+    @profile = Profile.new(params[:profile])
     @profile.save
     
     if content_type == :html
@@ -47,8 +42,8 @@ class Profiles < Application
 
   # PUT /profiles/:id
   def update
-    @profile = Profile.find(params[:id])
-    @profile.set_attributes(params[:profile])
+    @profile = Profile[params[:id]]
+    @profile.update_attributes(params[:profile])
     @profile.save
     if content_type == :html
       redirect '/profiles'
@@ -66,5 +61,13 @@ class Profiles < Application
     else
       display true
     end
+  end
+  
+private
+
+  def set_profile
+    @profile = Profile.get!(params[:id])
+    rescue DataMapper::ObjectNotFoundError
+      raise NotFound
   end
 end
