@@ -12,7 +12,6 @@ class Profiles < Application
   # GET /profiles/:id
   def show
     provides :html, :xml, :yaml
-    @profile = Profile[params[:id]]
     display @profile
   end
 
@@ -24,7 +23,6 @@ class Profiles < Application
 
   # GET /profiles/:id/edit
   def edit
-    @profile = Profile[params[:id]]
     render
   end
 
@@ -42,7 +40,6 @@ class Profiles < Application
 
   # PUT /profiles/:id
   def update
-    @profile = Profile[params[:id]]
     @profile.update_attributes(params[:profile])
     @profile.save
     if content_type == :html
@@ -54,7 +51,6 @@ class Profiles < Application
 
   # DELETE /profiles/:id
   def destroy
-    @profile = Profile.find(params[:id])
     @profile.destroy!
     if content_type == :html
       redirect '/profiles'
