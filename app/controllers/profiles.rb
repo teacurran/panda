@@ -51,7 +51,7 @@ class Profiles < Application
 
   # DELETE /profiles/:id
   def destroy
-    @profile.destroy!
+    @profile.destroy
     if content_type == :html
       redirect '/profiles'
     else

@@ -1,6 +1,10 @@
 <% set_page_title "Panda - Edit #{@profile.title}"%>
 <h1>Edit <%= @profile.title %></h1>
 
+<%= form_for(@profile, :action => url(:profile, :id => @profile.id), :method => :delete) do %>
+  <%= submit "Delete video", :onclick => "var agree=confirm('This will delete the profile. But all existing videos encoded with it will not be affected.');if (agree) {return true} else {return false}" %>
+<% end =%>
+
 <%= form_for(@profile, :action => "/profiles/#{@profile.id}") do %>
 	<%= hidden_field :name => '_method', :value => 'put' %>
 	<%= partial :form, :profile => @profile %>

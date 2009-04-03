@@ -3,7 +3,7 @@
 <ul>
 <% @profiles.each do |p| %>
 	<li>
-		<%= link_to p.title, "/profiles/#{p.id}/edit" %> 
-		[<%= link_to "Delete", "/profiles/#{p.id}", :method => :delete, :confirm => "Are you sure you want to delete profile #{p.title}?"%>]</li>
+		<%= link_to p.title, "/profiles/#{p.id}/edit" %>
+	</li>
 <% end %>
 </ul>
