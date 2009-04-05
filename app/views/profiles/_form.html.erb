@@ -1,13 +1,41 @@
-	<%= text_field :title, :label => 'Title' %>
-	<%= select :player, :label => 'Player', :collection => Profile.players %>
-	<%= select :container, :label => 'Container', :collection => Profile.containers %>
+<%= text_field :title, :label => 'Title' %>
+
+<p>
+  <label for="profile_player">Player</label>
+  <span class="note">Where will this video be played? Selecting <em>Flash Player</em> will ensure the video is playable on the web.</span>
+  <%= select :player, :collection => Profile.players %>
+</p>
+
+<p>
+  <label for="profile_container">Container</label>
+  <span class="note">The contain determines what the filetype of the output video will be.</span>
+  <%= select :container, :collection => Profile.containers %>
+</p>
+
+
+<fieldset>
+  <legend>Video settings</legend>
 	<%= text_field :width, :label => 'Width' %>
 	<%= text_field :height, :label => 'Height' %>
-	<%= text_field :video_codec, :label => 'Video Codec' %>
-	<%= text_field :video_bitrate, :label => 'Video Bitrate' %>
-	<%= text_field :fps, :label => 'fps' %>
+	
+	<p>
+	  <label for="profile_video_codec">Video Codec</label>
+  	<span class="note">Leave blank to use the selected container's default value.</span>
+  	<%= text_field :video_codec %>
+  </p>
+  
+  <p>
+    <label for="profile_video_bitrate">Video Bitrate</label>
+  	<%= text_field :video_bitrate %>
+  	<span class="unit">kbit/s</span>
+  </p>
+  
+	<%= select :fps, :label => 'FPS', :collection => Profile.fpss %>
+</fieldset>
+
+<fieldset>
+  <legend>Audio settings</legend>
 	<%= select :audio_codec, :label => 'Audio Codec', :collection => Profile.audio_codecs %>
 	<%= text_field :audio_bitrate, :label => 'Audio Bitrate' %>
 	<%= text_field :audio_sample_rate, :label => 'Audio Sample Rate' %>
-	<%= text_field :position, :label => 'Position' %>
-	<p><%= submit "Create new Profile" %></p>
+</fieldset>

@@ -2,4 +2,5 @@
 
 <%= form_for(@profile, :action => resource(:profiles)) do %>
 	<%= partial :form, :profile => @profile %>
+  <div class="buttons"><%= submit "Create Profile" %></div>
 <% end =%>

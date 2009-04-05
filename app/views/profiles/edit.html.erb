@@ -8,4 +8,5 @@
 <%= form_for(@profile, :action => "/profiles/#{@profile.id}") do %>
 	<%= hidden_field :name => '_method', :value => 'put' %>
 	<%= partial :form, :profile => @profile %>
+  <div class="buttons"><%= submit "Save Profile" %></div>
 <% end =%>

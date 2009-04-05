@@ -28,14 +28,18 @@ class Profile
   end
   
   def self.containers
-    ['mp4','flv']
+    [['mp4','MPEG4'],['flv','Flash Video']]
   end
   
   def self.audio_codecs
-    ['aac']
+    [['','Same as container'],['aac','AAC']]
   end
   
   def self.players
-    ['flash']
+    [['flash','Flash Player'],['default','Standard video player']]
+  end
+  
+  def self.fpss
+    [['','Same as source'],['24','24 (PAL)'],['25','25 (NTSC)'],['','TODO ADD IN MORE']]
   end
 end
