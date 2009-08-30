@@ -4,69 +4,36 @@ class Videos < Application
   before :set_video_with_nice_errors, :only => [:form, :done, :state]
 
   def index
-    provides :html, :xml, :yaml
+    provides :json
     
     @videos = Video.all_originals
-    
     display @videos
   end
 
   def show
-    provides :html, :xml, :yaml
+    provides :json
     
-    case content_type
-    when :html
-      if @video.status == "original"
-        render :show_parent
-      else
-        render :show_encoding
-      end
-    when :xml
-      @video.show_response.to_simple_xml
-    when :yaml
-      @video.show_response.to_yaml
-    end
+    display @video.show_response
   end
   
-  # Use: HQ
-  # Only used in the admin side to post to create and then forward to the form 
-  # where the video is uploaded
-  def new
-    render :layout => :simple
-  end
-  
-  # Use: HQ
   def destroy
     @video.obliterate!
-    redirect "/videos"
+    display true
   end
 
-  # Use: HQ, API
   def create
-    provides :html, :xml, :yaml
+    provides :json
     
     @video = Video.create_empty
     Merb.logger.info "#{@video.key}: Created video"
     
-    case content_type
-    when :html
-      redirect url(:form_video, @video.key)
-    when :xml
-      headers.merge!({'Location'=> "/videos/#{@video.key}"})
-      @video.create_response.to_simple_xml
-    when :yaml
-      headers.merge!({'Location'=> "/videos/#{@video.key}"})
-      @video.create_response.to_yaml
-    end
+    headers.merge!({'Location'=> "/videos/#{@video.key}"})
+    display({:video => {:id => @video.id}})
   end
   
-  # Use: HQ, API, iframe upload
-  def form
-    render :layout => :uploader
-  end
-  
-  # Use: HQ, http/iframe upload
+  # Flash us default option for upload (as it can be done as inline in a site). For larger files, http upload with the ajax progress bar can be used.
   def upload
+    provides :html, :json
     begin
       @video = Video.get(params[:id])
       @video.initial_processing(params[:file])
@@ -99,12 +66,6 @@ class Videos < Application
     render :layout => :uploader
   end
   
-  # TODO: Why do we need this method?
-  def add_to_queue
-    @video.add_to_queue
-    redirect "/videos/#{@video.key}"
-  end
-  
 private
 
   def render_error(msg, exception = nil)
@@ -118,10 +79,8 @@ private
         @exception = msg
         render(:template => "exceptions/video_exception", :layout => false) # TODO: Why is :action setting 404 instead of 500?!?!
       end
-    when :xml
-      {:error => msg}.to_simple_xml
-    when :yaml
-      {:error => msg}.to_yaml
+    when :json
+      display({:error => msg})
     end
   end
   

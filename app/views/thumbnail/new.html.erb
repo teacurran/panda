@@ -1,7 +1,0 @@
-<h2>Select a screenshot to use for this video</h2>
-
-<ul id="screenshots">
-  <% @percentages.each do | percentage |%>
-    <li><%= link_to image_tag(@video.clipping(percentage).url(:thumbnail)), "/videos/#{@video.key}/thumbnail/create?percentage=#{percentage}&iframe=#{params[:iframe]}" %></li>
-  <% end %>
-</ul>

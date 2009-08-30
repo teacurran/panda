@@ -26,12 +26,18 @@ Panda::Config.use do |p|
   # p[:public_tmp_url]        = "http://images.app.com"
   
   # ================================================
+  # AWS access identifiers
+  # ================================================
+  
+  # For SimpleDB database and/or S3 storage
+  # p[:access_key_id]         = "AWS_ACCESS_KEY"
+  # p[:secret_access_key]     = "AWS_SECRET_ACCESS_KEY"
+
+  # ================================================
   # Storage location for uploaded and encoded videos
   # ================================================
   
   # For S3 storage:
-  p[:access_key_id]         = "AWS_ACCESS_KEY"
-  p[:secret_access_key]     = "AWS_SECRET_ACCESS_KEY"
   p[:videos_store]          = :s3
   p[:videos_domain]         = "s3.amazonaws.com/S3_BUCKET"
   p[:s3_videos_bucket]      = "S3_BUCKET"

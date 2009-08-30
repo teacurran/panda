@@ -4,14 +4,14 @@ class Profiles < Application
   
   # GET /profiles
   def index
-    provides :html, :xml, :yaml
+    provides :json
     @profiles = Profile.all
     display @profiles
   end
 
   # GET /profiles/:id
   def show
-    provides :html, :xml, :yaml
+    provides :json
     display @profile
   end
 
@@ -30,33 +30,20 @@ class Profiles < Application
   def create
     @profile = Profile.new(params[:profile])
     @profile.save
-    
-    if content_type == :html
-      redirect '/profiles'
-    else
-      display @profile
-    end
+    display @profile
   end
 
   # PUT /profiles/:id
   def update
     @profile.update_attributes(params[:profile])
     @profile.save
-    if content_type == :html
-      redirect '/profiles'
-    else
-      display @profile
-    end
+    display @profile
   end
 
   # DELETE /profiles/:id
   def destroy
     @profile.destroy
-    if content_type == :html
-      redirect '/profiles'
-    else
-      display true
-    end
+    display true
   end
   
 private

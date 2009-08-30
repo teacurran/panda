@@ -1,9 +1,0 @@
-<p><%= link_to "Create New Encoding Profile", "/profiles/new"%>
-<h1>Encoding Profiles</h1>
-<ul>
-<% @profiles.each do |p| %>
-	<li>
-		<%= link_to p.title, "/profiles/#{p.id}/edit" %>
-	</li>
-<% end %>
-</ul>

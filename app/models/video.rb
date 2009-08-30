@@ -172,32 +172,6 @@ class Video
     Store.url(self.filename)
   end
   
-  def embed_html
-    return nil unless self.encoding?
-    %(<embed src="#{Store.url('flvplayer.swf')}" width="#{self.width}" height="#{self.height}" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight=#{self.height}&file=#{self.url}&width=#{self.width}&height=#{self.height}&image=#{self.clipping.url(:screenshot)}" />)
-  end
-  
-  def embed_js
-    return nil unless self.encoding?
-  	%(
-  	<div id="flash_container_#{self.id[0..4]}"><a href="http://www.macromedia.com/go/getflashplayer">Get the latest Flash Player</a> to watch this video.</div>
-  	<script type="text/javascript">
-      var flashvars = {};
-      
-      flashvars.file = "#{self.url}";
-      flashvars.image = "#{self.clipping.url(:screenshot)}";
-      flashvars.width = "#{self.width}";
-      flashvars.height = "#{self.height}";
-      flashvars.fullscreen = "true";
-      flashvars.controlbar = "over";
-      var params = {wmode:"transparent",allowfullscreen:"true"};
-      var attributes = {};
-      attributes.align = "top";
-      swfobject.embedSWF("#{Store.url('player.swf')}", "flash_container_#{self.id[0..4]}", "#{self.width}", "#{self.height}", "9.0.115", "#{Store.url('expressInstall.swf')}", flashvars, params, attributes);
-  	</script>
-  	)
-	end
-  
   # Interaction with store
   # ======================
   
@@ -412,13 +386,6 @@ class Video
     end
     
     return r
-  end
-  
-  def create_response
-    {:video => {
-        :id => self.id
-      }
-    }
   end
   
   # Notifications
