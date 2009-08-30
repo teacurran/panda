@@ -20,11 +20,11 @@ class Video
   property :profile, String
   property :profile_title, String
   property :player, String
-  property :queued_at, Time
-  property :started_encoding_at, Time
+  property :queued_at, Time, :default => nil
+  property :started_encoding_at, Time, :default => 0
   property :encoding_time, String
   property :encoded_at, String
-  property :last_notification_at, Time
+  property :last_notification_at, Time, :default => 0
   # This is to fill the gap of different behavior between MySQL
   # and SimpleDB in use of null.
   # At MySQL, it won't pick up NULL: eg, notification.not 'success'
@@ -32,8 +32,8 @@ class Video
   # Then SimpleDB fails as Simpledb can not be searchable by nil
   # As a workaround, I forced default as empty string
   property :notification, String, :default => '', :nullable => false
-  property :updated_at, Time
-  property :created_at, Time
+  property :updated_at, Time, :default => 0
+  property :created_at, Time, :default => 0
   property :thumbnail_position, String
   
   # TODO: state machine for status

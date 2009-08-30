@@ -10,9 +10,7 @@ dependency "merb-mailer", merb_gems_version
 dependency "dm-core", dm_gems_version         
 dependency 'dm-timestamps', dm_gems_version
 dependency "merb_datamapper", merb_gems_version
-dependency "do_mysql", "0.9.12"
-
-dependency "simple_record"
+dependency "do_mysql"
 
 dependency 'RubyInline', :require_as => 'inline'
 # dependency 'uuid', '2.0.2'

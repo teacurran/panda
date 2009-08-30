@@ -7,8 +7,8 @@ class User
   property :salt, String
   property :crypted_password, String
   property :api_key, String
-  property :updated_at, Time
-  property :created_at, Time
+  property :updated_at, Time, :default => 0
+  property :created_at, Time, :default => 0
   
   attr_accessor :password, :password_confirmation
   

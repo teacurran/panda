@@ -34,14 +34,6 @@ Merb::BootLoader.before_app_loads do
   require 'local_store'
   
   require 'data_mapper/types/uuid_index'
-  
-  SimpleRecord::Base.set_domain_prefix("panda_sr_")
-  # TODO use per_thread connection_mode
-  SimpleRecord.establish_connection(
-    Panda::Config[:access_key_id],
-    Panda::Config[:secret_access_key],
-    :connection_mode => :per_thread
-  )
 end
  
 Merb::BootLoader.after_app_loads do
@@ -63,6 +55,4 @@ Merb::BootLoader.after_app_loads do
   LocalStore.ensure_directories_exist
   
   Profile.warn_if_no_encodings unless Merb.env =~ /test/
-  
-  t = Test.new; t.name = "foobar"; t.save
 end
