@@ -581,12 +581,15 @@ RESPONSE
       Merb.logger.info "Audio encoding done"
 
       # Squash the audio and video together
-      FileUtils.rm(self.tmp_filepath) if File.exists?(self.tmp_filepath) # rm, otherwise we end up with multiple video streams when we encode a few times!!
-      %x(MP4Box -add #{temp_video_output_file}#video #{self.tmp_filepath})
-      %x(MP4Box -add #{temp_audio_output_file}#audio #{self.tmp_filepath})
+      # A bit of a hacker here, because on some EC2 instances it won't save to /mnt for some reason. In the long term we won't need MP4Box because newer ffmpeg versions include aac support.
+      tmp_mp4box_filepath = "/tmp/#{self.filename}"
+      FileUtils.rm(tmp_mp4box_filepath) if File.exists?(tmp_mp4box_filepath) # rm, otherwise we end up with multiple video streams when we encode a few times!!
+      %x(MP4Box -add #{temp_video_output_file}#video #{tmp_mp4box_filepath})
+      %x(MP4Box -add #{temp_audio_output_file}#audio #{tmp_mp4box_filepath})
 
       # Interleave meta data
-      %x(MP4Box -inter 500 #{self.tmp_filepath})
+      %x(MP4Box -inter 500 #{tmp_mp4box_filepath})
+      FileUtils.mv(tmp_mp4box_filepath, self.tmp_filepath)
       Merb.logger.info "Squashing done"
     else
       Merb.logger.info "This video does't have an audio stream"
