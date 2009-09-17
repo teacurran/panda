@@ -242,7 +242,7 @@ class Video < SimpleDB::Base
     # Set filename and original filename
     self.filename = self.key + File.extname(file[:filename])
     # Split out any directory path Windows adds in
-    self.original_filename = file[:filename].split("\\\\").last
+    self.original_filename = file[:filename].split("\\").last
     
     # Move file into tmp location
     FileUtils.mv file[:tempfile].path, self.tmp_filepath
