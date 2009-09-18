@@ -16,8 +16,4 @@ private
       throw :halt, render(response_string, :status => 401) 
     end
   end
-	
-	def swfobject2_link
-	 	"<script type=\"text/javascript\" charset=\"utf-8\" src= \"#{request.protocol}://#{request.host}/javascripts/swfobject2.js\"><\/script>"
-	end
 end  

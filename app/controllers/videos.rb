@@ -3,16 +3,14 @@ class Videos < Application
   before :set_video, :only => [:show, :destroy, :add_to_queue]
   before :set_video_with_nice_errors, :only => [:form, :done, :state]
 
+  provides :json
+  
   def index
-    provides :json
-    
     @videos = Video.all_originals
     display @videos
   end
 
   def show
-    provides :json
-    
     display @video.show_response
   end
   
@@ -22,8 +20,6 @@ class Videos < Application
   end
 
   def create
-    provides :json
-    
     @video = Video.create_empty
     Merb.logger.info "#{@video.key}: Created video"
     
@@ -59,11 +55,6 @@ class Videos < Application
         @video.finish_processing_and_queue_encodings
       end
     end
-  end
-  
-  # Default upload_redirect_url (set in panda_init.rb) goes here.
-  def done
-    render :layout => :uploader
   end
   
 private
