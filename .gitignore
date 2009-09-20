@@ -10,8 +10,11 @@ panda_*.god
 panda_nginx.conf
 videos/*
 config/mailer.rb
+config/mailer_*.rb
 config/deploy.rb
+config/deploy_*.rb
 config/panda_init_*.rb
+config/panda.rb
 panda_all_staging_nginx.conf
 public/images/tmp/*jpg
 public/store

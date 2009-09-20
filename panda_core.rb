@@ -2,14 +2,12 @@ require 'rubygems'
 require 'sinatra/base'
 require 'simple_record'
 
-$LOAD_PATH.unshift(File.dirname(__FILE__) + '/lib')
-require 'sdb/video'
-
-SimpleRecord.establish_connection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
+require 'lib/panda'
 
 module Panda
   class Core < Sinatra::Base
-    get '/' do
+    get '/videos' do
+      # Allow scope by status
       # Store a model object to SimpleDB
       mm = MyModel.new
       mm.name = "Travis"
@@ -24,4 +22,4 @@ module Panda
   end
 end
 
-run Panda::Core
+# run Panda::Core
