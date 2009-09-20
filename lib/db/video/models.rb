@@ -1,8 +1,7 @@
-
-
 # TODO: if Panda::Config[:database] == :simpledb
   require 'sdb'
-  class VideoBase::Base < SdbModel::VideoBase::Base
+  module VideoBase
+    class Base < SdbModel::VideoBase::Base; end
   end
 # else if Panda::Config[:database] == :mysql
   # class Video < ArModel::Video
@@ -10,10 +9,12 @@
 # end
 
 require 'base'
-require 'encoding'
+require 'encode'
+# require 'clippings'
+# require 'notificaions'
 
 class Encoding < VideoBase::Base
-  include VideoBase::Encoding
+  include VideoBase::Encode
   # Finders
   # =======
   
@@ -24,6 +25,7 @@ class Encoding < VideoBase::Base
 end
 
 class Video < VideoBase::Base
+  # include VideoBase::Clippings
   
   def self.all_with_status(status)
     self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
@@ -60,18 +62,6 @@ class Video < VideoBase::Base
     return video
   end
   
-  def clipping(position = nil)
-    Clipping.new(self, position)
-  end
-  
-  def clippings
-    self.thumbnail_percentages.map do |p|
-      Clipping.new(self, p)
-    end
-  end
-  
-
-  
   # Attr helpers
   # ============
   
@@ -91,44 +81,13 @@ class Video < VideoBase::Base
     self.status == 'empty'
   end
   
-  def upload_redirect_url
-    Panda::Config[:upload_redirect_url].gsub(/\$id/, self.id)
+  # TODO: define these when the video is created via the API instead of in the config
+  def get_upload_redirect_url
+    self.upload_redirect_url.gsub(/\$id/, self.id)
   end
   
-  def state_update_url
-    Panda::Config[:state_update_url].gsub(/\$id/, self.id)
-  end
-  
-  # Thumbnails
-  # ==========
-  
-  # Returns configured number of 'middle points', for example [25,50,75]
-  def thumbnail_percentages
-    n = Panda::Config[:choose_thumbnail]
-    
-    return [50] if n == false
-    
-    # Interval length
-    interval = 100.0 / (n + 1)
-    # Points is [0,25,50,75,100] for example
-    points = (0..(n + 1)).map { |p| p * interval }.map { |p| p.to_i }
-    
-    # Don't include the end points
-    return points[1..-2]
-  end
-  
-  def generate_thumbnail_selection
-    self.thumbnail_percentages.each do |percentage|
-      self.clipping(percentage).capture
-      self.clipping(percentage).resize
-    end
-  end
-  
-  def upload_thumbnail_selection
-    self.thumbnail_percentages.each do |percentage|
-      self.clipping(percentage).upload_to_store
-      self.clipping(percentage).delete_locally
-    end
+  def get_state_update_url
+    self.state_update_url.gsub(/\$id/, self.id)
   end
   
   # Checks that video can accept new file, checks that the video is valid, 
@@ -149,7 +108,7 @@ class Video < VideoBase::Base
     # Set filename and original filename
     self.filename = self.id + File.extname(file[:filename])
     # Split out any directory path Windows adds in
-    self.original_filename = file[:filename].split("\\\\").last
+    self.original_filename = file[:filename].split("\\").last
     
     # Move file into tmp location
     FileUtils.mv file[:tempfile].path, self.tmp_filepath
@@ -183,7 +142,7 @@ class Video < VideoBase::Base
   # Raises FormatNotRecognised if the video is not valid
   # 
   def read_metadata
-    Merb.logger.info "#{self.id}: Reading metadata of video file"
+    Log.info "#{self.id}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     
@@ -218,8 +177,7 @@ class Video < VideoBase::Base
     
     # Attrs from the profile
     encoding.profile = p.id
-    encoding.profile_title = p.title
-    [:container, :width, :height, :video_codec, :video_bitrate, :fps, :audio_codec, :audio_bitrate, :audio_sample_rate, :player].each do |k|
+    [:width, :height, :command].each do |k|
       encoding.send("#{k}=", p.attribute_get(k))
     end
     
@@ -256,7 +214,4 @@ class Video < VideoBase::Base
   # 500
   class NoFileSubmitted < VideoError; end
   class FormatNotRecognised < VideoError; end
-  
-
-
 end

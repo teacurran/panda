@@ -8,3 +8,11 @@ The only thing Panda will interpret is the resolution. By default Panda will add
 We are working to provide a separate set of tools which will assist with the creation and management of encoding profiles.
 
 See the README for example profiles.
+
+# Notifications
+
+TODO: Implement this!
+ 
+Instead of setting a global notification callback url (the address which Panda sends a message to when a video has been encoded), you will need to provide the url in the POST request when you create a new video using the API.
+
+Changing this means that you can now easily use and test Panda with multiple applications.
