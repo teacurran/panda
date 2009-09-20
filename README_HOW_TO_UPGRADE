@@ -1,0 +1,10 @@
+
+# Profiles
+
+The output encoding profiles now must include the ffmpeg command to be run. Previously these were hardcoded into Panda. To make profiles simpler, Panda will now require you to put the encoding details such as bitrate into the ffmpeg command.
+
+The only thing Panda will interpret is the resolution. By default Panda will add black bar letter boxing (both vertical and horizontal) to videos which don't match the output resolution.
+
+We are working to provide a separate set of tools which will assist with the creation and management of encoding profiles.
+
+See the README for example profiles.

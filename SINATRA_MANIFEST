@@ -1,0 +1,9 @@
+panda_core.rb
+panda_core_config.nu
+config/panda.rb
+lib/config.rb
+lib/db
+lib/core_extensions
+lib/store
+lib/magick_resize.rb
+README_HOW_TO_UPGRADE
