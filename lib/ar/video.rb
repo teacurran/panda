@@ -1,1 +1,0 @@
-# Activerecord version

@@ -1,13 +1,8 @@
-require 'rubygems'
-require 'sinatra/base'
-require 'simple_record'
-
 require 'lib/panda'
+require 'sinatra/base'
 
 # Logger
 # ======
-
-require 'logger'
  
 configure do
   Log = Logger.new("sinatra.log") # or log/development.log, whichever you prefer

@@ -1,5 +1,5 @@
 module VideoBase
-  class Clippings
+  module Clippings
     # Returns configured number of 'middle points', for example [25,50,75]
     def thumbnail_percentages
       n = Panda::Config[:choose_thumbnail]

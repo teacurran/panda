@@ -18,10 +18,6 @@ Panda::Config.use do |p|
   # Local storage. Public should be accessible from the internet
   # ============================================================
   
-  p[:private_tmp_path]      = Merb.root / "tmp" / "videos"
-  # Defaults to tmp within the Panda public directory. Optionally configurable
-  # p[:public_tmp_path]       = "/var/www/images"
-  # p[:public_tmp_url]        = "http://images.app.com"
   
   # ================================================
   # AWS access identifiers
@@ -31,12 +27,21 @@ Panda::Config.use do |p|
   # p[:access_key_id]         = "AWS_ACCESS_KEY"
   # p[:secret_access_key]     = "AWS_SECRET_ACCESS_KEY"
   
+  # ================================================
+  # Database
+  # ================================================
+  
+  # p[:database] = :simpledb
+  
   # Set SimpleDB domain prefix. Use this if you have multiple Panda accounts using one SimpeDB account.
   # p[:sdb_domain_prefix] = "production_"
 
   # ================================================
   # Storage location for uploaded and encoded videos
   # ================================================
+  
+  # Temporary location for videos being uploaded or encoded
+  # p[:private_tmp_path]      = "/tmp"
   
   # For S3 storage:
   p[:videos_store]          = :s3
@@ -46,7 +51,11 @@ Panda::Config.use do |p|
   # For local filesystem storage:
   # p[:videos_store]          = :filesystem
   # p[:videos_domain]         = "localhost:4000/store"
-  # p[:public_videos_dir]     = Merb.root / "public" / "store"
+  # p[:public_videos_dir]     = File.dirname(__FILE__) + "/../public/store"
+  
+  # TODO: Do we need these below?
+  # p[:public_tmp_path]       = "/var/www/images"
+  # p[:public_tmp_url]        = "http://images.app.com"
   
   # ================================================
   # Thumbnail

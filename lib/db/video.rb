@@ -1,31 +1,19 @@
-# TODO: if Panda::Config[:database] == :simpledb
-  require 'sdb'
-  module VideoBase
-    class Base < SdbModel::VideoBase::Base; end
-  end
-# else if Panda::Config[:database] == :mysql
-  # class Video < ArModel::Video
-  # end
-# end
+require 'video_base/store'
 
-require 'base'
-require 'encode'
-# require 'clippings'
-# require 'notificaions'
-
-class Encoding < VideoBase::Base
-  include VideoBase::Encode
-  # Finders
-  # =======
-  
-  def parent_video
-    Video.find(self.parent)
+case Panda::Config[:database]
+when :simpledb
+  class Video < SimpleRecord::Base
+    has_ints :duration, :width, :height, :fps
+    has_attributes :filename, :original_filename, :container, :video_codec,  :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
+    has_dates :uploaded_at # TODO implement uploaded_at
   end
-  
+when :mysql
+  class Video < ActiveRecord::Base
+  end
 end
 
-class Video < VideoBase::Base
-  # include VideoBase::Clippings
+class Video
+  include VideoBase::Store
   
   def self.all_with_status(status)
     self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
@@ -43,7 +31,7 @@ class Video < VideoBase::Base
   # end
 
   def encodings
-    self.class.find(:all, :conditions => ["parent=?",self.id])
+    Encoding.find(:all, :conditions => ["parent_id=?",self.id])
   end
 
   # def successful_encodings
@@ -51,7 +39,7 @@ class Video < VideoBase::Base
   # end
 
   def find_encoding_for_profile(p)
-    self.class.find(:all, :conditions => ["parent=? and profile=?", self.id, p.id])
+    Encoding.find(:all, :conditions => ["parent_id=? and profile_id=?", self.id, p.id])
   end
   
   def self.create_empty
@@ -78,7 +66,7 @@ class Video < VideoBase::Base
   
   # Has the actual video file been uploaded for encoding?
   def empty?
-    self.status == 'empty'
+    self.original_filename == ""
   end
   
   # TODO: define these when the video is created via the API instead of in the config
@@ -201,6 +189,28 @@ class Video < VideoBase::Base
       end
     end
     return true
+  end
+  
+  # API
+  # ===
+
+  # Hash of paramenters for video and encodings when video.xml/yaml requested.
+  # 
+  # See the specs for an example of what this returns
+  # 
+  def show_response
+    r = {:video => {}}
+  
+    [:id, :filename, :original_filename, :width, :height, :duration].each do |k|
+      r[:video][k] = self.send(k)
+    end
+    # r[:video][:screenshot]  = self.clipping.filename(:screenshot)
+    # r[:video][:thumbnail]   = self.clipping.filename(:thumbnail)
+  
+    # If the video is a parent, also return the data for all its encodings
+    r[:video][:encodings] = self.encodings.map {|e| e.show_response}
+
+    return r
   end
   
   # Exceptions
