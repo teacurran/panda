@@ -1,4 +1,4 @@
-require 'video_base/store'
+require File.dirname(__FILE__)+'/video_base/store'
 
 case Panda::Config[:database]
 when :simpledb

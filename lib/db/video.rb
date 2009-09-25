@@ -1,10 +1,10 @@
-require 'video_base/store'
+require File.dirname(__FILE__)+'/video_base/store'
 
 case Panda::Config[:database]
 when :simpledb
   class Video < SimpleRecord::Base
     has_ints :duration, :width, :height, :fps
-    has_attributes :filename, :original_filename, :container, :video_codec,  :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
+    has_attributes :filename, :original_filename, :container, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate, :thumbnail_position, :upload_redirect_url, :state_update_url
     has_dates :uploaded_at # TODO implement uploaded_at
   end
 when :mysql
@@ -102,7 +102,6 @@ class Video
     FileUtils.mv file[:tempfile].path, self.tmp_filepath
     
     self.read_metadata
-    self.status = "original"
     self.save
   end
   
@@ -133,19 +132,17 @@ class Video
     Log.info "#{self.id}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
-    
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
     
     self.duration = (inspector.duration rescue nil)
+    self.fps = (inspector.fps rescue nil)
     self.container = (inspector.container rescue nil)
     self.width = (inspector.width rescue nil)
     self.height = (inspector.height rescue nil)
-    
     self.video_codec = (inspector.video_codec rescue nil)
     self.video_bitrate = (inspector.bitrate rescue nil)
-    self.fps = (inspector.fps rescue nil)
-    
     self.audio_codec = (inspector.audio_codec rescue nil)
+    self.audio_bitrate = (inspector.audio_bitrate rescue nil)
     self.audio_sample_rate = (inspector.audio_sample_rate rescue nil)
     
     # Don't allow videos with a duration of 0
