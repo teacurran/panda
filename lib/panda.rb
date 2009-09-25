@@ -39,7 +39,7 @@ case Panda::Config[:database]
 when :simpledb
   require 'simple_record'
   
-  SimpleRecord::Base.set_domain_prefix(Panda::Config[:sdb_domain_prefix]) if Panda::Config[:sdb_domain_prefix]
+  SimpleRecord::Base.set_domain_prefix(Panda::Config[:sdb_domain_prefix])
   SimpleRecord.establish_connection(Panda::Config[:access_key_id],Panda::Config[:secret_access_key])
 when :mysql
   raise "TODO: MySQL models and config"

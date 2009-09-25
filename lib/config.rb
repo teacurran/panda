@@ -15,8 +15,8 @@ module Panda
           :notification_retries   => 6,
           :notification_frequency => 10,
           
-          :database => :simpledb,
-          
+          :database               => :simpledb,
+          :sdb_domain_prefix      => "panda2",
           :sdb_base_url           => "http://sdb.amazonaws.com/"
         }
       end
