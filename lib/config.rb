@@ -5,18 +5,15 @@ module Panda
     class << self
       def defaults
         @defaults ||= {
-          :account_name           => "My Panda Account",
-          
           :private_tmp_path       => "/tmp",
           
           :thumbnail_height_constrain => 125,
-          :choose_thumbnail       => false,
           
           :notification_retries   => 6,
           :notification_frequency => 10,
           
           :database               => :simpledb,
-          :sdb_domain_prefix      => "panda2",
+          :sdb_domain_prefix      => "panda2_",
           :sdb_base_url           => "http://sdb.amazonaws.com/"
         }
       end
@@ -36,8 +33,6 @@ module Panda
       
       def check
         check_present(:api_key, "Please specify a secret api_key")
-        check_present(:upload_redirect_url)
-        check_present(:state_update_url)
       end
       
       def check_present(option, message = nil)

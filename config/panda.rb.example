@@ -1,6 +1,4 @@
 Panda::Config.use do |p|
-  # p[:account_name]          = "OPTIONAL_STRING_TO_IDENTIFY_PANDA_INSTANCE"
-  
   # ================================================
   # API integration options
   # ================================================
