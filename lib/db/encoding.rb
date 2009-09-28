@@ -14,6 +14,7 @@ end
 
 class Encoding
   include VideoBase::Store
+  include AASM
   
   belongs_to :video
   belongs_to :profile
@@ -26,20 +27,19 @@ class Encoding
   aasm_state :error
   
   aasm_state :claim do
-    transitions :from => :queued, :to => :assigned
+    transitions :from => :queued, :to => :assigned,
                 :exit => :download_video
   end
   
   aasm_event :encode do
     transitions :from  => :queued, :to => :encoding,
-                # :guard => :master_file_exists?, 
                 :after => :encode_video,
                 :exit  => :cleanup
   end
   
   aasm_event :success do
     transitions :from => :encoding, :to => :success,
-                :enter => :upload_encoding,
+                :enter => :upload_encoding
   end
   
   aasm_event :fail do

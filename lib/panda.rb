@@ -12,6 +12,7 @@ Panda::Config.check
 # ====
 require 'rubygems'
 require 'fileutils'
+require 'aasm'
 
 # File store
 # ==========

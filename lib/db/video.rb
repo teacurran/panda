@@ -42,14 +42,6 @@ class Video
     Encoding.find(:all, :conditions => ["parent_id=? and profile_id=?", self.id, p.id])
   end
   
-  def self.create_empty
-    video = self.class.new
-    video.status = 'empty'
-    video.save
-    
-    return video
-  end
-  
   # Attr helpers
   # ============
   
@@ -112,11 +104,11 @@ class Video
     self.upload_to_store
     
     # Generate thumbnails before we add to encoding queue
-    self.generate_thumbnail_selection
-    self.clipping(self.thumbnail_percentages.first).set_as_default
-    self.upload_thumbnail_selection
-    
-    self.thumbnail_position = self.thumbnail_percentages.first
+    # self.generate_thumbnail_selection
+    # self.clipping(self.thumbnail_percentages.first).set_as_default
+    # self.upload_thumbnail_selection
+    # 
+    # self.thumbnail_position = self.thumbnail_percentages.first
     self.save
     
     self.add_to_queue
@@ -151,7 +143,6 @@ class Video
   
   def create_encoding_for_profile(p)
     encoding = Video.new
-    encoding.status = 'queued'
     encoding.filename = "#{encoding.id}.#{p.container}"
     
     # Attrs from the parent video
@@ -174,7 +165,7 @@ class Video
   def add_to_queue
     # Die if there aren't any profiles
     if Profile.all.empty?
-      Merb.logger.error "There are no encoding profiles!"
+      Log.error "There are no encoding profiles!"
       return nil
     end
     
