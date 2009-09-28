@@ -18,6 +18,34 @@ class Encoding
   belongs_to :video
   belongs_to :profile
   
+  aasm_initial_state :queued
+  aasm_state :queued
+  aasm_state :assigned
+  aasm_state :encoding
+  aasm_state :success
+  aasm_state :error
+  
+  aasm_state :claim do
+    transitions :from => :queued, :to => :assigned
+                :exit => :download_video
+  end
+  
+  aasm_event :encode do
+    transitions :from  => :queued, :to => :encoding,
+                # :guard => :master_file_exists?, 
+                :after => :encode_video,
+                :exit  => :cleanup
+  end
+  
+  aasm_event :success do
+    transitions :from => :encoding, :to => :success,
+                :enter => :upload_encoding,
+  end
+  
+  aasm_event :fail do
+    transitions :from => :encoding, :to => :error
+  end
+  
   # API
   # ===
 
@@ -117,51 +145,35 @@ class Encoding
       :resolution_and_padding => self.ffmpeg_resolution_and_padding_no_cropping
     }
   end
-
-  def execute_encode
-    transcoder = RVideo::Transcoder.new
-    transcoder.execute(self.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath))
+  
+  def download_video
+    self.video.fetch_from_store
   end
-
-  def encode
-    raise "You can only encode encodings" unless self.encoding?
-    self.status = "processing"
-    self.save
-
+  
+  def encode_video
     begun_encoding = Time.now
 
     begin
-      Log.info "(#{Time.now.to_s}) Encoding #{self.id}"
-
-      self.video.fetch_from_store
-
-      self.execute_encode
-      self.upload_to_store
+      transcoder = RVideo::Transcoder.new
+      transcoder.execute(self.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath))
       
-      # self.generate_thumbnail_selection
-      # self.clipping.set_as_default
-      # self.upload_thumbnail_selection
-  
-      self.notification = 0
-      self.status = "success"
       self.encoded_at = Time.now
       self.encoding_time = (Time.now - begun_encoding).to_i
       self.save
-
-      Log.info "Removing tmp video files"
-      FileUtils.rm self.tmp_filepath
-      FileUtils.rm self.video.tmp_filepath
-  
-      Log.info "Encoding successful"
-    rescue
-      self.notification = 0
-      self.status = "error"
-      self.save
-      FileUtils.rm self.video.tmp_filepath
-  
-      Merb.logger.error "Unable to transcode file #{self.id}: #{$!.class} - #{$!.message}"
-    
-      raise
+      
+      self.success!
+    rescue # TODO: Specify some error type
+      
+      self.fail!
     end
+  end
+  
+  def upload_encoding
+    self.upload_to_store
+  end
+  
+  def cleanup
+    FileUtils.rm self.tmp_filepath
+    FileUtils.rm self.video.tmp_filepath
   end
 end
