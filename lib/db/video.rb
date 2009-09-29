@@ -91,7 +91,7 @@ class Video
   def self.create_from_upload(file, upload_redirect_url, state_update_url)
     raise NoFileSubmitted if !file || file.blank?
     
-    video = self.create
+    video = self.create(:upload_redirect_url => upload_redirect_url, :state_update_url => state_update_url)
     video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last

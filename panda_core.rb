@@ -6,10 +6,10 @@ require 'lib/run_later'
 # Logger
 # ======
  
-  Log = Logger.new("sinatra.log") # or log/development.log, whichever you prefer
-  Log.level  = Logger::INFO
-  # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
-  Log.info "Why isn't this working #{@users.inspect}"
+Log = Logger.new("sinatra.log") # or log/development.log, whichever you prefer
+Log.level  = Logger::INFO
+# I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
+Log.info "Why isn't this working #{@users.inspect}"
 
   
 class InvalidRequest < StandardError; end
@@ -19,10 +19,8 @@ module Panda
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
     # mime :json, "application/json"
-    
-    disable :raise_errors
-    
-    def response(object, ext)
+        
+    def display_response(object, ext)
       case ext.to_sym
       when :json
         content_type :json
@@ -38,7 +36,7 @@ module Panda
     end
     
     def required_params(params, *params_list)
-      params_list.each {|p| raise InvalidRequest unless params.has_key?(p) }
+      params_list.each {|p| raise InvalidRequest unless params.has_key?(p.to_s) }
     end
     
     get '/videos.*' do
