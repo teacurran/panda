@@ -1,9 +1,8 @@
+SINATRA_MANIFEST
 panda_core.rb
-panda_core_config.nu
+panda_core_config.ru
 config/panda.rb
-lib/config.rb
-lib/db
-lib/core_extensions
-lib/store
-lib/magick_resize.rb
+lib
+public
 README_HOW_TO_UPGRADE
+README.markdown

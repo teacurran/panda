@@ -24,3 +24,4 @@ TODO: Write scripts and test the hell out of it
 Changes
 * simple_record uses a different number storage method.
 * Video and Encoding are now separate domains.
+* Rename filenames to extnames

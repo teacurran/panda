@@ -25,7 +25,7 @@ module LocalStore
   end
   
   def add_filename_to(option, *args)
-    Panda::Config[option] / args.map { |e| e.to_s }.join('_')
+    File.join(Panda::Config[option], args.map { |e| e.to_s }.join('_'))
   end
   
 end

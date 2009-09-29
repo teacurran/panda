@@ -13,13 +13,14 @@ Panda::Config.check
 require 'rubygems'
 require 'fileutils'
 require 'aasm'
+require 'rvideo'
 
 # File store
 # ==========
 require 'store/abstract_store'
 require 'store/file_store'
 # TODO: store tmp clippings on S3 instead of locally so we can support clusters
-# require 'store/local_store'
+require 'store/local_store'
 
 Store = case Panda::Config[:videos_store]
 when :s3

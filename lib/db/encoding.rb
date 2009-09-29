@@ -4,7 +4,7 @@ case Panda::Config[:database]
 when :simpledb
   class Encoding < SimpleRecord::Base
     has_ints :duration, :width, :height, :encoding_time
-    has_attributes :filename, :status, :video_id, :profile_id, :command
+    has_attributes :extname, :status, :video_id, :profile_id, :command
     has_dates :queued_at, :started_encoding_at
   end
 when :mysql

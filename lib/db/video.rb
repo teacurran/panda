@@ -4,7 +4,7 @@ case Panda::Config[:database]
 when :simpledb
   class Video < SimpleRecord::Base
     has_ints :duration, :width, :height, :fps
-    has_attributes :filename, :original_filename, :container, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate, :thumbnail_position, :upload_redirect_url, :state_update_url
+    has_attributes :extname, :original_filename, :container, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate, :thumbnail_position, :upload_redirect_url, :state_update_url
     has_dates :uploaded_at # TODO implement uploaded_at
   end
 when :mysql
@@ -14,6 +14,7 @@ end
 
 class Video
   include VideoBase::Store
+  include LocalStore
   
   def self.all_with_status(status)
     self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
@@ -70,6 +71,10 @@ class Video
     self.state_update_url.gsub(/\$id/, self.id)
   end
   
+  def filename
+    self.id + self.extname
+  end
+  
   # Checks that video can accept new file, checks that the video is valid, 
   # reads some metadata from it, and moves video into a private tmp location.
   # 
@@ -81,39 +86,22 @@ class Video
   #   "filename" => "file.mov"
   # }
   # 
-  def initial_processing(file)
+  
+  
+  def self.create_from_upload(file, upload_redirect_url, state_update_url)
     raise NoFileSubmitted if !file || file.blank?
-    raise NotValid unless self.empty?
     
-    # Set filename and original filename
-    self.filename = self.id + File.extname(file[:filename])
+    video = self.create
+    video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
-    self.original_filename = file[:filename].split("\\").last
+    video.original_filename = file[:filename].split("\\").last
     
     # Move file into tmp location
-    FileUtils.mv file[:tempfile].path, self.tmp_filepath
+    FileUtils.mv file[:tempfile].path, video.tmp_filepath
     
-    self.read_metadata
-    self.save
-  end
-  
-  # Uploads video to store, generates thumbnails if required, cleans up 
-  # temporary file, and adds encodings to the encoding queue.
-  # 
-  def finish_processing_and_queue_encodings
-    self.upload_to_store
-    
-    # Generate thumbnails before we add to encoding queue
-    # self.generate_thumbnail_selection
-    # self.clipping(self.thumbnail_percentages.first).set_as_default
-    # self.upload_thumbnail_selection
-    # 
-    # self.thumbnail_position = self.thumbnail_percentages.first
-    self.save
-    
-    self.add_to_queue
-    
-    FileUtils.rm self.tmp_filepath
+    video.read_metadata
+    video.save
+    return video
   end
   
   # Reads information about the video into attributes.
@@ -142,18 +130,17 @@ class Video
   end
   
   def create_encoding_for_profile(p)
-    encoding = Video.new
-    encoding.filename = "#{encoding.id}.#{p.container}"
+    encoding = Encoding.new
     
     # Attrs from the parent video
-    encoding.parent = self.id
+    encoding.parent_id = self.id
     [:original_filename, :duration].each do |k|
       encoding.send("#{k}=", self.attribute_get(k))
     end
     
     # Attrs from the profile
     encoding.profile = p.id
-    [:width, :height, :command].each do |k|
+    [:extname, :width, :height, :command].each do |k|
       encoding.send("#{k}=", p.attribute_get(k))
     end
     
@@ -162,7 +149,7 @@ class Video
   end
   
   # TODO: Breakout Profile adding into a different method
-  def add_to_queue
+  def queue_encodings
     # Die if there aren't any profiles
     if Profile.all.empty?
       Log.error "There are no encoding profiles!"
@@ -206,10 +193,8 @@ class Video
   class VideoError < StandardError; end
   class NotificationError < StandardError; end
   
-  # 404
+  # 422
   class NotValid < VideoError; end
-  
-  # 500
   class NoFileSubmitted < VideoError; end
   class FormatNotRecognised < VideoError; end
 end
