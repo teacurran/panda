@@ -1,4 +1,3 @@
-require 'lib/panda'
 require 'sinatra/base'
 require 'json'
 require 'lib/run_later'
@@ -11,11 +10,10 @@ Log.level  = Logger::INFO
 # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
 Log.info "Why isn't this working #{@users.inspect}"
 
+module Panda::Core
+  class InvalidRequest < StandardError; end
   
-class InvalidRequest < StandardError; end
-
-module Panda
-  class Core < Sinatra::Base
+  class Server < Sinatra::Base
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
     # mime :json, "application/json"
