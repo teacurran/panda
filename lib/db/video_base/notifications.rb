@@ -1,4 +1,4 @@
-module Panda::Core
+module VideoBase
   module Notifications
     def notification_wait_period
       (Panda::Config[:notification_frequency] * self.notification.to_i)

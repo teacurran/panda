@@ -2,15 +2,17 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 # Config
 # ======
-require 'panda/config'
+require 'config'
+# Load the user's config options
+require File.dirname(__FILE__)+'/../config/panda.rb'
 # TODO: move config store to sdb
-Panda::Config.load
 Panda::Config.check
 
 # Deps
 # ====
-require 'aasm'
+require 'rubygems'
 require 'fileutils'
+require 'aasm'
 require 'rvideo'
 
 # File store
@@ -20,7 +22,7 @@ require 'store/file_store'
 # TODO: store tmp clippings on S3 instead of locally so we can support clusters
 require 'store/local_store'
 
-Storage = case Panda::Config[:videos_store]
+Store = case Panda::Config[:videos_store]
 when :s3
   require 'aws/s3'
   require 'store/s3_store'
@@ -45,4 +47,8 @@ when :mysql
   raise "TODO: MySQL models and config"
 end
 
-require 'panda/core'
+# Models
+# ======
+require 'db/video'
+require 'db/profile'
+require 'db/encoding'

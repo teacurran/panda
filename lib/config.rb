@@ -31,10 +31,6 @@ module Panda
         @configuration[key] = val
       end
       
-      def load
-        require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'config', 'panda.rb'))
-      end
-      
       def check
         check_present(:api_key, "Please specify a secret api_key")
       end
