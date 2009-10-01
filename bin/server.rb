@@ -1,4 +1,3 @@
-require 'lib/panda'
 require 'sinatra/base'
 require 'json'
 require 'lib/run_later'
@@ -11,16 +10,15 @@ Log.level  = Logger::INFO
 # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
 Log.info "Why isn't this working #{@users.inspect}"
 
+module Panda::Core
+  class InvalidRequest < StandardError; end
   
-class InvalidRequest < StandardError; end
-
-module Panda
-  class Core < Sinatra::Base
+  class Server < Sinatra::Base
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
     # mime :json, "application/json"
         
-    def api_response(object, ext)
+    def display_response(object, ext)
       case ext.to_sym
       when :json
         content_type :json
@@ -58,9 +56,13 @@ module Panda
       'You got it wrong'
     end
     
+    get '/foo' do
+      status 401
+    end
+    
     # HTML uplaod method where video data is uploaded directly
     post '/videos' do
-      begin
+      # begin
         required_params(params, :upload_redirect_url, :state_update_url)
         
         video = Video.create_from_upload(params[:file], params[:upload_redirect_url], params[:state_update_url])
@@ -72,32 +74,36 @@ module Panda
         
         # TODO instead of one custom_params param maybe passthorugh everything starting with custom_ ?
         ajax_response(:location => video.get_upload_redirect_url, :custom_params => params[:custom_params])
-      rescue InvalidRequest => e
-        status 400
-        ajax_response(:error => e.to_s)
-      rescue Video::VideoError => e
-        status 422
-        ajax_response(:error => e.to_s.gsub(/Video::/,""))
-      rescue => e
-        status 500
-        ajax_response(:error => "InternalServerError")
-      end
+      # rescue InvalidRequest => e
+      #   # status 400
+      #   raise 'bar'
+      #   return 'foo'
+      #   # ajax_response(:error => e.to_s)
+      # rescue Video::VideoError => e
+      #   status 422
+      #   ajax_response(:error => e.to_s.gsub(/Video::/,""))
+      # rescue => e
+      #   # status 500
+      #   # ajax_response(:error => "InternalServerError")
+      #   raise e
+      #   'asdsa'
+      # end
     end
     
-    # post '/videos.*' do
-    #   begin
-    #     video = Video.new
-    #     video.id = params[:id]
-    #     video.initial_processing(params[:file])
-    #     video.finish_processing_and_queue_encodings
-    #     status 200
-    #     api_response video, params[:splat].first
-    #   rescue Video::NotValid
-    #     status 422
-    #   rescue Video::VideoError
-    #     status 500
-    #   end
-    # end
+    post '/videos.*' do
+      begin
+        video = Video.new
+        video.id = params[:id]
+        video.initial_processing(params[:file])
+        video.finish_processing_and_queue_encodings
+        status 200
+        response video, params[:splat].first
+      rescue Video::NotValid
+        status 422
+      rescue Video::VideoError
+        status 500
+      end
+    end
   end
 end
 

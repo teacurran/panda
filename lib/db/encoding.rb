@@ -10,6 +10,9 @@ when :simpledb
 when :mysql
   class Encoding < ActiveRecord::Base
   end
+when :sqlite
+  class Encoding < ActiveRecord::Base
+  end
 end
 
 class Encoding

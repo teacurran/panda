@@ -43,8 +43,17 @@ when :simpledb
   
   SimpleRecord::Base.set_domain_prefix(Panda::Config[:sdb_domain_prefix])
   SimpleRecord.establish_connection(Panda::Config[:access_key_id],Panda::Config[:secret_access_key])
+when :sqlite
+  require 'activerecord'
+  
+  ActiveRecord::Base.establish_connection(
+    :adapter => 'sqlite3',
+    :dbfile =>  'db/panda.sqlite3.db'
+  )
 when :mysql
-  raise "TODO: MySQL models and config"
+  require 'activerecord'
+  
+  raise "TODO: MySQL config and conneciton"
 end
 
 # Models

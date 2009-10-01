@@ -10,6 +10,9 @@ when :simpledb
 when :mysql
   class Video < ActiveRecord::Base
   end
+when :sqlite
+  class Video < ActiveRecord::Base
+  end
 end
 
 class Video
