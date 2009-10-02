@@ -1,0 +1,5 @@
+Process for loading on EC2
+
+* Start instance with user data containing api key
+* Instance boots with default config
+* Configure AWS credentials and other settings via api (allows encoders to be repurposed on the fly in future.)
