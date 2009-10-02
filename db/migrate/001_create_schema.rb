@@ -6,10 +6,7 @@ class CreateSchema < ActiveRecord::Migration
       t.string :original_filename
       t.string :container
       t.string :video_codec
-      t.string :video_bitrate
       t.string :audio_codec
-      t.string :audio_bitrate
-      t.string :audio_sample_rate
       t.string :thumbnail_position
       t.string :upload_redirect_url
       t.string :state_update_url

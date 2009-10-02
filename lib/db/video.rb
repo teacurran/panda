@@ -4,7 +4,7 @@ case Panda::Config[:database]
 when :simpledb
   class Video < SimpleRecord::Base
     has_ints :duration, :width, :height, :fps
-    has_attributes :extname, :original_filename, :container, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate, :thumbnail_position, :upload_redirect_url, :state_update_url
+    has_attributes :extname, :original_filename, :container, :video_codec, :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
     has_dates :uploaded_at # TODO implement uploaded_at
   end
 when :mysql
@@ -117,7 +117,7 @@ class Video
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
     
-    [:duration, :fps, :width, :height, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate].each do |k|
+    [:duration, :fps, :width, :height, :video_codec, :audio_codec].each do |k|
       self.send("#{k}=", (inspector.send(k) rescue nil))
     end
     
