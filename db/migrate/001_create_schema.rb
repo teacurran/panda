@@ -1,6 +1,7 @@
 class CreateSchema < ActiveRecord::Migration
   def self.up
     create_table :videos do |t|
+      t.string :key
       t.string :extname
       t.string :original_filename
       t.string :container
@@ -24,6 +25,7 @@ class CreateSchema < ActiveRecord::Migration
     end
     
     create_table :encodings do |t|
+      t.string :key
       t.string :extname
       t.string :status
       t.string :video_id
@@ -42,6 +44,7 @@ class CreateSchema < ActiveRecord::Migration
     end
     
     create_table :profiles do |t|
+      t.string :key
       t.string :category
       t.string :title
       t.string :extname

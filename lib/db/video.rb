@@ -35,15 +35,15 @@ class Video
   # end
 
   def encodings
-    Encoding.find(:all, :conditions => ["parent_id=?",self.id])
+    Encoding.find(:all, :conditions => ["parent_id=?",self.key])
   end
 
   # def successful_encodings
-  #   self.class.all(:parent => self.id, :status => "success")
+  #   self.class.all(:parent => self.key, :status => "success")
   # end
 
   def find_encoding_for_profile(p)
-    Encoding.find(:all, :conditions => ["parent_id=? and profile_id=?", self.id, p.id])
+    Encoding.find(:all, :conditions => ["parent_id=? and profile_id=?", self.key, p.key])
   end
   
   # Attr helpers
@@ -67,15 +67,15 @@ class Video
   
   # TODO: define these when the video is created via the API instead of in the config
   def get_upload_redirect_url
-    self.upload_redirect_url.gsub(/\$id/, self.id)
+    self.upload_redirect_url.gsub(/\$id/, self.key)
   end
   
   def get_state_update_url
-    self.state_update_url.gsub(/\$id/, self.id)
+    self.state_update_url.gsub(/\$id/, self.key)
   end
   
   def filename
-    self.id + self.extname
+    self.key + self.extname
   end
   
   # Checks that video can accept new file, checks that the video is valid, 
@@ -95,7 +95,7 @@ class Video
     raise NoFileSubmitted if !file || file.blank?
     
     video = self.create
-    raise video.id.to_s
+    raise video.key.to_s
     video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
@@ -113,7 +113,7 @@ class Video
   # Raises FormatNotRecognised if the video is not valid
   # 
   def read_metadata
-    Log.info "#{self.id}: Reading metadata of video file"
+    Log.info "#{self.key}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
@@ -130,13 +130,13 @@ class Video
     encoding = Encoding.new
     
     # Attrs from the parent video
-    encoding.parent_id = self.id
+    encoding.parent_id = self.key
     [:original_filename, :duration].each do |k|
       encoding.send("#{k}=", self.attribute_get(k))
     end
     
     # Attrs from the profile
-    encoding.profile = p.id
+    encoding.profile = p.key
     [:extname, :width, :height, :command].each do |k|
       encoding.send("#{k}=", p.attribute_get(k))
     end

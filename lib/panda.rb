@@ -40,18 +40,23 @@ end
 case Panda::Config[:database]
 when :simpledb
   require 'simple_record'
+  require 'db/id_compatebility/sr.rb'
   
   SimpleRecord::Base.set_domain_prefix(Panda::Config[:sdb_domain_prefix])
   SimpleRecord.establish_connection(Panda::Config[:access_key_id],Panda::Config[:secret_access_key])
 when :sqlite
+  require 'uuid'
   require 'activerecord'
+  require 'db/id_compatebility/ar.rb'
   
   ActiveRecord::Base.establish_connection(
     :adapter => 'sqlite3',
     :dbfile =>  'db/panda.sqlite3.db'
   )
 when :mysql
+  require 'uuid'
   require 'activerecord'
+  require 'db/id_compatebility/ar.rb'
   
   raise "TODO: MySQL config and conneciton"
 end
