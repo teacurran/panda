@@ -1,16 +1,8 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
 require 'sinatra/base'
 require 'json'
-require 'lib/run_later'
 require 'lib/panda'
-
-# Logger
-# ======
- 
-Log = Logger.new("sinatra.log") # or log/development.log, whichever you prefer
-Log.level  = Logger::INFO
-# I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
-Log.info "Why isn't this working #{@users.inspect}"
+require 'lib/run_later'
 
 module Panda
   class InvalidRequest < StandardError; end
@@ -63,16 +55,13 @@ module Panda
       begin
         required_params(params, :upload_redirect_url, :state_update_url)
         
-        video = Video.create_from_upload(params[:file])
-        video.upload_redirect_url = params[:upload_redirect_url] 
-        video.state_update_url = params[:state_update_url]
+        video = Video.create_from_upload(params[:file], params[:state_update_url],  params[:upload_redirect_url])
         
-        run_later do # TODO: ensure run_later timeout is long enough
+        # run_later do # TODO: ensure run_later timeout is long enough
           video.upload_to_store
           video.queue_encodings
-        end
+        # end
         
-        # TODO instead of one custom_params param maybe passthorugh everything starting with custom_ ?
         status 200
         ajax_response(:location => video.get_upload_redirect_url)
       rescue InvalidRequest => e
@@ -91,8 +80,8 @@ module Panda
     post '/videos.*' do
       # begin
         required_params(params, :state_update_url)
-        video = Video.create_from_upload(params[:file])
-        video.state_update_url = params[:state_update_url]
+        
+        video = Video.create_from_upload(params[:file], params[:state_update_url])
         video.upload_to_store
         video.queue_encodings
         

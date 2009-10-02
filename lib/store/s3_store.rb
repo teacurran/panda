@@ -7,7 +7,7 @@ class S3Store < AbstractStore
   DELAY = 3
 
   def initialize
-    raise Panda::ConfigError, "You must specify videos_domain and s3_videos_bucket to use s3 storage" unless Panda::Config[:videos_domain] && Panda::Config[:s3_videos_bucket]
+    raise RuntimeError, "You must specify videos_domain, s3_videos_bucket and AWS credentials to use s3 storage" unless Panda::Config[:videos_domain] && Panda::Config[:s3_videos_bucket] && Panda::Config[:access_key_id] && Panda::Config[:secret_access_key]
     
     AWS::S3::Base.establish_connection!(
       :access_key_id     => Panda::Config[:access_key_id],

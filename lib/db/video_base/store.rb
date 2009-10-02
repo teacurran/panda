@@ -1,9 +1,9 @@
 module VideoBase
-  module Store
-    # Location to store video file fetched from S3 for encoding
+  module StoreMethods
     def tmp_filepath
-      private_filepath(self.filename)
+      File.join(Panda::Config[:private_tmp_path], self.filename)
     end
+
   
     def url
       Store.url(self.filename)
@@ -20,9 +20,10 @@ module VideoBase
     # Deletes the video file without raising an exception if the file does not exist.
     def delete_from_store
       Store.delete(self.filename)
-      self.clippings.each { |c| c.delete_from_store }
-      Store.delete(self.clipping.filename(:screenshot, :default => true))
-      Store.delete(self.clipping.filename(:thumbnail, :default => true))
+      # TODO: clippings
+      # self.clippings.each { |c| c.delete_from_store }
+      # Store.delete(self.clipping.filename(:screenshot, :default => true))
+      # Store.delete(self.clipping.filename(:thumbnail, :default => true))
     rescue AbstractStore::FileDoesNotExistError
       false
     end

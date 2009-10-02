@@ -14,13 +14,20 @@ require 'rubygems'
 require 'fileutils'
 require 'aasm'
 require 'rvideo'
+require 'logger'
+
+# Logger
+# ======
+Log = Logger.new("log/server.log") # or log/development.log, whichever you prefer
+Log.level  = Logger::INFO
+# I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
+Log.info "Panda server has started."
 
 # File store
 # ==========
 require 'store/abstract_store'
 require 'store/file_store'
 # TODO: store tmp clippings on S3 instead of locally so we can support clusters
-require 'store/local_store'
 
 Store = case Panda::Config[:videos_store]
 when :s3
@@ -32,8 +39,6 @@ when :filesystem
 else
   raise RuntimeError, "You have specified an invalid videos_store configuration option. Valid options are :s3 and :filesystem"
 end
-
-# LocalStore.ensure_directories_exist
 
 # Database
 # ========
@@ -59,6 +64,8 @@ when :mysql
   require 'db/id_compatebility/ar.rb'
   
   raise "TODO: MySQL config and conneciton"
+else
+  raise RuntimeError, "You have specified an invalid database configuration option. Valid options are :simpledb, :mysql and :sqlite"
 end
 
 # Models

@@ -1,4 +1,5 @@
 class ActiveRecord::Base
+  set_primary_key "uuid"
   before_create :set_key
   
   def set_key

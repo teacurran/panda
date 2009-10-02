@@ -5,7 +5,6 @@ when :simpledb
   class Video < SimpleRecord::Base
     has_ints :duration, :width, :height, :fps
     has_attributes :extname, :original_filename, :container, :video_codec, :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
-    has_dates :uploaded_at # TODO implement uploaded_at
   end
 when :mysql
   class Video < ActiveRecord::Base
@@ -16,8 +15,7 @@ when :sqlite
 end
 
 class Video
-  include VideoBase::Store
-  include LocalStore
+  include VideoBase::StoreMethods
   
   def self.all_with_status(status)
     self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
@@ -35,15 +33,15 @@ class Video
   # end
 
   def encodings
-    Encoding.find(:all, :conditions => ["parent_id=?",self.key])
+    Encoding.find(:all, :conditions => ["video_id=?",self.key])
   end
 
   # def successful_encodings
-  #   self.class.all(:parent => self.key, :status => "success")
+  #   self.class.find(:all)(:parent => self.key, :status => "success")
   # end
 
-  def find_encoding_for_profile(p)
-    Encoding.find(:all, :conditions => ["parent_id=? and profile_id=?", self.key, p.key])
+  def has_encoding_for_profile?(p)
+    !Encoding.find(:all, :conditions => ["video_id=? and profile_id=?", self.key, p.key]).empty?
   end
   
   # Attr helpers
@@ -91,19 +89,22 @@ class Video
   # 
   
   
-  def self.create_from_upload(file)
+  def self.create_from_upload(file, state_update_url = nil, upload_redirect_url = nil)
     raise NoFileSubmitted if !file || file.blank?
     
     video = self.create
     video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
+    video.state_update_url = state_update_url
+    video.upload_redirect_url = upload_redirect_url
     
     # Move file into tmp location
     FileUtils.mv file[:tempfile].path, video.tmp_filepath
     
     video.read_metadata
     video.save
+    Log.info video.inspect
     return video
   end
   
@@ -125,43 +126,36 @@ class Video
     raise FormatNotRecognised if self.duration == 0
   end
   
-  def create_encoding_for_profile(p)
-    encoding = Encoding.new
-    
-    # Attrs from the parent video
-    encoding.parent_id = self.key
-    [:original_filename, :duration].each do |k|
-      encoding.send("#{k}=", self.attribute_get(k))
-    end
-    
-    # Attrs from the profile
-    encoding.profile = p.key
-    [:extname, :width, :height, :command].each do |k|
-      encoding.send("#{k}=", p.attribute_get(k))
-    end
-    
-    encoding.save
-    return encoding
-  end
-  
   # TODO: Breakout Profile adding into a different method
   def queue_encodings
     # Die if there aren't any profiles
-    if Profile.all.empty?
+    if Profile.find(:all).empty?
       Log.error "There are no encoding profiles!"
       return nil
     end
     
     # TODO: Allow manual selection of encoding profiles used in both form and api
     # For now we will just encode to all available profiles
-    Profile.all.each do |p|
-      if self.find_encoding_for_profile(p).empty?
-        self.create_encoding_for_profile(p)
-      end
+    Profile.find(:all).each do |p|
+      Log.info p.inspect
+      self.create_encoding_for_profile(p) unless self.has_encoding_for_profile?(p)
     end
+    
     return true
   end
   
+  def create_encoding_for_profile(p)
+    encoding = Encoding.new
+    encoding.video_id = self.key
+    encoding.profile_id = p.key
+    [:extname, :width, :height].each do |k|
+      encoding.send("#{k}=", p.send(k))
+    end
+    encoding.save
+    Log.info encoding.inspect
+    return encoding
+  end
+
   # API
   # ===
 
@@ -169,19 +163,10 @@ class Video
   # 
   # See the specs for an example of what this returns
   # 
-  def show_response
-    r = {:video => {}}
-  
-    [:id, :filename, :original_filename, :width, :height, :duration].each do |k|
-      r[:video][k] = self.send(k)
-    end
-    # r[:video][:screenshot]  = self.clipping.filename(:screenshot)
-    # r[:video][:thumbnail]   = self.clipping.filename(:thumbnail)
-  
-    # If the video is a parent, also return the data for all its encodings
-    r[:video][:encodings] = self.encodings.map {|e| e.show_response}
-
-    return r
+  def to_hash
+    h = self.attributes
+    h[:encodings] = self.encodings.map {|e| e.to_hash }
+    return h
   end
   
   # Exceptions

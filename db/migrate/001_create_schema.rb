@@ -1,10 +1,9 @@
 class CreateSchema < ActiveRecord::Migration
   def self.up
     create_table :videos do |t|
-      t.string :key
+      t.string :key, :limit => 36, :primary => true
       t.string :extname
       t.string :original_filename
-      t.string :container
       t.string :video_codec
       t.string :audio_codec
       t.string :thumbnail_position
@@ -16,32 +15,27 @@ class CreateSchema < ActiveRecord::Migration
       t.integer :height
       t.integer :fps
       
-      t.datetime :uploaded_at
-      
       t.timestamps
     end
     
     create_table :encodings do |t|
-      t.string :key
+      t.string :key, :limit => 36, :primary => true
       t.string :extname
       t.string :status
       t.string :video_id
       t.string :profile_id
-      t.string :command
       
-      t.integer :duration
       t.integer :width
       t.integer :height
       t.integer :encoding_time
       
-      t.datetime :queued_at
       t.datetime :started_encoding_at
       
       t.timestamps
     end
     
     create_table :profiles do |t|
-      t.string :key
+      t.string :key, :limit => 36, :primary => true
       t.string :category
       t.string :title
       t.string :extname

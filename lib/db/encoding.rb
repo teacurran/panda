@@ -3,9 +3,9 @@ require File.dirname(__FILE__)+'/video_base/store'
 case Panda::Config[:database]
 when :simpledb
   class Encoding < SimpleRecord::Base
-    has_ints :duration, :width, :height, :encoding_time
-    has_attributes :extname, :status, :video_id, :profile_id, :command
-    has_dates :queued_at, :started_encoding_at
+    has_ints :width, :height, :encoding_time
+    has_attributes :extname, :status, :video_id, :profile_id
+    has_dates :started_encoding_at
   end
 when :mysql
   class Encoding < ActiveRecord::Base
@@ -16,18 +16,20 @@ when :sqlite
 end
 
 class Encoding
-  include VideoBase::Store
   include AASM
+  include VideoBase::StoreMethods
   
   belongs_to :video
   belongs_to :profile
   
-  aasm_initial_state :queued
+  aasm_column :status
   aasm_state :queued
   aasm_state :assigned
   aasm_state :encoding
   aasm_state :success
   aasm_state :error
+  
+  aasm_initial_state :queued
   
   aasm_state :claim do
     transitions :from => :queued, :to => :assigned,
@@ -56,15 +58,8 @@ class Encoding
   # 
   # See the specs for an example of what this returns
   # 
-  def show_response
-    r = {:video => {}}
-  
-    [:id, :filename, :video_id, :status, :profile_id, :command, :duration, :width, :height, :encoding_time, :queued_at, :started_encoding_at, :updated, :created].each do |k|
-      r[:video][k] = self.send(k)
-    end
-    # r[:video][:screenshot]  = self.clipping.filename(:screenshot)
-    # r[:video][:thumbnail]   = self.clipping.filename(:thumbnail)
-    return r
+  def to_hash
+    self.attributes
   end
   
   # Encoding
