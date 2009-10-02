@@ -45,7 +45,11 @@ module RunLater
     end
     
     def self.instance
-      @worker ||= RunLater::Worker.new
+      @worker ||= begin
+        w = RunLater::Worker.new
+        w.logger = Logger.new(STDOUT) # TODO: output to log for each video up, which is uploaded to S3 if there's an exception
+        w
+      end
     end
  
     def self.shutdown
@@ -74,7 +78,6 @@ module RunLater
         end
       rescue Timeout::Error
         logger.warn("Worker thread takes too long and will be killed.")
-        logger.flush
         instance.thread.kill!
         @worker = RunLater::Worker.new
       end
@@ -87,11 +90,9 @@ module RunLater
           Thread.current[:running] = true
           block.call
           Thread.current[:running] = false
-          logger.flush
         end
       rescue Exception => e
         logger.error("Worker thread crashed, retrying. Error was: #{e}")
-        logger.flush
         Thread.current[:running] = false
         retry
       end
