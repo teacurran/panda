@@ -23,32 +23,34 @@ class Encoding
   belongs_to :profile
   
   aasm_column :status
+  
   aasm_state :queued
-  aasm_state :assigned
-  aasm_state :encoding
-  aasm_state :success
-  aasm_state :error
+  aasm_state :assigned, :exit => :download_video
+  aasm_state :encoding, :enter => :encode_video
+  aasm_state :success, :enter => :upload_encoding, :after_enter  => :cleanup
+  aasm_state :error, :enter => :save_logs, :after_enter  => :cleanup
   
   aasm_initial_state :queued
   
-  aasm_state :claim do
-    transitions :from => :queued, :to => :assigned,
-                :exit => :download_video
+  aasm_event :claim do
+    transitions :from => :queued, :to => :assigned
   end
   
   aasm_event :encode do
-    transitions :from  => :queued, :to => :encoding,
-                :after => :encode_video,
-                :exit  => :cleanup
+    transitions :from  => :assigned, :to => :encoding
   end
   
-  aasm_event :success do
-    transitions :from => :encoding, :to => :success,
-                :enter => :upload_encoding
+  aasm_event :win do
+    transitions :from => :encoding, :to => :success
   end
   
   aasm_event :fail do
     transitions :from => :encoding, :to => :error
+  end
+  
+
+  def self.get_job
+    self.find(:first, :conditions => "status='queued'", :order => "created_at asc")
   end
   
   # API
@@ -65,39 +67,6 @@ class Encoding
   # Encoding
   # ========
 
-  def ffmpeg_resolution_and_padding
-    # Calculate resolution and any padding
-    in_w = self.video.width.to_f
-    in_h = self.video.height.to_f
-    out_w = self.width.to_f
-    out_h = self.height.to_f
-
-    begin
-      aspect = in_w / in_h
-    rescue
-      Merb.logger.error "Couldn't do w/h to caculate aspect. Just using the output resolution now."
-      return %(-s #{self.width}x#{self.height})
-    end
-
-    height = (out_w / aspect.to_f).to_i
-    height -= 1 if height % 2 == 1
-
-    opts_string = %(-s #{self.width}x#{height} )
-
-    # Crop top and bottom is the video is too tall, but add top and bottom bars if it's too wide (aspect wise)
-    if height > out_h
-      crop = ((height.to_f - out_h) / 2.0).to_i
-      crop -= 1 if crop % 2 == 1
-      opts_string += %(-croptop #{crop} -cropbottom #{crop})
-    elsif height < out_h
-      pad = ((out_h - height.to_f) / 2.0).to_i
-      pad -= 1 if pad % 2 == 1
-      opts_string += %(-padtop #{pad} -padbottom #{pad})
-    end
-
-    return opts_string
-  end
-
   def ffmpeg_resolution_and_padding_no_cropping
     # Calculate resolution and any padding
     in_w = self.video.width.to_f
@@ -109,7 +78,7 @@ class Encoding
       aspect = in_w / in_h
       aspect_inv = in_h / in_w
     rescue
-      Merb.logger.error "Couldn't do w/h to caculate aspect. Just using the output resolution now."
+      Log.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
       return %(-s #{self.width}x#{self.height} )
     end
 
@@ -168,6 +137,10 @@ class Encoding
   
   def upload_encoding
     self.upload_to_store
+  end
+  
+  def save_logs
+    Log.info "TODO: Save logs for video file to store so it can be debugged at a later date."
   end
   
   def cleanup

@@ -21,10 +21,6 @@ class Video
     self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
   end
 
-  def self.next_job
-    self.find(:first, :conditions => "status='queued'", :order => "created_at asc")
-  end
-
   # TODO: enable notifications in a nicer way
   # def self.outstanding_notifications
   #   # TODO: Do this in one query
@@ -58,11 +54,6 @@ class Video
     self.destroy
   end
   
-  # Has the actual video file been uploaded for encoding?
-  def empty?
-    self.original_filename == ""
-  end
-  
   # TODO: define these when the video is created via the API instead of in the config
   def get_upload_redirect_url
     self.upload_redirect_url.gsub(/\$id/, self.key)
@@ -94,6 +85,7 @@ class Video
     
     video = self.create
     video.extname = File.extname(file[:filename])
+    raise FormatNotRecognised if video.extname.blank?
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
     video.state_update_url = state_update_url
