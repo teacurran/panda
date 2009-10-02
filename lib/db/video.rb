@@ -95,7 +95,6 @@ class Video
     raise NoFileSubmitted if !file || file.blank?
     
     video = self.create
-    raise video.key.to_s
     video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
@@ -118,7 +117,7 @@ class Video
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
     
-    [:duration, :fps, :container, :width, :height, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate].each do |k|
+    [:duration, :fps, :width, :height, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate].each do |k|
       self.send("#{k}=", (inspector.send(k) rescue nil))
     end
     
