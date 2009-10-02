@@ -91,10 +91,11 @@ class Video
   # 
   
   
-  def self.create_from_upload(file, upload_redirect_url, state_update_url)
+  def self.create_from_upload(file)
     raise NoFileSubmitted if !file || file.blank?
     
-    video = self.create(:upload_redirect_url => upload_redirect_url, :state_update_url => state_update_url)
+    video = self.create
+    raise video.id.to_s
     video.extname = File.extname(file[:filename])
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
@@ -117,16 +118,9 @@ class Video
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
     
-    self.duration = (inspector.duration rescue nil)
-    self.fps = (inspector.fps rescue nil)
-    self.container = (inspector.container rescue nil)
-    self.width = (inspector.width rescue nil)
-    self.height = (inspector.height rescue nil)
-    self.video_codec = (inspector.video_codec rescue nil)
-    self.video_bitrate = (inspector.bitrate rescue nil)
-    self.audio_codec = (inspector.audio_codec rescue nil)
-    self.audio_bitrate = (inspector.audio_bitrate rescue nil)
-    self.audio_sample_rate = (inspector.audio_sample_rate rescue nil)
+    [:duration, :fps, :container, :width, :height, :video_codec, :video_bitrate, :audio_codec, :audio_bitrate, :audio_sample_rate].each do |k|
+      self.send("#{k}=", (inspector.send(k) rescue nil))
+    end
     
     # Don't allow videos with a duration of 0
     raise FormatNotRecognised if self.duration == 0

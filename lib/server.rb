@@ -1,6 +1,8 @@
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
 require 'sinatra/base'
 require 'json'
 require 'lib/run_later'
+require 'lib/panda'
 
 # Logger
 # ======
@@ -10,7 +12,7 @@ Log.level  = Logger::INFO
 # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
 Log.info "Why isn't this working #{@users.inspect}"
 
-module Panda::Core
+module Panda
   class InvalidRequest < StandardError; end
   
   class Server < Sinatra::Base
@@ -52,20 +54,18 @@ module Panda::Core
     end
     
     
-    error InvalidRequest do
-      'You got it wrong'
-    end
-    
-    get '/foo' do
-      status 401
-    end
+    # error InvalidRequest do
+    #   'You got it wrong'
+    # end
     
     # HTML uplaod method where video data is uploaded directly
     post '/videos' do
-      # begin
+      begin
         required_params(params, :upload_redirect_url, :state_update_url)
         
-        video = Video.create_from_upload(params[:file], params[:upload_redirect_url], params[:state_update_url])
+        video = Video.create_from_upload(params[:file])
+        video.upload_redirect_url = params[:upload_redirect_url] 
+        video.state_update_url = params[:state_update_url]
         
         run_later do # TODO: ensure run_later timeout is long enough
           video.upload_to_store
@@ -73,36 +73,38 @@ module Panda::Core
         end
         
         # TODO instead of one custom_params param maybe passthorugh everything starting with custom_ ?
-        ajax_response(:location => video.get_upload_redirect_url, :custom_params => params[:custom_params])
-      # rescue InvalidRequest => e
-      #   # status 400
-      #   raise 'bar'
-      #   return 'foo'
-      #   # ajax_response(:error => e.to_s)
-      # rescue Video::VideoError => e
-      #   status 422
-      #   ajax_response(:error => e.to_s.gsub(/Video::/,""))
-      # rescue => e
-      #   # status 500
-      #   # ajax_response(:error => "InternalServerError")
-      #   raise e
-      #   'asdsa'
-      # end
+        status 200
+        ajax_response(:location => video.get_upload_redirect_url)
+      rescue InvalidRequest => e
+        status 400
+        ajax_response(:error => e.to_s)
+      rescue Video::VideoError => e
+        status 422
+        ajax_response(:error => e.to_s.gsub(/Video::/,""))
+      rescue => e
+        raise e
+        status 500
+        ajax_response(:error => "InternalServerError")
+      end
     end
     
     post '/videos.*' do
-      begin
-        video = Video.new
-        video.id = params[:id]
-        video.initial_processing(params[:file])
-        video.finish_processing_and_queue_encodings
+      # begin
+        required_params(params, :state_update_url)
+        video = Video.create_from_upload(params[:file])
+        video.state_update_url = params[:state_update_url]
+        video.upload_to_store
+        video.queue_encodings
+        
         status 200
         response video, params[:splat].first
-      rescue Video::NotValid
-        status 422
-      rescue Video::VideoError
-        status 500
-      end
+        # TODO: handle errors with Sinatra's error blocks
+        
+      # rescue Video::NotValid
+      #   status 422
+      # rescue Video::VideoError
+      #   status 500
+      # end
     end
   end
 end
