@@ -67,7 +67,7 @@ class Videos < Application
   end
   
   # Use: HQ, API, iframe upload
-  def form
+  def upload_form
     render :layout => :uploader
   end
   

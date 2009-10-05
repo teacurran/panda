@@ -28,6 +28,7 @@ Merb::Router.prepare do |r|
     video.match('/thumbnail/update').to(:controller => "thumbnail", :action => "update")
   end
   
+  r.match("/videos/form").to(:controller => "videos", :action => "upload_form")
   r.match("/signup").to(:controller => "accounts", :action => "new")
   r.match("/login").to(:controller => "auth", :action => "login")
   r.match("/logout").to(:controller => "auth", :action => "logout")
