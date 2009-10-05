@@ -1,7 +1,7 @@
 class Videos < Application
   before :require_login, :only => [:index, :show, :destroy, :new, :create, :add_to_queue]
   before :set_video, :only => [:show, :destroy, :add_to_queue]
-  before :set_video_with_nice_errors, :only => [:form, :done, :state]
+  before :set_video_with_nice_errors, :only => [:upload_form, :done, :state]
 
   def index
     provides :html, :xml, :yaml
@@ -56,7 +56,7 @@ class Videos < Application
     
     case content_type
     when :html
-      redirect url(:form_video, @video.key)
+      redirect url(:upload_form_video, @video.key)
     when :xml
       headers.merge!({'Location'=> "/videos/#{@video.key}"})
       @video.create_response.to_simple_xml
