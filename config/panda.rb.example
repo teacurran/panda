@@ -23,7 +23,7 @@ Panda::Config.use do |p|
   # Database
   # ================================================
   
-  # p[:database] = :simpledb
+  p[:database] = :simpledb
   
   # Set SimpleDB domain prefix. Use this if you have multiple Panda accounts using one SimpeDB account.
   # p[:sdb_domain_prefix] = "panda2_"
@@ -46,18 +46,9 @@ Panda::Config.use do |p|
   # p[:public_videos_dir]     = File.dirname(__FILE__) + "/../public/store"
   
   # ================================================
-  # Application notification
-  # ================================================
-  # Panda will send your application a notfication when a video has finished
-  # encoding. If it fails it will retry notification_retries times. These 
-  # values are the defaults and should work for most applications.
-  
-  # p[:notification_retries]  = 6
-  # p[:notification_frequency]= 10
-  
-  # ================================================
   # Advanced options
   # ================================================
+  
   # Each encoding job has its own log file. If there's an error this file is uploaded to the configured store for debugging purposes.
-  p[:encoding_log_dir]     = File.dirname(__FILE__) + "/../log"
+  # p[:encoding_log_dir]     = File.dirname(__FILE__) + "/../log"
 end
