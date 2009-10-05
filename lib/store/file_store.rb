@@ -8,20 +8,20 @@ class FileStore < AbstractStore
   
   # Set file. Returns true if success.
   def set(key, tmp_file)
-    FileUtils.mv(tmp_file, File.join(@dir, key))
+    FileUtils.cp(tmp_file, File.join(@dir, key))
     true
   end
   
   # Get file.
   def get(key, tmp_file)
-    FileUtils.mv(File.join(@dir / key), tmp_file)
+    FileUtils.cp(File.join(@dir, key), tmp_file)
   rescue
     raise_file_error(key)
   end
   
   # Delete file. Returns true if success.
   def delete(key)
-    FileUtils.rm(@dir / key)
+    FileUtils.rm(@dir, key)
   rescue
     raise_file_error(key)
   end

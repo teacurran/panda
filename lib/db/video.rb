@@ -63,10 +63,6 @@ class Video
     self.state_update_url.gsub(/\$id/, self.key)
   end
   
-  def filename
-    self.key + self.extname
-  end
-  
   # Checks that video can accept new file, checks that the video is valid, 
   # reads some metadata from it, and moves video into a private tmp location.
   # 

@@ -29,7 +29,7 @@ class AbstractStore
   private
   
   def raise_file_error(key)
-    Merb.logger.error "Tried to delete #{key} but the file does not exist"
+    Log.error "Tried to delete #{key} but the file does not exist"
     raise FileDoesNotExistError, "#{key} does not exist"
   end
 end

@@ -56,10 +56,8 @@ Panda::Config.use do |p|
   # p[:notification_frequency]= 10
   
   # ================================================
-  # Get emailed error messages
+  # Advanced options
   # ================================================
-  # If you want errors emailed to you, when an encoding fails or panda fails 
-  # to post a notification to your application, fill in both values:
-  # p[:notification_email]    = "me@mydomain.com"
-  # p[:noreply_from]          = "panda@mydomain.com"
+  # Each encoding job has its own log file. If there's an error this file is uploaded to the configured store for debugging purposes.
+  p[:encoding_log_dir]     = File.dirname(__FILE__) + "/../log"
 end

@@ -21,7 +21,7 @@ require 'logger'
 Log = Logger.new("log/server.log") # or log/development.log, whichever you prefer
 Log.level  = Logger::INFO
 # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
-Log.info "Panda server has started."
+Log.info "Panda server has started. #{Time.now}"
 
 # File store
 # ==========

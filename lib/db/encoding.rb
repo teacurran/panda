@@ -26,9 +26,9 @@ class Encoding
   
   aasm_state :queued
   aasm_state :assigned, :exit => :download_video
-  aasm_state :encoding, :enter => :encode_video
+  aasm_state :encoding, :after_enter => :encode_video
   aasm_state :success, :enter => :upload_encoding, :after_enter  => :cleanup
-  aasm_state :error, :enter => :save_logs, :after_enter  => :cleanup
+  aasm_state :error, :enter => :save_error_logs, :after_enter  => :cleanup
   
   aasm_initial_state :queued
   
@@ -53,6 +53,14 @@ class Encoding
     self.find(:first, :conditions => "status='queued'", :order => "created_at asc")
   end
   
+  def log_filename
+    self.key + '.log'
+  end
+  
+  def tmp_log_filepath
+    File.join(Panda::Config[:encoding_log_dir],self.log_filename)
+  end
+  
   # API
   # ===
 
@@ -66,6 +74,12 @@ class Encoding
   
   # Encoding
   # ========
+  
+  # If a custom log is defined use that otherwise use the global log.
+  attr_writer :log
+  def log
+    @log || Log
+  end
 
   def ffmpeg_resolution_and_padding_no_cropping
     # Calculate resolution and any padding
@@ -78,7 +92,7 @@ class Encoding
       aspect = in_w / in_h
       aspect_inv = in_h / in_w
     rescue
-      Log.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
+      self.log.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
       return %(-s #{self.width}x#{self.height} )
     end
 
@@ -118,18 +132,27 @@ class Encoding
   end
   
   def encode_video
-    begun_encoding = Time.now
-
+    self.started_encoding_at = Time.now
+    self.save
+    
+    self.log.info "BEGIN"
+    self.log.info self.inspect
+    
     begin
+      RVideo.logger = self.log
       transcoder = RVideo::Transcoder.new
-      transcoder.execute(self.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath))
+      transcoder.execute(self.profile.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath))
       
-      self.encoded_at = Time.now
-      self.encoding_time = (Time.now - begun_encoding).to_i
+      self.encoding_time = (Time.now - self.started_encoding_at).to_i
       self.save
+      Log.debug "SUCCESS #{self.key}"
       
-      self.success!
-    rescue # TODO: Specify some error type
+      self.win!
+    rescue => e # TODO: Specify some error type
+      Log.debug "FAIL #{self.key}"
+      self.log.error "FAIL"
+      self.log.error "#{e.class} - #{e.message}"
+      self.log.error self.inspect
       
       self.fail!
     end
@@ -139,12 +162,13 @@ class Encoding
     self.upload_to_store
   end
   
-  def save_logs
-    Log.info "TODO: Save logs for video file to store so it can be debugged at a later date."
+  def save_error_logs
+    Store.set(self.log_filename, self.tmp_log_filepath)
   end
   
   def cleanup
-    FileUtils.rm self.tmp_filepath
-    FileUtils.rm self.video.tmp_filepath
+    FileUtils.rm self.tmp_log_filepath, :force => true
+    FileUtils.rm self.tmp_filepath, :force => true
+    FileUtils.rm self.video.tmp_filepath, :force => true
   end
 end

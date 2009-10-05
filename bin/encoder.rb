@@ -1,17 +1,22 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
 require 'lib/panda'
 
-Log.info 'Encoder awake!'
+Log.info "Encoder awake! #{Time.now}"
 
 loop do
   sleep rand(8) # Randomize the sleep so that the servers don't all wake up at the same time
   Log.debug "Checking for messages... #{Time.now}"
-  
-  if encoding = Encoding.get_job
-    begin
-      video.encode
-    rescue  
-      Log.error("Error encoding #{encoding.key}\n#{$!}\n\n#{encoding.inspect}\n#{encoding.video.inspect}" rescue "Error logging encoding error!")
+  begin
+    if encoding = Encoding.get_job
+      Log.debug "PROCESSING #{encoding.key}"
+      encoding.log = Logger.new(encoding.tmp_log_filepath)
+      encoding.log.level = Logger::DEBUG
+
+      encoding.claim!
+      encoding.encode!
     end
+  rescue => e
+    Log.error "APP LEVEL ENCODING ERROR"
+    Log.error "#{e.class} - #{e.message}"
   end
 end

@@ -1,9 +1,12 @@
 module VideoBase
   module StoreMethods
+    def filename
+      self.key + self.extname
+    end
+    
     def tmp_filepath
       File.join(Panda::Config[:private_tmp_path], self.filename)
     end
-
   
     def url
       Store.url(self.filename)

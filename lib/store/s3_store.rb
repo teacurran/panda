@@ -24,11 +24,11 @@ class S3Store < AbstractStore
   def set(key, tmp_file)
     begin
       retryable(:tries => 5, :delay => DELAY) do
-        Merb.logger.info "Upload to S3"
+        Log.info "Upload to S3"
         S3VideoObject.store(key, File.open(tmp_file), :access => :public_read)
       end
     rescue AWS::S3::S3Exception
-      Merb.logger.error "Error uploading #{key} to S3"
+      Log.error "Error uploading #{key} to S3"
       raise
     else
       true
@@ -40,7 +40,7 @@ class S3Store < AbstractStore
     begin
       retryable(:tries => 5, :delay => DELAY) do
         File.open(tmp_file, 'w') do |file|
-          Merb.logger.info "Fetch from S3"
+          Log.info "Fetch from S3"
           S3VideoObject.stream(key) {|chunk| file.write chunk}
         end
       end
@@ -55,7 +55,7 @@ class S3Store < AbstractStore
   def delete(key)
     begin
       retryable(:tries => 5, :delay => DELAY) do
-        Merb.logger.info "Deleting #{key} from S3"
+        Log.info "Deleting #{key} from S3"
         S3VideoObject.delete(key)
       end
     rescue AWS::S3::S3Exception

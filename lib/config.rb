@@ -14,7 +14,9 @@ module Panda
           
           :database               => :simpledb,
           :sdb_domain_prefix      => "panda2_",
-          :sdb_base_url           => "http://sdb.amazonaws.com/"
+          :sdb_base_url           => "http://sdb.amazonaws.com/",
+          
+          :encoding_log_dir       => File.dirname(__FILE__) + "/../log"
         }
       end
       
