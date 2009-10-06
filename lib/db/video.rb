@@ -18,7 +18,7 @@ class Video
   include VideoBase::StoreMethods
   
   def self.all_with_status(status)
-    self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
+    self.find(:all, :conditions => ["status=?",status], :order => "created desc")
   end
 
   # TODO: enable notifications in a nicer way

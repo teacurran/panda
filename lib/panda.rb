@@ -16,6 +16,8 @@ require 'aasm'
 require 'rvideo'
 require 'logger'
 
+require 'core_extensions/kernel'
+
 # Logger
 # ======
 Log = Logger.new("log/server.log") # or log/development.log, whichever you prefer

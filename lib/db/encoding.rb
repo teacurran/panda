@@ -50,7 +50,7 @@ class Encoding
   
 
   def self.get_job
-    self.find(:first, :conditions => "status='queued'", :order => "created_at asc")
+    self.find(:first, :conditions => ["status='queued'"], :order => "created asc")
   end
   
   def log_filename
