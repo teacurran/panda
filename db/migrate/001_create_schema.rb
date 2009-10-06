@@ -15,7 +15,8 @@ class CreateSchema < ActiveRecord::Migration
       t.integer :height
       t.integer :fps
       
-      t.timestamps
+      t.datetime :created
+      t.datetime :updated
     end
     
     create_table :encodings do |t|
@@ -31,7 +32,8 @@ class CreateSchema < ActiveRecord::Migration
       
       t.datetime :started_encoding_at
       
-      t.timestamps
+      t.datetime :created
+      t.datetime :updated
     end
     
     create_table :profiles do |t|
@@ -44,7 +46,8 @@ class CreateSchema < ActiveRecord::Migration
       t.integer :width
       t.integer :height
       
-      t.timestamps
+      t.datetime :created
+      t.datetime :updated
     end
   end
 
