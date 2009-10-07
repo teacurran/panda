@@ -4,7 +4,7 @@ case Panda::Config[:database]
 when :simpledb
   class Video < SimpleRecord::Base
     has_ints :duration, :width, :height, :fps
-    has_attributes :extname, :original_filename, :container, :video_codec, :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
+    has_attributes :extname, :original_filename, :video_codec, :audio_codec, :thumbnail_position, :upload_redirect_url, :state_update_url
   end
 when :mysql
   class Video < ActiveRecord::Base

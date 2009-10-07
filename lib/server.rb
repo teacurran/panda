@@ -33,7 +33,7 @@ module Panda
     # Videos
     
     get '/videos.*' do
-      
+      display_response Video.find(:all), params[:splat].first
     end
     
     # HTML uplaod method where video data is uploaded directly

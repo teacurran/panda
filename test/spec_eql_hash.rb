@@ -12,8 +12,10 @@ module Spec
         
         # Both hashes have the key, but the values are different
         @expected.each do |k,v|
-          unless actual[k] == v
-            @missmatches << "#{k} key expected value of #{v} #{actual[k] ? ", got #{actual[k]}" : "but it wasn't in the actual hash"}"
+          unless v == :any_value
+            unless actual[k] == v
+              @missmatches << "#{k} key expected value of #{v} #{actual[k] ? ", got #{actual[k]}" : "but it wasn't in the actual hash"}"
+            end
           end
         end
         
