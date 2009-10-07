@@ -4,6 +4,7 @@ module Spec
     class EqlHash #:nodoc:
       def initialize(expected)
         @expected = expected
+        @ignore_attrs = [:id, :key, :created_at, :updated_at]
       end
   
       def matches?(actual)
@@ -12,15 +13,15 @@ module Spec
         
         # Both hashes have the key, but the values are different
         @expected.each do |k,v|
-          unless v == :any_value
-            unless actual[k] == v
+          unless @ignore_attrs.include?(k)
+            unless actual[k.to_s] == v
               @missmatches << "#{k} key expected value of #{v} #{actual[k] ? ", got #{actual[k]}" : "but it wasn't in the actual hash"}"
             end
           end
         end
         
         # The actual hash has extra keys that weren't expected
-        (actual.keys - @expected.keys).each do |k|
+        (actual.keys.map {|k| k.to_s } - @expected.keys.map {|k| k.to_s } - @ignore_attrs.map {|k| k.to_s }).each do |k|
           @missmatches << "#{k} key wasn't expected but is in the actual hash, with a value of #{actual[k]}"
         end
         
