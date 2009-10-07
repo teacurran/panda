@@ -1,8 +1,16 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
+
 require 'sinatra/base'
 require 'json'
-require 'lib/panda'
 require 'lib/run_later'
+
+require 'lib/config'
+require 'config/panda' # User's config
+Sinatra::Base.set :environment, :production
+Panda::Config.environment = :production
+Panda::Config.check
+
+require 'lib/panda'
 
 module Panda
   class InvalidRequest < StandardError; end
@@ -96,14 +104,14 @@ module Panda
     end
     
     post '/profiles.*' do
-      required_params(params, :width, :height :category, :title, :extname, :command)
+      required_params(params, :width, :height, :category, :title, :extname, :command)
       profile = Profile.create()
       display_response(profile, params[:splat].first)
     end
     
     put '/profiles/:key.*' do
       profile = Profile.find(params[:key])
-      profile.update_attributes(select_params(params, Profile.writeable_attributes))
+      profile.update_attributes(select_params(params, :width, :height, :category, :title, :extname, :command))
       display_response(profile, params[:splat].first)
     end
     

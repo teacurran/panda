@@ -20,17 +20,22 @@ module Panda
         }
       end
       
-      def use
+      def environment=(env)
+        @environment = env
+      end
+      
+      def use(env)
         @configuration ||= {}
-        yield @configuration
+        @configuration[env] ||= {}
+        yield @configuration[env]
       end
 
       def [](key)
-        @configuration[key] || defaults[key]
+        @configuration[@environment][key] || defaults[key]
       end
       
       def []=(key,val)
-        @configuration[key] = val
+        @configuration[@environment][key] = val
       end
       
       def check

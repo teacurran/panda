@@ -1,13 +1,5 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-# Config
-# ======
-require 'config'
-# Load the user's config options
-require File.dirname(__FILE__)+'/../config/panda.rb'
-# TODO: move config store to sdb
-Panda::Config.check
-
 # Deps
 # ====
 require 'rubygems'
