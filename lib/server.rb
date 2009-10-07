@@ -1,4 +1,5 @@
 require 'lib/panda'
+require 'run_later'
 
 module Panda
   class InvalidRequest < StandardError; end

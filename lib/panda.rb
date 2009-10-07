@@ -17,7 +17,6 @@ require 'rvideo'
 require 'logger'
 require 'json'
 
-require 'run_later'
 require 'core_extensions/kernel'
 
 # Logger
@@ -60,7 +59,7 @@ when :sqlite
   
   ActiveRecord::Base.establish_connection(
     :adapter => 'sqlite3',
-    :dbfile =>  'db/panda.sqlite3.db'
+    :dbfile =>  Panda::Config[:sqlite_dbfile]
   )
 when :mysql
   require 'uuid'

@@ -15,9 +15,14 @@ module Panda
           :database               => :simpledb,
           :sdb_domain_prefix      => "panda2_",
           :sdb_base_url           => "http://sdb.amazonaws.com/",
+          :sqlite_dbfile          => 'db/production.sqlite3.db',
           
           :encoding_log_dir       => File.dirname(__FILE__) + "/../log"
         }
+      end
+      
+      def environment
+        @environment
       end
       
       def environment=(env)

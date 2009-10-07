@@ -1,5 +1,6 @@
 desc "Load env"
 task :environment do
+  PANDA_ENV = ENV['PANDA_ENV'].to_sym
   require 'lib/panda'
 end
 

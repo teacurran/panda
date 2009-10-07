@@ -56,6 +56,7 @@ end
 Panda::Config.use(:test) do |p|
   p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
   p[:database]              = :sqlite
+  p[:sqlite_dbfile]         = 'db/test.sqlite3.db'
   p[:videos_store]          = :filesystem
   p[:videos_domain]         = "localhost:4000/store"
   p[:public_videos_dir]     = File.dirname(__FILE__) + "/../public/store"
