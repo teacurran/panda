@@ -1,9 +1,12 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
+require 'rubygems'
+require 'sinatra/base'
+Sinatra::Base.set :environment, :test
+PANDA_ENV = :test
 require 'lib/server'
+
 require 'spec'
 require 'rack/test'
-
-set :environment, :test
 
 Spec::Runner.configure do |conf|
   conf.include Rack::Test::Methods

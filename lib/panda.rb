@@ -1,13 +1,23 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
+# Config
+# ======
+
+require 'config'
+Panda::Config.environment = PANDA_ENV
+require 'config/panda' # User's config
+Panda::Config.check
+
 # Deps
 # ====
-require 'rubygems'
+
 require 'fileutils'
 require 'aasm'
 require 'rvideo'
 require 'logger'
+require 'json'
 
+require 'run_later'
 require 'core_extensions/kernel'
 
 # Logger

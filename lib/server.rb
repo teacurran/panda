@@ -1,29 +1,9 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
-
-require 'sinatra/base'
-require 'json'
-require 'lib/run_later'
-
-require 'lib/config'
-Sinatra::Base.set :environment, :production
-Panda::Config.check
-
 require 'lib/panda'
 
 module Panda
   class InvalidRequest < StandardError; end
   
   class Server < Sinatra::Base
-    configure do
-      Panda::Config.environment = :production
-      require 'config/panda' # User's config
-    end
-    configure :production do
-      raise "FOOO"
-    end
-    configure :test do
-      raise "FOOO"
-    end
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
     # mime :json, "application/json"

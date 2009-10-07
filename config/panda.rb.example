@@ -1,4 +1,4 @@
-Panda::Config.use do |p|
+Panda::Config.use(:production) do |p|
   # ================================================
   # API integration options
   # ================================================
@@ -51,4 +51,12 @@ Panda::Config.use do |p|
   
   # Each encoding job has its own log file. If there's an error this file is uploaded to the configured store for debugging purposes.
   # p[:encoding_log_dir]     = File.dirname(__FILE__) + "/../log"
+end
+
+Panda::Config.use(:test) do |p|
+  p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
+  p[:database]              = :sqlite
+  p[:videos_store]          = :filesystem
+  p[:videos_domain]         = "localhost:4000/store"
+  p[:public_videos_dir]     = File.dirname(__FILE__) + "/../public/store"
 end

@@ -1,4 +1,4 @@
 require 'rubygems'
-require 'lib/server'
+require 'bin/server'
 
 run Panda::Server
