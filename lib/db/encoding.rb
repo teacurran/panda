@@ -19,6 +19,10 @@ class Encoding
   include AASM
   include VideoBase::StoreMethods
   
+  def self.writeable_attributes
+    []
+  end
+  
   belongs_to :video
   belongs_to :profile
   

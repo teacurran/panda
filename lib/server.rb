@@ -28,27 +28,16 @@ module Panda
     end
     
     def required_params(params, *params_list)
-      params_list.each {|p| raise InvalidRequest unless params.has_key?(p.to_s) }
+      params_list.each do |p|
+        raise InvalidRequest unless params.has_key?(p.to_s)
+      end
     end
+    
+    # Videos
     
     get '/videos.*' do
-      # Allow scope by status
-      # Store a model object to SimpleDB
-      mm = MyModel.new
-      mm.name = "Travis"
-      mm.age = 32
-      mm.save
-      id = mm.id
-
-      # Get an object from SimpleDB
-      mm2 = MyModel.find(id)
-      'got=' + mm2.name + ' and he/she is ' + mm.age.to_s + ' years old'
+      
     end
-    
-    
-    # error InvalidRequest do
-    #   'You got it wrong'
-    # end
     
     # HTML uplaod method where video data is uploaded directly
     post '/videos' do
@@ -77,16 +66,16 @@ module Panda
       end
     end
     
-    post '/videos.*' do
+    # post '/videos.*' do
       # begin
-        required_params(params, :state_update_url)
-        
-        video = Video.create_from_upload(params[:file], params[:state_update_url])
-        video.upload_to_store
-        video.queue_encodings
-        
-        status 200
-        response video, params[:splat].first
+        # required_params(params, :state_update_url)
+        # 
+        # video = Video.create_from_upload(params[:file], params[:state_update_url])
+        # video.upload_to_store
+        # video.queue_encodings
+        # 
+        # status 200
+        # response video, params[:splat].first
         # TODO: handle errors with Sinatra's error blocks
         
       # rescue Video::NotValid
@@ -94,6 +83,34 @@ module Panda
       # rescue Video::VideoError
       #   status 500
       # end
+    # end
+    
+    # Profiles
+    
+    get '/profiles.*' do
+      display_response(Profile.find(:all), params[:splat].first)
+    end
+    
+    get '/profiles/:key.*' do
+      display_response(Profile.find(params[:key]), params[:splat].first)
+    end
+    
+    post '/profiles.*' do
+      required_params(params, :width, :height :category, :title, :extname, :command)
+      profile = Profile.create()
+      display_response(profile, params[:splat].first)
+    end
+    
+    put '/profiles/:key.*' do
+      profile = Profile.find(params[:key])
+      profile.update_attributes(select_params(params, Profile.writeable_attributes))
+      display_response(profile, params[:splat].first)
+    end
+    
+    delete '/profiles/:key.*' do 
+      profile = Profile.find(params[:key])
+      profile.destroy!
+      status 200
     end
   end
 end

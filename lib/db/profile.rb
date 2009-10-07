@@ -14,4 +14,7 @@ end
 
 class Profile
   
+  def self.writeable_attributes
+    [:width, :height, :category, :title, :extname, :command]
+  end
 end

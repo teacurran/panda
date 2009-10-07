@@ -17,6 +17,10 @@ end
 class Video
   include VideoBase::StoreMethods
   
+  def self.writeable_attributes
+    [:thumbnail_position, :upload_redirect_url, :state_update_url]
+  end
+  
   def self.all_with_status(status)
     self.find(:all, :conditions => ["status=?",status], :order => "created desc")
   end
@@ -82,6 +86,7 @@ class Video
     video = self.create
     video.extname = File.extname(file[:filename])
     raise FormatNotRecognised if video.extname.blank?
+    # TODO: Should we only accept extnames from a speicic list?
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
     video.state_update_url = state_update_url
