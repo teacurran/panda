@@ -165,7 +165,7 @@ class Video
   # Exceptions
   
   class VideoError < StandardError; end
-  class NotificationError < StandardError; end
+  # class NotificationError < StandardError; end
   
   # 422
   class NotValid < VideoError; end

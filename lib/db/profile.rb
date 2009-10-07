@@ -17,4 +17,8 @@ class Profile
   def self.writeable_attributes
     [:width, :height, :category, :title, :extname, :command]
   end
+  
+  def encodings
+    Encoding.find(:all, :conditions => ["profile_id=?",self.key])
+  end
 end

@@ -26,6 +26,17 @@ describe 'API' do
     
     @profile_hash = {:category => "Flash flv", :title => "Medium", :width => 320, :height => 240, :extname => ".flv", :command => "ffmpeg -i $input_file$ -ar 22050 -ab 64k -f flv -b 256k $resolution_and_padding$ -y $output_file$\nflvtool2 -U $output_file$"}
     @profile = Profile.create(@profile_hash)
+    
+    @encoding_hash = {:width => 320, :height => 240, :encoding_time => 9, :extname => '.mp4', :status => 'queued', :video_id => @video.key, :profile_id => @profile.key, :started_encoding_at => Time.now}
+    @encoding = Encoding.create(@encoding_hash)
+  end
+  
+  # Generic errors
+  
+  it "returns a 404" do
+    get "/profiles/999.json"
+    last_response.status.should == 404
+    JSON.parse(last_response.body).should eql_hash({:message => "Couldn't find Profile with ID=999", :error => "RecordNotFound"})
   end
   
   # Videos
@@ -34,6 +45,10 @@ describe 'API' do
     get "/videos.json"
     last_response.should be_ok
     JSON.parse(last_response.body).first.should eql_hash(@video_hash)
+  end
+  
+  it "posts /videos" do
+    
   end
   
   # Profiles
@@ -57,10 +72,9 @@ describe 'API' do
   end
   
   it "posts /profiles.json and requires all params" do
-    # lambda { post "/profiles.json", {} }.should raise_error(Panda::InvalidRequest)
     post "/profiles.json", {}
-    last_response.status.should == 500
-    last_response.body.should == "All required parameters were not supplied."
+    last_response.status.should == 400
+    JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied", :error => "InvalidRequest"})
   end
   
   it "puts /profiles/key.json" do
@@ -70,9 +84,23 @@ describe 'API' do
   end
   
   it "puts /profiles/key.json but doesn't allow restricted params" do
-    put "/profiles/#{@profile.key}.json", {:restricted_param => 'the_value'}
-    # last_response.should be_ok
-    # JSON.parse(last_response.body).should eql_hash(@profile_hash)
+    put "/profiles/#{@profile.key}.json", @profile_hash.merge({:extname => ".xxx", :restricted_param => 'the_value'})
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@profile_hash.merge({:extname => ".xxx"}))
   end
   
+  it "doesn't delete /profiles/key.json if it has encodings associated" do
+    delete "/profiles/#{@profile.key}.json"
+    Profile.find(:all, :conditions => ["key=?",@profile.key]).size.should == 1
+    last_response.status.should == 422
+    JSON.parse(last_response.body).should eql_hash({:message => "Couldn't delete Profile with ID=#{@profile.key} as it has associated encodings which must be deleted first", :error => "CannotDelete"})
+  end
+  
+  it "deletes /profiles/key.json" do
+    profile = Profile.create(@profile_hash)
+    delete "/profiles/#{profile.key}.json"
+    Profile.find(:all, :conditions => ["key=?",profile.key]).size.should == 0
+    last_response.should be_ok
+    last_response.body.should == ''
+  end
 end

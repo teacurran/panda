@@ -3,6 +3,8 @@ require 'run_later'
 
 module Panda
   class InvalidRequest < StandardError; end
+  class RecordNotFound < StandardError; end
+  class CannotDelete < StandardError; end
   
   class Server < Sinatra::Base
     configure(:test) do
@@ -16,45 +18,50 @@ module Panda
       case ext.to_sym
       when :json
         content_type :json
-        object.to_json
+        r = object.to_json
       when :xml
         content_type :xml
-        object.to_xml
+        r = object.to_xml
       end
-    end
-    
-    def ajax_response(r)
-      "<textarea>" + r.to_json + "</textarea>"
+      
+      r = "<textarea>#{r}</textarea>" if request.env['panda.ajax']
+      return r
     end
     
     # Errors
     
-    def display_error(e)
+    def display_error(s)
+      status s
       # TODO: support xml in returned error messages
-      r = {:error => e.class.to_s, :message => e.message}
-      if ajax_request?
-        
+      r = {:error => request.env['sinatra.error'].class.to_s.split('::').last, :message => request.env['sinatra.error'].message}
+      display_response(r, :json)
     end
     
     error do
-      display_error(request.env['sinatra.error'])
+      display_error 500
     end
-        
+    
+    error ActiveRecord::RecordNotFound do
+      display_error 404
+    end
+    
     error InvalidRequest do
-      status 400
-      display_error(request.env['sinatra.error'])
+      display_error 400
     end
     
     error Video::VideoError do
-      status 422
-      display_error(request.env['sinatra.error'])
+      display_error 422
+    end
+    
+    error CannotDelete do
+      display_error 422
     end
     
     # Params
     
     def required_params(params, *params_list)
       params_list.each do |p|
-        raise(InvalidRequest, "All required parameters were not supplied.") unless params.has_key?(p.to_s)
+        raise(InvalidRequest, "All required parameters were not supplied") unless params.has_key?(p.to_s)
       end
     end
     
@@ -69,12 +76,14 @@ module Panda
     # Videos
     
     get '/videos.*' do
-      raise request.env.inspect
       display_response Video.find(:all), params[:splat].first
     end
     
     # HTML uplaod method where video data is uploaded directly
+    # This is the only method which allows ajax submittion. If it's submitted by ajax we must wrap the response in <textarea> tags
     post '/videos' do
+      request.env['panda.ajax'] = request.env['rack.request'].xhr?
+      
       required_params(params, :upload_redirect_url, :state_update_url)
       
       video = Video.create_from_upload(params[:file], params[:state_update_url],  params[:upload_redirect_url])
@@ -84,8 +93,8 @@ module Panda
         video.queue_encodings
       # end
       
-      if ajax_request?
-        ajax_response({:location => video.get_upload_redirect_url})
+      if request.env['panda.ajax']
+        display_response({:location => video.get_upload_redirect_url}, params[:splat].first)
       else
         redirect video.get_upload_redirect_url
       end
@@ -134,7 +143,8 @@ module Panda
     
     delete '/profiles/:key.*' do 
       profile = Profile.find(params[:key])
-      profile.destroy!
+      raise(CannotDelete, "Couldn't delete Profile with ID=#{params[:key]} as it has associated encodings which must be deleted first") unless profile.encodings.empty?
+      profile.destroy
       status 200
     end
   end
