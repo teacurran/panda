@@ -39,6 +39,18 @@ describe 'API' do
     JSON.parse(last_response.body).should eql_hash({:message => "Couldn't find Profile with ID=999", :error => "RecordNotFound"})
   end
   
+  # Video html upload
+  
+  it "posts /videos" do
+    post "/videos.json", @video_hash
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@video_hash)
+  end
+  
+  # Video api upload
+
+  # it "posts /videos.json"
+  
   # Videos
   
   it "gets /videos.json" do
@@ -46,11 +58,34 @@ describe 'API' do
     last_response.should be_ok
     JSON.parse(last_response.body).first.should eql_hash(@video_hash)
   end
-  
-  it "posts /videos" do
-    
+
+  it "gets /videos/:key.json" do
+    get "/videos/#{@video.key}.json"
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@video_hash)
   end
-  
+
+  it "puts /videos/key.json" do
+    put "/videos/#{@video.key}.json", {:upload_redirect_url => "xxx"}
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@video_hash.merge({:upload_redirect_url => "xxx"}))
+  end
+
+  it "puts /videos/key.json but doesn't allow restricted params" do
+    video = Video.create(@video_hash)
+    put "/videos/#{video.key}.json", @video_hash.merge({:upload_redirect_url => "xxx", :restricted_param => 'the_value'})
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@video_hash.merge({:upload_redirect_url => "xxx"}))
+  end
+
+  it "deletes /videos/key.json and associated encodings" do
+    video = video.create(@video_hash)
+    delete "/videos/#{video.key}.json"
+    video.find(:all, :conditions => ["key=?",video.key]).size.should == 0
+    last_response.should be_ok
+    last_response.body.should == ''
+  end
+    
   # Profiles
   
   it "gets /profiles.json" do
@@ -84,7 +119,8 @@ describe 'API' do
   end
   
   it "puts /profiles/key.json but doesn't allow restricted params" do
-    put "/profiles/#{@profile.key}.json", @profile_hash.merge({:extname => ".xxx", :restricted_param => 'the_value'})
+    profile = Profile.create(@profile_hash)
+    put "/profiles/#{profile.key}.json", @profile_hash.merge({:extname => ".xxx", :restricted_param => 'the_value'})
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@profile_hash.merge({:extname => ".xxx"}))
   end

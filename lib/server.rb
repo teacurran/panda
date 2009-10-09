@@ -19,12 +19,14 @@ module Panda
       when :json
         content_type :json
         r = object.to_json
-      when :xml
-        content_type :xml
-        r = object.to_xml
+      # when :xml
+      #   content_type :xml
+      #   r = object.to_xml
+      else
+        raise InvalidRequest, "Currently only .json is supported as a format"
       end
       
-      r = "<textarea>#{r}</textarea>" if request.env['panda.ajax']
+      r = "<textarea>#{r}</textarea>" if request.env['panda.iframe']
       return r
     end
     
@@ -82,7 +84,8 @@ module Panda
     # HTML uplaod method where video data is uploaded directly
     # This is the only method which allows ajax submittion. If it's submitted by ajax we must wrap the response in <textarea> tags
     post '/videos' do
-      request.env['panda.ajax'] = request.env['rack.request'].xhr?
+      puts request.env.inspect
+      request.env['panda.iframe'] = params[:iframe].to_bool
       
       required_params(params, :upload_redirect_url, :state_update_url)
       
@@ -93,8 +96,8 @@ module Panda
         video.queue_encodings
       # end
       
-      if request.env['panda.ajax']
-        display_response({:location => video.get_upload_redirect_url}, params[:splat].first)
+      if request.env['panda.iframe']
+        display_response({:location => video.get_upload_redirect_url}, :json)
       else
         redirect video.get_upload_redirect_url
       end

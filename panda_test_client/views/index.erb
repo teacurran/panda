@@ -6,6 +6,22 @@
     <title></title>
     <link href="/panda.css" type="text/css" rel="Stylesheet" charset="utf-8" media="all" />
 
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/jquery.form.js"></script>
+
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() { 
+          $('#panda_form').ajaxForm({
+			        beforeSubmit: function(a,f,o) {
+			            alert("Sending");
+			        },
+			        success: function(data) {
+			            alert("yay");
+			        },
+							iframe: true
+          });
+      });
+		</script>
   </head>
   <body>
 
@@ -14,12 +30,13 @@
          <h1>Panda</h1>
        </div>
 
-            <form id="" action="http://localhost:5678/videos" method="post" enctype="multipart/form-data">
+            <form id="panda_form" action="http://localhost:5678/videos" method="post" enctype="multipart/form-data">
                 <p>
                     <label for="file">Video:</label>
                     <input type="file" name="file" id="file" />        
                 </p>
-                
+                <input type="hidden" name="iframe" value="true" /> 
+                <input type="hidden" name="MAX_FILE_SIZE" value="100000" /> 
                 <input type="hidden" name="upload_redirect_url" value="http://localhost:4567/upload_redirect_url/$id" />
                 <input type="hidden" name="state_update_url" value="http://localhost:4567/state_update_url/$id" />
 

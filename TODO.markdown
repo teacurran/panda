@@ -4,3 +4,4 @@
 * SimpleDB pagination for index get requests
 * Raise RecordNotFound when using SimpleDB (right now we just return nil)
 * Test ajax responses including errors
+* Use nginx with file upload plugin so ruby doesn't touch any video data
