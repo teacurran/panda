@@ -15,19 +15,21 @@ module Panda
     # mime :json, "application/json"
         
     def display_response(object, ext)
-      case ext.to_sym
-      when :json
-        content_type :json
-        r = object.to_json
-      # when :xml
-      #   content_type :xml
-      #   r = object.to_xml
+      if request.env['panda.iframe']
+        content_type :html
+        return "<textarea>#{object.to_json}</textarea>"
       else
-        raise InvalidRequest, "Currently only .json is supported as a format"
+        case ext.to_sym
+        when :json
+          content_type :json
+          return object.to_json
+        # when :xml
+        #   content_type :xml
+        #   r = object.to_xml
+        else
+          raise InvalidRequest, "Currently only .json is supported as a format"
+        end
       end
-      
-      r = "<textarea>#{r}</textarea>" if request.env['panda.iframe']
-      return r
     end
     
     # Errors
@@ -82,9 +84,13 @@ module Panda
     end
     
     # HTML uplaod method where video data is uploaded directly
-    # This is the only method which allows ajax submittion. If it's submitted by ajax we must wrap the response in <textarea> tags
-    post '/videos' do
-      puts request.env.inspect
+    # TODO: allow url param with location of external video
+    # Allows both /videos and /videos.json
+    # post %r{/videos(\.)?(\w+)?} do
+    post '/videos.*' do
+      # We either return the requested format (if supported by display_response), or default to :json if the upload's from html or Flash. TODO: Not sure we really need to support POST /videos without the file extension. Maybe some browsers might pay attention to the .json though. PDI.
+      # return_format = params[:captures] ? params[:captures][1].to_sym || :json
+      
       request.env['panda.iframe'] = params[:iframe].to_bool
       
       required_params(params, :upload_redirect_url, :state_update_url)
@@ -96,31 +102,8 @@ module Panda
         video.queue_encodings
       # end
       
-      if request.env['panda.iframe']
-        display_response({:location => video.get_upload_redirect_url}, :json)
-      else
-        redirect video.get_upload_redirect_url
-      end
+      display_response(video, params[:splat].first)
     end
-    
-    # post '/videos.*' do
-      # begin
-        # required_params(params, :state_update_url)
-        # 
-        # video = Video.create_from_upload(params[:file], params[:state_update_url])
-        # video.upload_to_store
-        # video.queue_encodings
-        # 
-        # status 200
-        # response video, params[:splat].first
-        # TODO: handle errors with Sinatra's error blocks
-        
-      # rescue Video::NotValid
-      #   status 422
-      # rescue Video::VideoError
-      #   status 500
-      # end
-    # end
     
     # Profiles
     

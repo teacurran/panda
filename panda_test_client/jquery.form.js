@@ -298,7 +298,7 @@ $.fn.ajaxSubmit = function(options) {
 					log('Could not access iframe DOM after 50 tries.');
 					return;
 				}
-
+				
 				xhr.responseText = doc.body ? doc.body.innerHTML : null;
 				xhr.responseXML = doc.XMLDocument ? doc.XMLDocument : doc;
 				xhr.getResponseHeader = function(header){
@@ -324,6 +324,7 @@ $.fn.ajaxSubmit = function(options) {
 				data = $.httpData(xhr, opts.dataType);
 			}
 			catch(e){
+			alert(e);
 				ok = false;
 				$.handleError(opts, xhr, 'error', e);
 			}
