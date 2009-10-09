@@ -1,0 +1,19 @@
+<script type="text/javascript" charset="utf-8">
+	intv = setInterval(function() {
+		$.get("/status/<%= @video['key'] %>.json", {}, function(res, testStatus) {
+			encoding = res[0];
+			$('#status').html(encoding['status']);
+			
+			if(encoding['status'] == 'success') {
+				alert('<embed src="http://localhost:5678/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:5678/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
+				$('#video').html('<embed src="http://localhost:5678/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:5678/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
+				clearInterval(intv);
+			}
+		}, 'json');
+	}, 2000);
+</script>
+
+<h2>Uploaded "<%= @video['original_filename'] %>"</h2>
+
+<div id="status">Getting status...</div>
+<div id="video"></div>

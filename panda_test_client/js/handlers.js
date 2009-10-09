@@ -131,7 +131,7 @@ function uploadSuccess(file, serverData) {
 			this.customSettings.upload_successful = false;
 		} else {
 			this.customSettings.upload_successful = true;
-			document.getElementById("hidFileID").value = serverData;
+			document.getElementById("video").value = serverData;
 		}
 		
 	} catch (e) {
