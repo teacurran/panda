@@ -79,16 +79,20 @@ class Video
   # }
   # 
   
+  # TODO: test strip_windows_windows_path
+  def self.strip_windows_windows_path(fn)
+    fn.split("\\").last
+  end
   
   def self.create_from_upload(file, state_update_url = nil, upload_redirect_url = nil)
-    raise NoFileSubmitted if !file || file.blank?
+    raise(NoFileSubmitted, "No file was submitted") if !file || file.blank?
     
     video = self.create
     video.extname = File.extname(file[:filename])
     raise(FormatNotRecognised, "Filename has no extension") if video.extname.blank?
     # TODO: Should we only accept extnames from a speicic list?
     # Split out any directory path Windows adds in
-    video.original_filename = file[:filename].split("\\").last
+    video.original_filename = self.strip_windows_windows_path(file[:filename])
     video.state_update_url = state_update_url
     video.upload_redirect_url = upload_redirect_url
     
@@ -109,7 +113,7 @@ class Video
     Log.info "#{self.key}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
-    raise("FormatNotRecognised", "Video data in file not recognised") unless inspector.valid? and inspector.video?
+    raise(FormatNotRecognised, "Video data in file not recognised") unless inspector.valid? and inspector.video?
     
     [:duration, :fps, :width, :height, :video_codec, :audio_codec].each do |k|
       self.send("#{k}=", (inspector.send(k) rescue nil))

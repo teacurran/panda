@@ -2,13 +2,13 @@ require 'lib/panda'
 require 'run_later'
 
 module Panda
-  class InvalidRequest < StandardError; end
+  class BadRequest < StandardError; end
   class RecordNotFound < StandardError; end
   class CannotDelete < StandardError; end
   
   class Server < Sinatra::Base
     configure(:test) do
-      # set :raise_errors, false
+      set :raise_errors, false
     end
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
@@ -27,7 +27,7 @@ module Panda
         #   content_type :xml
         #   r = object.to_xml
         else
-          raise InvalidRequest, "Currently only .json is supported as a format"
+          raise BadRequest, "Currently only .json is supported as a format"
         end
       end
     end
@@ -49,12 +49,20 @@ module Panda
       display_error 404
     end
     
-    error InvalidRequest do
+    error BadRequest do
       display_error 400
     end
     
-    error Video::VideoError do
+    error Video::NotValid do
       display_error 422
+    end
+    
+    error Video::FormatNotRecognised do
+      display_error 422
+    end
+    
+    error Video::NoFileSubmitted do
+      display_error 400
     end
     
     error CannotDelete do
@@ -65,7 +73,7 @@ module Panda
     
     def required_params(params, *params_list)
       params_list.each do |p|
-        raise(InvalidRequest, "All required parameters were not supplied") unless params.has_key?(p.to_s)
+        raise(BadRequest, "All required parameters were not supplied") unless params.has_key?(p.to_s)
       end
     end
     
