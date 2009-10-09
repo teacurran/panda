@@ -90,11 +90,15 @@ module Panda
     get '/videos.*' do
       display_response Video.find(:all), params[:splat].first
     end
-    
+  
     get '/videos/:key.*' do
       display_response(Video.find(params[:key]), params[:splat].first)
     end
     
+    get '/videos/:key/encodings.*' do
+      display_response(Video.find(params[:key]).encodings, params[:splat].first)
+    end
+
     # HTML uplaod method where video data is uploaded directly
     # TODO: allow url param with location of external video
     # Allows both /videos.json and /videos.html

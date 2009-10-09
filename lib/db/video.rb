@@ -22,7 +22,7 @@ class Video
   end
   
   def self.all_with_status(status)
-    self.find(:all, :conditions => ["status=?",status], :order => "created desc")
+    self.find(:all, :conditions => ["status=?",status], :order => "created_at desc")
   end
 
   # TODO: enable notifications in a nicer way
@@ -155,16 +155,6 @@ class Video
 
   # API
   # ===
-
-  # Hash of paramenters for video and encodings when video.xml/yaml requested.
-  # 
-  # See the specs for an example of what this returns
-  # 
-  def to_hash
-    h = self.attributes
-    h[:encodings] = self.encodings.map {|e| e.to_hash }
-    return h
-  end
   
   # Exceptions
   

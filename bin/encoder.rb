@@ -1,11 +1,13 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
+require 'rubygems'
+PANDA_ENV = :production
 require 'lib/panda'
 
 Log.info "Encoder awake! #{Time.now}"
 
 loop do
   sleep rand(8) # Randomize the sleep so that the servers don't all wake up at the same time
-  Log.debug "Checking for messages... #{Time.now}"
+  # Log.debug "Checking for messages... #{Time.now}"
   begin
     if encoding = Encoding.get_job
       Log.debug "PROCESSING #{encoding.key}"

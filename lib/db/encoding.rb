@@ -54,7 +54,7 @@ class Encoding
   
 
   def self.get_job
-    self.find(:first, :conditions => ["status='queued'"], :order => "created asc")
+    self.find(:first, :conditions => ["status='queued'"], :order => "created_at asc")
   end
   
   def log_filename
@@ -67,14 +67,6 @@ class Encoding
   
   # API
   # ===
-
-  # Hash of paramenters for video and encodings when video.xml/yaml requested.
-  # 
-  # See the specs for an example of what this returns
-  # 
-  def to_hash
-    self.attributes
-  end
   
   # Encoding
   # ========

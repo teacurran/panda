@@ -23,7 +23,7 @@ require 'core_extensions/string'
 # Logger
 # ======
 Log = Logger.new("log/server.log") # or log/development.log, whichever you prefer
-Log.level  = Logger::INFO
+Log.level  = Logger::DEBUG
 # I'm assuming the other logging levels are debug &amp; error, couldn't find documentation on the different levels though
 Log.info "Panda server has started. #{Time.now}"
 
