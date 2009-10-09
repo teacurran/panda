@@ -5,4 +5,4 @@
 * Raise RecordNotFound when using SimpleDB (right now we just return nil)
 * Test ajax responses including errors
 * Non-flash file upload. Write js (extract stuff from jquery.form.js) which submits file in an iframe and processes response.
-* Use nginx with file upload plugin so ruby doesn't touch any video data
+* Use nginx with file upload plugin so ruby doesn't touch any video data: e.g. http://www.motionstandingstill.com/nginx-upload-awesomeness/2008-08-13/

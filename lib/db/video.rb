@@ -85,7 +85,7 @@ class Video
     
     video = self.create
     video.extname = File.extname(file[:filename])
-    raise FormatNotRecognised if video.extname.blank?
+    raise(FormatNotRecognised, "Filename has no extension") if video.extname.blank?
     # TODO: Should we only accept extnames from a speicic list?
     # Split out any directory path Windows adds in
     video.original_filename = file[:filename].split("\\").last
@@ -93,7 +93,7 @@ class Video
     video.upload_redirect_url = upload_redirect_url
     
     # Move file into tmp location
-    FileUtils.mv file[:tempfile].path, video.tmp_filepath
+    FileUtils.mv file[:tempfile].path, video.tmp_filepath, :force => true
     
     video.read_metadata
     video.save
@@ -109,14 +109,14 @@ class Video
     Log.info "#{self.key}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
-    raise FormatNotRecognised unless inspector.valid? and inspector.video?
+    raise("FormatNotRecognised", "Video data in file not recognised") unless inspector.valid? and inspector.video?
     
     [:duration, :fps, :width, :height, :video_codec, :audio_codec].each do |k|
       self.send("#{k}=", (inspector.send(k) rescue nil))
     end
     
     # Don't allow videos with a duration of 0
-    raise FormatNotRecognised if self.duration == 0
+    raise(FormatNotRecognised, "Video has a duration of 0") if self.duration == 0
   end
   
   # TODO: Breakout Profile adding into a different method

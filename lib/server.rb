@@ -8,7 +8,7 @@ module Panda
   
   class Server < Sinatra::Base
     configure(:test) do
-      set :raise_errors, false
+      # set :raise_errors, false
     end
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
@@ -83,26 +83,45 @@ module Panda
       display_response Video.find(:all), params[:splat].first
     end
     
+    get '/videos/:key.*' do
+      display_response(Video.find(params[:key]), params[:splat].first)
+    end
+    
     # HTML uplaod method where video data is uploaded directly
     # TODO: allow url param with location of external video
-    # Allows both /videos and /videos.json
-    # post %r{/videos(\.)?(\w+)?} do
+    # Allows both /videos.json and /videos.html
     post '/videos.*' do
-      # We either return the requested format (if supported by display_response), or default to :json if the upload's from html or Flash. TODO: Not sure we really need to support POST /videos without the file extension. Maybe some browsers might pay attention to the .json though. PDI.
-      # return_format = params[:captures] ? params[:captures][1].to_sym || :json
-      
+      # puts params.inspect
+      # puts request.env.inspect
       request.env['panda.iframe'] = params[:iframe].to_bool
       
       required_params(params, :upload_redirect_url, :state_update_url)
       
       video = Video.create_from_upload(params[:file], params[:state_update_url],  params[:upload_redirect_url])
       
-      # run_later do # TODO: ensure run_later timeout is long enough
+      if PANDA_ENV == :test
         video.upload_to_store
         video.queue_encodings
-      # end
+      else
+        # run_later do # TODO: ensure run_later timeout is long enough
+          video.upload_to_store
+          video.queue_encodings
+        # end
+      end
       
       display_response(video, params[:splat].first)
+    end
+    
+    put '/videos/:key.*' do
+      video = Video.find(params[:key])
+      video.update_attributes(select_params(params, :upload_redirect_url, :state_update_url, :thumbnail_position))
+      display_response(video, params[:splat].first)
+    end
+    
+    delete '/videos/:key.*' do 
+      video = Video.find(params[:key])
+      video.obliterate!
+      status 200
     end
     
     # Profiles

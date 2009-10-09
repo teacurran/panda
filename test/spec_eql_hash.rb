@@ -15,13 +15,13 @@ module Spec
         @expected.each do |k,v|
           unless @ignore_attrs.include?(k)
             unless actual[k.to_s] == v
-              @missmatches << "#{k} key expected value of #{v} #{actual[k] ? ", got #{actual[k]}" : "but it wasn't in the actual hash"}"
+              @missmatches << "#{k} key expected value of #{v} #{actual[k.to_s] ? ", got #{actual[k.to_s]}" : "but it wasn't in the actual hash"}"
             end
           end
         end
         
         # The actual hash has extra keys that weren't expected
-        (actual.keys.map {|k| k.to_s } - @expected.keys.map {|k| k.to_s } - @ignore_attrs.map {|k| k.to_s }).each do |k|
+        ((actual.keys.map {|k| k.to_s } - @expected.keys.map {|k| k.to_s }) - @ignore_attrs.map {|k| k.to_s }).each do |k|
           @missmatches << "#{k} key wasn't expected but is in the actual hash, with a value of #{actual[k]}"
         end
         
