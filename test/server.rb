@@ -2,6 +2,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..'))
 require 'rubygems'
 require 'sinatra/base'
 Sinatra::Base.set :environment, :test
+Sinatra::Base.set :raise_errors, false
 PANDA_ENV = :test
 require 'lib/server'
 
@@ -31,7 +32,7 @@ describe 'API' do
     @profile_hash = {:category => "Flash flv", :title => "Medium", :width => 320, :height => 240, :extname => ".flv", :command => "ffmpeg -i $input_file$ -ar 22050 -ab 64k -f flv -b 256k $resolution_and_padding$ -y $output_file$\nflvtool2 -U $output_file$"}
     @profile = Profile.create(@profile_hash)
     
-    @encoding_hash = {:width => 320, :height => 240, :encoding_time => 9, :extname => '.mp4', :status => 'queued', :video_id => @video.key, :profile_id => @profile.key, :started_encoding_at => Time.now}
+    @encoding_hash = {:width => 320, :height => 240, :encoding_time => 9, :extname => '.flv', :status => 'queued', :video_id => @video.key, :profile_id => @profile.key, :started_encoding_at => nil}
     @encoding = Encoding.create(@encoding_hash)
   end
   
@@ -44,12 +45,14 @@ describe 'API' do
     last_request.POST["file"][:type].should == "application/octet-stream"
     last_response.should be_ok
     # TODO: test windows filenames stripiing
-    puts last_response.body
     created_video_hash = JSON.parse(last_response.body)
     created_video_hash.should eql_hash({:duration => 14000, :width => 300, :height => 240, :fps => 29, :extname => '.mp4', :original_filename => 'panda.mp4', :video_codec => 'h264', :audio_codec => 'aac', :thumbnail_position => nil, :upload_redirect_url => 'http://localhost/upload_redirect_url/$id', :state_update_url => 'http://localhost/state_update_url/$id'})
     
     get "/videos/#{created_video_hash['key']}/encodings.json"
-    JSON.parse(last_response.body).first.should eql_hash({:width => 320, :height => 240, :encoding_time => nil, :extname => '.flv', :status => 'queued', :video_id => created_video_hash['key'], :profile_id => @profile.key, :started_encoding_at => nil})
+    created_encoding_hash = JSON.parse(last_response.body).first
+    created_encoding_hash.should eql_hash({:width => 320, :height => 240, :encoding_time => nil, :extname => '.flv', :status => 'queued', :video_id => created_video_hash['key'], :profile_id => @profile.key, :started_encoding_at => nil})
+    
+    Video.find(created_video_hash['key']).obliterate!
   end
   
   it "posts /videos.json and requires all params" do
@@ -76,36 +79,33 @@ describe 'API' do
     JSON.parse(last_response.body).should eql_hash({:message => "Filename has no extension", :error => "FormatNotRecognised"})
   end
   
-
-  # it "posts /videos.json"
-
   # Videos
-
+  
   it "gets /videos.json" do
     get "/videos.json"
     last_response.should be_ok
     JSON.parse(last_response.body).first.should eql_hash(@video_hash)
   end
-
+  
   it "gets /videos/:key.json" do
     get "/videos/#{@video.key}.json"
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@video_hash)
   end
-
+  
   it "puts /videos/:key.json" do
     put "/videos/#{@video.key}.json", {:upload_redirect_url => "xxx"}
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@video_hash.merge({:upload_redirect_url => "xxx"}))
   end
-
+  
   it "puts /videos/:key.json but doesn't allow restricted params" do
     video = Video.create(@video_hash)
     put "/videos/#{video.key}.json", @video_hash.merge({:upload_redirect_url => "xxx", :original_filename => 'restricted value should not be saved'})
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@video_hash.merge({:upload_redirect_url => "xxx"}))
   end
-
+  
   it "deletes /videos/:key.json and its encodings" do
     video = Video.create(@video_hash)
     encoding = Encoding.create(@encoding_hash.merge(:video_id => video.key))
@@ -116,66 +116,121 @@ describe 'API' do
     last_response.body.should == ''
   end
   
-  # Profiles
+  # Encodings
 
-  it "gets /profiles.json" do
-    get "/profiles.json"
+  it "gets /encodings.json" do
+    get "/encodings.json"
     last_response.should be_ok
-    JSON.parse(last_response.body).first.should eql_hash(@profile_hash)
+    JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
   end
 
-  it "gets /profiles/:key.json" do
-    get "/profiles/#{@profile.key}.json"
+  it "gets /encodings/:status.json" do
+    get "/encodings/error.json"
     last_response.should be_ok
-    JSON.parse(last_response.body).should eql_hash(@profile_hash)
+    Encoding.find(:all, :conditions => ["status=?",'error']).size.should == 0
+    
+    get "/encodings/queued.json"
+    last_response.should be_ok
+    JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
+  end
+  
+  it "gets /encodings/:key.json" do
+    get "/encodings/#{@encoding.key}.json"
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@encoding_hash)
+  end
+  
+  it "posts /encodings.json" do
+    post "/encodings.json", {:video_key => @video.key, :profile_key => @profile.key}
+    last_response.should be_ok
+    encoding_hash = JSON.parse(last_response.body)
+    encoding_hash.should eql_hash(@encoding_hash.merge({:encoding_time => nil}))
+    Encoding.find(:all).size.should == 2
+    Encoding.find(encoding_hash['key']).obliterate!
   end
 
-  it "posts /profiles.json" do
-    post "/profiles.json", @profile_hash
-    last_response.should be_ok
-    JSON.parse(last_response.body).should eql_hash(@profile_hash)
-  end
-
-  it "posts /profiles.json and requires all params" do
-    post "/profiles.json", {}
+  it "posts /encodings.json and requires all params" do
+    post "/encodings.json", {}
     last_response.status.should == 400
     JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied", :error => "BadRequest"})
   end
 
-  it "puts /profiles/:key.json" do
-    put "/profiles/#{@profile.key}.json", @profile_hash
+  it "puts /encodings/:key/retry.json and allows encoding to be retried"
+
+  it "deletes /encodings/:key.json" do
+    encoding = Encoding.create(@encoding_hash)
+    delete "/encodings/#{encoding.key}.json"
+    Encoding.find(:all, :conditions => ["key=?",encoding.key]).size.should == 0
     last_response.should be_ok
-    JSON.parse(last_response.body).should eql_hash(@profile_hash)
+    last_response.body.should == ''
+  end
+
+  # Profiles
+
+  it "gets /profiles.json" do
+   get "/profiles.json"
+   last_response.should be_ok
+   JSON.parse(last_response.body).first.should eql_hash(@profile_hash)
+  end
+
+  it "gets /profiles/:key.json" do
+   get "/profiles/#{@profile.key}.json"
+   last_response.should be_ok
+   JSON.parse(last_response.body).should eql_hash(@profile_hash)
+  end
+
+  it "gets /profiles/:key/encodings.json" do
+   get "/profiles/#{@profile.key}/encodings.json"
+   last_response.should be_ok
+   JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
+  end
+
+  it "posts /profiles.json" do
+   post "/profiles.json", @profile_hash
+   last_response.should be_ok
+   JSON.parse(last_response.body).should eql_hash(@profile_hash)
+  end
+
+  it "posts /profiles.json and requires all params" do
+   post "/profiles.json", {}
+   last_response.status.should == 400
+   JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied", :error => "BadRequest"})
+  end
+
+  it "puts /profiles/:key.json" do
+   put "/profiles/#{@profile.key}.json", @profile_hash
+   last_response.should be_ok
+   JSON.parse(last_response.body).should eql_hash(@profile_hash)
   end
 
   it "puts /profiles/:key.json but doesn't allow restricted params" do
-    profile = Profile.create(@profile_hash)
-    put "/profiles/#{profile.key}.json", @profile_hash.merge({:extname => ".xxx", :restricted_param => 'the_value'})
-    last_response.should be_ok
-    JSON.parse(last_response.body).should eql_hash(@profile_hash.merge({:extname => ".xxx"}))
+   profile = Profile.create(@profile_hash)
+   put "/profiles/#{profile.key}.json", @profile_hash.merge({:extname => ".xxx", :restricted_param => 'the_value'})
+   last_response.should be_ok
+   JSON.parse(last_response.body).should eql_hash(@profile_hash.merge({:extname => ".xxx"}))
   end
 
   it "doesn't delete /profiles/:key.json if it has encodings associated" do
-    delete "/profiles/#{@profile.key}.json"
-    Profile.find(:all, :conditions => ["key=?",@profile.key]).size.should == 1
-    last_response.status.should == 422
-    JSON.parse(last_response.body).should eql_hash({:message => "Couldn't delete Profile with ID=#{@profile.key} as it has associated encodings which must be deleted first", :error => "CannotDelete"})
+   delete "/profiles/#{@profile.key}.json"
+   Profile.find(:all, :conditions => ["key=?",@profile.key]).size.should == 1
+   last_response.status.should == 422
+   JSON.parse(last_response.body).should eql_hash({:message => "Couldn't delete Profile with ID=#{@profile.key} as it has associated encodings which must be deleted first", :error => "CannotDelete"})
   end
 
   it "deletes /profiles/:key.json" do
-    profile = Profile.create(@profile_hash)
-    delete "/profiles/#{profile.key}.json"
-    Profile.find(:all, :conditions => ["key=?",profile.key]).size.should == 0
-    last_response.should be_ok
-    last_response.body.should == ''
+   profile = Profile.create(@profile_hash)
+   delete "/profiles/#{profile.key}.json"
+   Profile.find(:all, :conditions => ["key=?",profile.key]).size.should == 0
+   last_response.should be_ok
+   last_response.body.should == ''
   end
 
   # Generic errors
 
   it "returns a 404" do
-    get "/profiles/999.json"
-    last_response.status.should == 404
-    JSON.parse(last_response.body).should eql_hash({:message => "Couldn't find Profile with ID=999", :error => "RecordNotFound"})
+   get "/profiles/999.json"
+   last_response.status.should == 404
+   JSON.parse(last_response.body).should eql_hash({:message => "Couldn't find Profile with ID=999", :error => "RecordNotFound"})
   end
 
 end

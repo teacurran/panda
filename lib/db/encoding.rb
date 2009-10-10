@@ -57,6 +57,18 @@ class Encoding
     self.find(:first, :conditions => ["status='queued'"], :order => "created_at asc")
   end
   
+  def self.create_for_video_and_profile(video, profile)
+    encoding = Encoding.new
+    encoding.video_id = video.key
+    encoding.profile_id = profile.key
+    [:extname, :width, :height].each do |k|
+      encoding.send("#{k}=", profile.send(k))
+    end
+    encoding.save
+    Log.info encoding.inspect
+    return encoding
+  end
+  
   def log_filename
     self.key + '.log'
   end
@@ -67,6 +79,11 @@ class Encoding
   
   # API
   # ===
+  
+  def obliterate!
+    self.delete_from_store
+    self.destroy
+  end
   
   # Encoding
   # ========

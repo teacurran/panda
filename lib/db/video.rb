@@ -52,8 +52,7 @@ class Video
     # TODO: should this raise an exception if the file does not exist?
     self.delete_from_store
     self.encodings.each do |e|
-      e.delete_from_store
-      e.destroy
+      e.obliterate!
     end
     self.destroy
   end
@@ -135,22 +134,10 @@ class Video
     # For now we will just encode to all available profiles
     Profile.find(:all).each do |p|
       Log.info p.inspect
-      self.create_encoding_for_profile(p) unless self.has_encoding_for_profile?(p)
+      Encoding.create_for_video_and_profile(self, p) unless self.has_encoding_for_profile?(p)
     end
     
     return true
-  end
-  
-  def create_encoding_for_profile(p)
-    encoding = Encoding.new
-    encoding.video_id = self.key
-    encoding.profile_id = p.key
-    [:extname, :width, :height].each do |k|
-      encoding.send("#{k}=", p.send(k))
-    end
-    encoding.save
-    Log.info encoding.inspect
-    return encoding
   end
 
   # API

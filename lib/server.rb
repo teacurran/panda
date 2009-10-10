@@ -7,10 +7,6 @@ module Panda
   class CannotDelete < StandardError; end
   
   class Server < Sinatra::Base
-    configure(:test) do
-      set :raise_errors, false
-    end
-    
     set :public, '../public/'
     
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
@@ -139,6 +135,34 @@ module Panda
       status 200
     end
     
+    # Encodings
+
+    get '/encodings.*' do
+      display_response(Encoding.find(:all), params[:splat].first)
+    end
+
+    get '/encodings/:keyorstatus.*' do
+      if Encoding.aasm_states.map {|s| s.name.to_s }.include?(params[:keyorstatus])
+        display_response(Encoding.find(:all, :conditions => ["status=?",params[:keyorstatus]]), params[:splat].first)
+      else
+        display_response(Encoding.find(params[:keyorstatus]), params[:splat].first)
+      end
+    end
+
+    post '/encodings.*' do
+      required_params(params, :video_key, :profile_key)
+      video = Video.find(params[:video_key])
+      profile = Profile.find(params[:profile_key])
+      encoding = Encoding.create_for_video_and_profile(video, profile)
+      display_response(encoding, params[:splat].first)
+    end
+
+    delete '/encodings/:key.*' do 
+      encoding = Encoding.find(params[:key])
+      encoding.obliterate!
+      status 200
+    end
+    
     # Profiles
     
     get '/profiles.*' do
@@ -147,6 +171,10 @@ module Panda
     
     get '/profiles/:key.*' do
       display_response(Profile.find(params[:key]), params[:splat].first)
+    end
+    
+    get '/profiles/:key/encodings.*' do
+      display_response(Profile.find(params[:key]).encodings, params[:splat].first)
     end
     
     post '/profiles.*' do
