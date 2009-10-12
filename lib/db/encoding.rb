@@ -3,7 +3,7 @@ require File.dirname(__FILE__)+'/video_base/store'
 case Panda::Config[:database]
 when :simpledb
   class Encoding < SimpleRecord::Base
-    has_ints :width, :height, :encoding_time
+    has_ints :width, :height, :encoding_time, :encoding_progress
     has_attributes :extname, :status, :video_id, :profile_id
     has_dates :started_encoding_at
   end
@@ -136,7 +136,10 @@ class Encoding
     {
       :input_file => input_file,
       :output_file => output_file,
-      :resolution_and_padding => self.ffmpeg_resolution_and_padding_no_cropping
+      :resolution_and_padding => self.ffmpeg_resolution_and_padding_no_cropping,
+      
+      :progress_sample_rate => 1,
+      :progress_timeout => 60
     }
   end
   
@@ -154,7 +157,11 @@ class Encoding
     begin
       RVideo.logger = self.log
       transcoder = RVideo::Transcoder.new
-      transcoder.execute(self.profile.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath))
+      transcoder.execute(self.profile.command, recipe_options(self.video.tmp_filepath, self.tmp_filepath)) do |tool, progress|
+        puts "PROGRESS: #{progress.inspect}"
+        self.encoding_progress = progress
+        self.save
+      end
       
       self.encoding_time = (Time.now - self.started_encoding_at).to_i
       self.save

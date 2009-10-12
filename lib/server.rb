@@ -7,8 +7,6 @@ module Panda
   class CannotDelete < StandardError; end
   
   class Server < Sinatra::Base
-    set :public, '../public/'
-    
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
     
     # mime :json, "application/json"

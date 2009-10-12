@@ -13,6 +13,7 @@ Panda::Config.check
 
 require 'fileutils'
 require 'aasm'
+require 'open4'
 require 'rvideo'
 require 'logger'
 require 'json'

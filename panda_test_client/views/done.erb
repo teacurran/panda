@@ -3,10 +3,12 @@
 		$.get("/status/<%= @video['key'] %>.json", {}, function(res, testStatus) {
 			encoding = res[0];
 			$('#status').html(encoding['status']);
+			$('#bar').css('width', encoding['encoding_progress']+'%')
 			
 			if(encoding['status'] == 'success') {
-				alert('<embed src="http://localhost:5678/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:5678/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
-				$('#video').html('<embed src="http://localhost:5678/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:5678/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
+  			$('#bar').css('width', '100%')
+  			
+				$('#video').html('<embed src="http://localhost:6789/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:6789/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
 				clearInterval(intv);
 			}
 		}, 'json');
@@ -16,4 +18,5 @@
 <h2>Uploaded "<%= @video['original_filename'] %>"</h2>
 
 <div id="status">Getting status...</div>
+<div id="progress"><div id="bar"></div></div>
 <div id="video"></div>

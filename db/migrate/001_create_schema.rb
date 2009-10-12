@@ -27,6 +27,7 @@ class CreateSchema < ActiveRecord::Migration
       
       t.integer :width
       t.integer :height
+      t.integer :encoding_progress
       t.integer :encoding_time
       
       t.datetime :started_encoding_at
