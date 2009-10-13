@@ -98,6 +98,8 @@ class Video
     return video
   end
   
+  def self.create_when_file_already_in_store
+  
   # Reads information about the video into attributes.
   # 
   # Raises FormatNotRecognised if the video is not valid
