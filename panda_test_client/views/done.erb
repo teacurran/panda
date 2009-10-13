@@ -1,6 +1,6 @@
 <script type="text/javascript" charset="utf-8">
 	intv = setInterval(function() {
-		$.get("/status/<%= @video['key'] %>.json", {}, function(res, testStatus) {
+		$.get("/status/<%= @video['id'] %>.json", {}, function(res, testStatus) {
 			encoding = res[0];
 			$('#status').html(encoding['status']);
 			$('#bar').css('width', encoding['encoding_progress']+'%')
@@ -8,7 +8,7 @@
 			if(encoding['status'] == 'success') {
   			$('#bar').css('width', '100%')
   			
-				$('#video').html('<embed src="http://localhost:6789/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:6789/store/'+encoding['key']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
+				$('#video').html('<embed src="http://localhost:6789/player.swf" width="'+encoding['width']+'" height="'+encoding['height']+'" allowfullscreen="true" allowscriptaccess="always" flashvars="&displayheight='+encoding['height']+'&file=http://localhost:6789/store/'+encoding['id']+encoding['extname']+'&width='+encoding['width']+'&height='+encoding['height']+'" />');
 				clearInterval(intv);
 			}
 		}, 'json');

@@ -109,12 +109,12 @@ module Panda
       display_response Video.find(:all), params[:splat].first
     end
   
-    get '/videos/:key.*' do
-      display_response(Video.find(params[:key]), params[:splat].first)
+    get '/videos/:id.*' do
+      display_response(Video.find(params[:id]), params[:splat].first)
     end
     
-    get '/videos/:key/encodings.*' do
-      display_response(Video.find(params[:key]).encodings, params[:splat].first)
+    get '/videos/:id/encodings.*' do
+      display_response(Video.find(params[:id]).encodings, params[:splat].first)
     end
 
     # HTML uplaod method where video data is uploaded directly
@@ -142,14 +142,14 @@ module Panda
       display_response(video, params[:splat].first)
     end
     
-    put '/videos/:key.*' do
-      video = Video.find(params[:key])
+    put '/videos/:id.*' do
+      video = Video.find(params[:id])
       video.update_attributes(select_params(params, :upload_redirect_url, :state_update_url, :thumbnail_position))
       display_response(video, params[:splat].first)
     end
     
-    delete '/videos/:key.*' do 
-      video = Video.find(params[:key])
+    delete '/videos/:id.*' do 
+      video = Video.find(params[:id])
       video.obliterate!
       status 200
     end
@@ -160,24 +160,24 @@ module Panda
       display_response(Encoding.find(:all), params[:splat].first)
     end
 
-    get '/encodings/:keyorstatus.*' do
-      if Encoding.aasm_states.map {|s| s.name.to_s }.include?(params[:keyorstatus])
-        display_response(Encoding.find(:all, :conditions => ["status=?",params[:keyorstatus]]), params[:splat].first)
+    get '/encodings/:idorstatus.*' do
+      if Encoding.aasm_states.map {|s| s.name.to_s }.include?(params[:idorstatus])
+        display_response(Encoding.find(:all, :conditions => ["status=?",params[:idorstatus]]), params[:splat].first)
       else
-        display_response(Encoding.find(params[:keyorstatus]), params[:splat].first)
+        display_response(Encoding.find(params[:idorstatus]), params[:splat].first)
       end
     end
 
     post '/encodings.*' do
-      required_params(params, :video_key, :profile_key)
-      video = Video.find(params[:video_key])
-      profile = Profile.find(params[:profile_key])
+      required_params(params, :video_id, :profile_id)
+      video = Video.find(params[:video_id])
+      profile = Profile.find(params[:profile_id])
       encoding = Encoding.create_for_video_and_profile(video, profile)
       display_response(encoding, params[:splat].first)
     end
 
-    delete '/encodings/:key.*' do 
-      encoding = Encoding.find(params[:key])
+    delete '/encodings/:id.*' do 
+      encoding = Encoding.find(params[:id])
       encoding.obliterate!
       status 200
     end
@@ -188,12 +188,12 @@ module Panda
       display_response(Profile.find(:all), params[:splat].first)
     end
     
-    get '/profiles/:key.*' do
-      display_response(Profile.find(params[:key]), params[:splat].first)
+    get '/profiles/:id.*' do
+      display_response(Profile.find(params[:id]), params[:splat].first)
     end
     
-    get '/profiles/:key/encodings.*' do
-      display_response(Profile.find(params[:key]).encodings, params[:splat].first)
+    get '/profiles/:id/encodings.*' do
+      display_response(Profile.find(params[:id]).encodings, params[:splat].first)
     end
     
     post '/profiles.*' do
@@ -202,15 +202,15 @@ module Panda
       display_response(profile, params[:splat].first)
     end
     
-    put '/profiles/:key.*' do
-      profile = Profile.find(params[:key])
+    put '/profiles/:id.*' do
+      profile = Profile.find(params[:id])
       profile.update_attributes(select_params(params, :width, :height, :category, :title, :extname, :command))
       display_response(profile, params[:splat].first)
     end
     
-    delete '/profiles/:key.*' do 
-      profile = Profile.find(params[:key])
-      raise(CannotDelete, "Couldn't delete Profile with ID=#{params[:key]} as it has associated encodings which must be deleted first") unless profile.encodings.empty?
+    delete '/profiles/:id.*' do 
+      profile = Profile.find(params[:id])
+      raise(CannotDelete, "Couldn't delete Profile with ID=#{params[:id]} as it has associated encodings which must be deleted first") unless profile.encodings.empty?
       profile.destroy
       status 200
     end

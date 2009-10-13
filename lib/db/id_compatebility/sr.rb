@@ -1,11 +1,29 @@
 # In SimpleDB, Mysql and Sqlite we use key as the attribute for uniquely identifying records. In ActiveRecord we have a key attribute in the tables. In SimpleDB we use the id which is already a UUID.
 
-class SimpleRecord::Base
-  def key
-    self.id
+module SimpleRecord
+  class Base
+    def key
+      self.id
+    end
+  
+    def key=(v)
+      self.id = v
+    end
+  
+    def to_json
+      fixed_attributes.to_json
+    end
+  
+    def fixed_attributes
+      fixed_attributes = {}
+      @attributes.each {|k,v| fixed_attributes[k] = get_attribute(k) }
+      return fixed_attributes
+    end
   end
   
-  def key=(v)
-    self.id = v
+  class ResultsArray
+    def to_json
+      items.map {|i| i.fixed_attributes}.to_json
+    end
   end
 end

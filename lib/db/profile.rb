@@ -19,6 +19,6 @@ class Profile
   end
   
   def encodings
-    Encoding.find(:all, :conditions => ["profile_id=?",self.key])
+    Encoding.find(:all, :conditions => ["profile_id=?",self.id])
   end
 end

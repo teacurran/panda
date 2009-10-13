@@ -10,7 +10,7 @@ loop do
   # Log.debug "Checking for messages... #{Time.now}"
   begin
     if encoding = Encoding.get_job
-      Log.debug "PROCESSING #{encoding.key}"
+      Log.debug "PROCESSING #{encoding.id}"
       encoding.log = Logger.new(encoding.tmp_log_filepath)
       encoding.log.level = Logger::DEBUG
 

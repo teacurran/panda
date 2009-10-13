@@ -1,7 +1,6 @@
 class CreateSchema < ActiveRecord::Migration
   def self.up
     create_table :videos do |t|
-      t.string :key, :limit => 36, :primary => true
       t.string :extname
       t.string :original_filename
       t.string :video_codec
@@ -18,8 +17,10 @@ class CreateSchema < ActiveRecord::Migration
       t.timestamps
     end
     
+    remove_column :videos, :id
+    add_column :videos, :id, :string, :limit => 36, :primary => true
+    
     create_table :encodings do |t|
-      t.string :key, :limit => 36, :primary => true
       t.string :extname
       t.string :status
       t.string :video_id
@@ -35,8 +36,10 @@ class CreateSchema < ActiveRecord::Migration
       t.timestamps
     end
     
+    remove_column :encodings, :id
+    add_column :encodings, :id, :string, :limit => 36, :primary => true
+    
     create_table :profiles do |t|
-      t.string :key, :limit => 36, :primary => true
       t.string :category
       t.string :title
       t.string :extname
@@ -47,6 +50,9 @@ class CreateSchema < ActiveRecord::Migration
       
       t.timestamps
     end
+    
+    remove_column :profiles, :id
+    add_column :profiles, :id, :string, :limit => 36, :primary => true
   end
 
   def self.down

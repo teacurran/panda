@@ -25,7 +25,7 @@ post '/done' do
   erb :done
 end
 
-get '/status/:key.json' do
+get '/status/:id.json' do
   content_type :json
-  '('+Panda.get("/videos/#{params[:key]}/encodings.json")+')'
+  '('+Panda.get("/videos/#{params[:id]}/encodings.json")+')'
 end

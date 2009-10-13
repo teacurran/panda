@@ -59,8 +59,8 @@ class Encoding
   
   def self.create_for_video_and_profile(video, profile)
     encoding = Encoding.new
-    encoding.video_id = video.key
-    encoding.profile_id = profile.key
+    encoding.video_id = video.id
+    encoding.profile_id = profile.id
     [:extname, :width, :height].each do |k|
       encoding.send("#{k}=", profile.send(k))
     end
@@ -70,7 +70,7 @@ class Encoding
   end
   
   def log_filename
-    self.key + '.log'
+    self.id + '.log'
   end
   
   def tmp_log_filepath
@@ -165,11 +165,11 @@ class Encoding
       
       self.encoding_time = (Time.now - self.started_encoding_at).to_i
       self.save
-      Log.debug "SUCCESS #{self.key}"
+      Log.debug "SUCCESS #{self.id}"
       
       self.win!
     rescue => e # TODO: Specify some error type
-      Log.debug "FAIL #{self.key}"
+      Log.debug "FAIL #{self.id}"
       self.log.error "FAIL"
       self.log.error "#{e.class} - #{e.message}"
       self.log.error self.inspect

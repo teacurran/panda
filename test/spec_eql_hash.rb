@@ -4,7 +4,7 @@ module Spec
     class EqlHash #:nodoc:
       def initialize(expected)
         @expected = expected
-        @ignore_attrs = [:id, :key, :created_at, :updated_at]
+        @ignore_attrs = [:id, :created_at, :updated_at]
       end
   
       def matches?(actual)

@@ -33,15 +33,15 @@ class Video
   # end
 
   def encodings
-    Encoding.find(:all, :conditions => ["video_id=?",self.key])
+    Encoding.find(:all, :conditions => ["video_id=?",self.id])
   end
 
   # def successful_encodings
-  #   self.class.find(:all)(:parent => self.key, :status => "success")
+  #   self.class.find(:all)(:parent => self.id, :status => "success")
   # end
 
   def has_encoding_for_profile?(p)
-    !Encoding.find(:all, :conditions => ["video_id=? and profile_id=?", self.key, p.key]).empty?
+    !Encoding.find(:all, :conditions => ["video_id=? and profile_id=?", self.id, p.id]).empty?
   end
   
   # Attr helpers
@@ -59,11 +59,11 @@ class Video
   
   # TODO: define these when the video is created via the API instead of in the config
   def get_upload_redirect_url
-    self.upload_redirect_url.gsub(/\$id/, self.key)
+    self.upload_redirect_url.gsub(/\$id/, self.id)
   end
   
   def get_state_update_url
-    self.state_update_url.gsub(/\$id/, self.key)
+    self.state_update_url.gsub(/\$id/, self.id)
   end
   
   # Checks that video can accept new file, checks that the video is valid, 
@@ -103,7 +103,7 @@ class Video
   # Raises FormatNotRecognised if the video is not valid
   # 
   def read_metadata
-    Log.info "#{self.key}: Reading metadata of video file"
+    Log.info "#{self.id}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
     raise(FormatNotRecognised, "Video data in file not recognised") unless inspector.valid? and inspector.video?

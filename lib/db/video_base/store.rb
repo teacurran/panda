@@ -1,7 +1,7 @@
 module VideoBase
   module StoreMethods
     def filename
-      self.key + self.extname
+      self.id + self.extname
     end
     
     def tmp_filepath
