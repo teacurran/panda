@@ -18,6 +18,8 @@ require 'rvideo'
 require 'logger'
 require 'json'
 
+require 'api_authentication'
+
 require 'core_extensions/kernel'
 require 'core_extensions/string'
 

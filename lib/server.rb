@@ -5,6 +5,7 @@ module Panda
   class BadRequest < StandardError; end
   class RecordNotFound < StandardError; end
   class CannotDelete < StandardError; end
+  class NotAuthorised < StandardError; end
   
   class Server < Sinatra::Base
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
@@ -42,6 +43,10 @@ module Panda
       display_error 500
     end
     
+    error NotAuthorised do
+      display_error 401
+    end
+    
     error ActiveRecord::RecordNotFound do
       display_error 404
     end
@@ -70,7 +75,7 @@ module Panda
     
     def required_params(params, *params_list)
       params_list.each do |p|
-        raise(BadRequest, "All required parameters were not supplied") unless params.has_key?(p.to_s)
+        raise(BadRequest, "All required parameters were not supplied: #{params_list.join(', ')}") unless params.has_key?(p.to_s)
       end
     end
     
@@ -80,6 +85,22 @@ module Panda
         only_selected_params[p] = params[p] if params.has_key?(p.to_s)
       end
       return only_selected_params
+    end
+    
+    # Authentication
+    
+    before do
+      puts request.inspect
+      required_params(params, :access_key, :signature, :timestamp)
+      
+      # Ignore file uplaods
+      params_to_hash = params.dup
+      params_to_hash.delete('file')
+      params_to_hash.delete('signature')
+      params_to_hash['access_key'] = Panda::Config[:access_key]
+      
+      signature = ApiAuthentication.authenticate(request.env['REQUEST_METHOD'], request.env['REQUEST_PATH'], request.env['SERVER_NAME'], Panda::Config[:secret_key], params_to_hash)
+      raise(NotAuthorised, "Signatures do not match") unless signature == params['signature']
     end
     
     # Videos

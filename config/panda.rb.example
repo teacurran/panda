@@ -4,12 +4,9 @@ Panda::Config.use(:production) do |p|
   # ================================================
   # The api_key allows your application to authenticate with Panda. You should 
   # generate a random string to use as the key.
-  # 
-  # When a video has been uploaded panda (through the iframe or popup) Panda 
-  # will redirect to upload_redirect_url. This URL should exist on your 
-  # application. The $id in the url will be replaced by the videos' key.
   
-  p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
+  p[:access_key]               = ""
+  p[:secret_key]               = ""
   
   # ================================================
   # AWS access identifiers

@@ -44,7 +44,9 @@ module Panda
       end
       
       def check
-        check_present(:api_key, "Please specify a secret api_key")
+        [:access_key, :secret_key].each do |k|
+          check_present(k)
+        end
       end
       
       def check_present(option, message = nil)
