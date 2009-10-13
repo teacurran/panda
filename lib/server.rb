@@ -90,7 +90,6 @@ module Panda
     # Authentication
     
     before do
-      puts request.inspect
       required_params(params, :access_key, :signature, :timestamp)
       
       # Ignore file uplaods
@@ -99,7 +98,7 @@ module Panda
       params_to_hash.delete('signature')
       params_to_hash['access_key'] = Panda::Config[:access_key]
       
-      signature = ApiAuthentication.authenticate(request.env['REQUEST_METHOD'], request.env['REQUEST_PATH'], request.env['SERVER_NAME'], Panda::Config[:secret_key], params_to_hash)
+      signature = ApiAuthentication.authenticate(request.env['REQUEST_METHOD'], request.env['PATH_INFO'], request.env['SERVER_NAME'], Panda::Config[:secret_key], params_to_hash)
       raise(NotAuthorised, "Signatures do not match") unless signature == params['signature']
     end
     
