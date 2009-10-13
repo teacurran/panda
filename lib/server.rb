@@ -124,19 +124,19 @@ module Panda
       # puts request.env.inspect
       request.env['panda.iframe'] = params[:iframe].to_bool
       
-      required_params(params, :upload_redirect_url, :state_update_url)
+      required_params(params, :upload_key, :upload_redirect_url, :state_update_url)
       
       video = Video.create_from_upload(params[:file], params[:state_update_url],  params[:upload_redirect_url])
       
-      if PANDA_ENV == :test
-        video.upload_to_store
-        video.queue_encodings
-      else
+      # if PANDA_ENV == :test
+      #   video.upload_to_store
+      #   video.queue_encodings
+      # else
         # run_later do # TODO: ensure run_later timeout is long enough
           video.upload_to_store
           video.queue_encodings
         # end
-      end
+      # end
       
       display_response(video, params[:splat].first)
     end

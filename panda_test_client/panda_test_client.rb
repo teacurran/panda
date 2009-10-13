@@ -2,12 +2,19 @@ require 'rubygems'
 require 'sinatra'
 require 'json'
 
-require 'rest_client'
-panda = RestClient::Resource.new 'http://localhost:5678'
+require 'panda'
+
+Panda.connect!("e339e090-9a28-012c-bb3e-001ec2b5c0e1", "ed710840-9a28-012c-bb43-001ec2b5c0e1", 'localhost', 5678)
 
 set :public, "."
 
 get '/' do
+  @params_to_post = {}
+  @params_to_post['upload_key'] = UUID.new.generate
+  @params_to_post['upload_redirect_url'] = "http://localhost:4567/videos/$id/done"
+  @params_to_post['state_update_url'] = "http://localhost:4567/videos/$id/update"
+  @params_to_post = Panda.authenticate("POST", "/videos.json", @params_to_post)
+  
   erb :index
 end
 
@@ -18,5 +25,5 @@ end
 
 get '/status/:key.json' do
   content_type :json
-  '('+panda["/videos/#{params[:key]}/encodings.json"].get+')'
+  '('+Panda.get("/videos/#{params[:key]}/encodings.json")+')'
 end

@@ -37,8 +37,7 @@
 						upload_url: "http://localhost:5678/videos.json",
 						file_post_name: "file",
 						post_params : {
-							"upload_redirect_url" : "http://localhost:4567/videos/$id/done",
-							"state_update_url" : "http://localhost:4567/videos/$id/update"
+						  <%= @params_to_post.map {|k,v| "'#{k}' : '#{v}'"}.join(', ') %>
 						},
 
 						// Flash file settings
