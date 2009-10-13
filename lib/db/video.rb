@@ -86,14 +86,8 @@ class Video
   def self.create_from_upload(file, state_update_url = nil, upload_redirect_url = nil)
     raise(NoFileSubmitted, "No file was submitted") if !file || file.blank?
     
-    video = self.create
-    video.extname = File.extname(file[:filename])
+    video = Video.create(:extname => File.extname(file[:filename]), :original_filename => self.strip_windows_windows_path(file[:filename]), :state_update_url => state_update_url, :upload_redirect_url => upload_redirect_url)
     raise(FormatNotRecognised, "Filename has no extension") if video.extname.blank?
-    # TODO: Should we only accept extnames from a speicic list?
-    # Split out any directory path Windows adds in
-    video.original_filename = self.strip_windows_windows_path(file[:filename])
-    video.state_update_url = state_update_url
-    video.upload_redirect_url = upload_redirect_url
     
     # Move file into tmp location
     FileUtils.mv file[:tempfile].path, video.tmp_filepath, :force => true

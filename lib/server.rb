@@ -47,8 +47,10 @@ module Panda
       display_error 401
     end
     
-    error ActiveRecord::RecordNotFound do
-      display_error 404
+    if Panda::Config[:database] == :sqlite or Panda::Config[:database] == :mysql
+      error ActiveRecord::RecordNotFound do
+        display_error 404
+      end
     end
     
     error BadRequest do

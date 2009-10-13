@@ -56,7 +56,7 @@ describe 'API' do
   # Video upload
   
   it "posts /videos.json and also create encodings" do
-    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:upload_key => UUID.new.generate}))
+    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:upload_key => UUID.timestamp_create().to_s}))
     
     last_request.POST["file"][:filename].should == "panda.mp4"
     last_request.POST["file"][:type].should == "application/octet-stream"
@@ -73,25 +73,25 @@ describe 'API' do
   end
   
   it "posts /videos.json and requires all params" do
-    request_with_auth(:post, "/videos.json", {:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'panda.mp4'), "application/octet-stream", true), :upload_key => UUID.new.generate})
+    request_with_auth(:post, "/videos.json", {:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'panda.mp4'), "application/octet-stream", true), :upload_key => UUID.timestamp_create().to_s})
     last_response.status.should == 400
     JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied: upload_key, upload_redirect_url, state_update_url", :error => "BadRequest"})
   end
   
   it "posts /videos.json and requires file to be submitted" do
-    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => nil, :upload_key => UUID.new.generate}))
+    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => nil, :upload_key => UUID.timestamp_create().to_s}))
     last_response.status.should == 400
     JSON.parse(last_response.body).should eql_hash({:message => "No file was submitted", :error => "NoFileSubmitted"})
   end
   
   it "posts /videos.json and doesn't recognise video format" do
-    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'not_valid_video.mp4'), "application/octet-stream", true), :upload_key => UUID.new.generate}))
+    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'not_valid_video.mp4'), "application/octet-stream", true), :upload_key => UUID.timestamp_create().to_s}))
     last_response.status.should == 422
     JSON.parse(last_response.body).should eql_hash({:message => "Video data in file not recognised", :error => "FormatNotRecognised"})
   end
   
   it "posts /videos.json and requires a file extension" do
-    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'not_valid_video'), "application/octet-stream", true), :upload_key => UUID.new.generate}))
+    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'not_valid_video'), "application/octet-stream", true), :upload_key => UUID.timestamp_create().to_s}))
     last_response.status.should == 422
     JSON.parse(last_response.body).should eql_hash({:message => "Filename has no extension", :error => "FormatNotRecognised"})
   end

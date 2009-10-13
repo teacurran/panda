@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'json'
-require 'uuid'
+require 'uuidtools'
 
 require 'panda'
 
@@ -11,7 +11,7 @@ set :public, "."
 
 get '/' do
   @params_to_post = {}
-  @params_to_post['upload_key'] = UUID.new.generate
+  @params_to_post['upload_key'] = UUID.timestamp_create().to_s
   @params_to_post['upload_redirect_url'] = "http://localhost:4567/videos/$id/done"
   @params_to_post['state_update_url'] = "http://localhost:4567/videos/$id/update"
   @params_to_post = Panda.authenticate("POST", "/videos.json", @params_to_post)
@@ -20,6 +20,7 @@ get '/' do
 end
 
 post '/done' do
+  puts "DONE #{params.inspect}"
   @video = JSON.parse(params[:video])
   erb :done
 end

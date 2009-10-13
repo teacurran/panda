@@ -17,6 +17,7 @@ require 'open4'
 require 'rvideo'
 require 'logger'
 require 'json'
+require 'uuidtools'
 
 require 'api_authentication'
 
@@ -57,7 +58,6 @@ when :simpledb
   SimpleRecord::Base.set_domain_prefix(Panda::Config[:sdb_domain_prefix])
   SimpleRecord.establish_connection(Panda::Config[:access_key_id],Panda::Config[:secret_access_key])
 when :sqlite
-  require 'uuid'
   require 'activerecord'
   require 'db/id_compatebility/ar.rb'
   
@@ -66,7 +66,6 @@ when :sqlite
     :dbfile =>  Panda::Config[:sqlite_dbfile]
   )
 when :mysql
-  require 'uuid'
   require 'activerecord'
   require 'db/id_compatebility/ar.rb'
   
