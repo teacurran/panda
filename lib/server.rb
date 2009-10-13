@@ -92,10 +92,9 @@ module Panda
     before do
       required_params(params, :access_key, :signature, :timestamp)
       
-      # Ignore file uplaods
+      # Ignore file uplaods and params from SWFUpload (Filename and Upload)
       params_to_hash = params.dup
-      params_to_hash.delete('file')
-      params_to_hash.delete('signature')
+      ['file', 'signature', 'Filename', 'Upload'].each {|v| params_to_hash.delete(v) }
       params_to_hash['access_key'] = Panda::Config[:access_key]
       
       signature = ApiAuthentication.authenticate(request.env['REQUEST_METHOD'], request.env['PATH_INFO'], request.env['SERVER_NAME'], Panda::Config[:secret_key], params_to_hash)

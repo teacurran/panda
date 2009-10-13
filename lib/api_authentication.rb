@@ -16,12 +16,14 @@ module Panda
           host.downcase + "\n" +
           request_uri + "\n" +
           query_string
-          
+      
       hmac = HMAC::SHA256.new( secret_key )
       hmac.update( string_to_sign )
       # chomp is important!  the base64 encoded version will have a newline at the end
       signature = Base64.encode64(hmac.digest).chomp 
-
+      puts "STRING TO SIGN"
+      puts string_to_sign
+      puts "SIGNATURE: #{signature}"
       return signature
 		end
 		
