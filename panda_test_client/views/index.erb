@@ -4,7 +4,7 @@
 	window.onload = function () {
 		swfu = new SWFUpload({
 			// Backend settings
-			upload_url: "http://localhost:5678/videos.json",
+			upload_url: "http://ec2-72-44-37-190.compute-1.amazonaws.com/v2/videos.json",
 			file_post_name: "file",
 			post_params : {
 			  <%= @params_to_post.map {|k,v| "'#{k}' : '#{v}'"}.join(', ') %>

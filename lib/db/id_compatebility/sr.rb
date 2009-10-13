@@ -16,7 +16,7 @@ module SimpleRecord
   
     def fixed_attributes
       fixed_attributes = {}
-      @attributes.each {|k,v| fixed_attributes[k] = get_attribute(k) }
+      @attributes.each {|k,v| fixed_attributes[k] = send(k) }
       return fixed_attributes
     end
   end

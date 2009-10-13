@@ -1,4 +1,10 @@
 require 'rubygems'
 require 'bin/server'
 
-run Panda::Server
+map '/v2' do
+  run Panda::Server
+end
+
+map '/' do
+  run Panda::Root
+end

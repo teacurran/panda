@@ -215,6 +215,17 @@ module Panda
       status 200
     end
   end
+  
+  class Root < Sinatra::Base
+    get '/crossdomain.xml' do
+      content_type :xml
+      %(<?xml version="1.0"?>
+      <!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">
+      <cross-domain-policy>
+         <allow-access-from domain="*" />
+      </cross-domain-policy>)
+    end
+  end
 end
 
 # run Panda::Core

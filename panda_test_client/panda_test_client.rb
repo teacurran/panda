@@ -5,7 +5,7 @@ require 'uuidtools'
 
 require 'panda'
 
-Panda.connect!("e339e090-9a28-012c-bb3e-001ec2b5c0e1", "ed710840-9a28-012c-bb43-001ec2b5c0e1", 'localhost', 5678)
+Panda.connect!("e339e090-9a28-012c-bb3e-001ec2b5c0e1", "ed710840-9a28-012c-bb43-001ec2b5c0e1", 'ec2-72-44-37-190.compute-1.amazonaws.com', 80)
 
 set :public, "."
 
