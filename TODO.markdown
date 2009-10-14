@@ -1,5 +1,6 @@
 * [done in new-bamboo/simple_record fork] Rename update and created to have _at in simple record
 * [done] Test post /videos
+* Fix the output .m3u8 file from the segmenter so it doesn't include the dir path in it and just uses the filename. http://www.ioncannon.net/programming/452/iphone-http-streaming-with-ffmpeg-and-an-open-source-segmenter/comment-page-1/#comments
 * API signatures + blog post on how to do it
 * SimpleDB pagination for index get requests
 * Raise RecordNotFound when using SimpleDB (right now we just return nil)
