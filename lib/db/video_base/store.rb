@@ -12,8 +12,11 @@ module VideoBase
       Store.url(self.filename)
     end
   
+    # Instead of just uploading the specific filename given by tmp_filepath (as fetch_from_store does), we upload all files which start with the id of this one. This is so that when we encode a video which spits out lots of videos like the iPhone stream segmenter does, they all get uploaded to the store.
     def upload_to_store
-      Store.set(self.filename, self.tmp_filepath)
+      Dir[File.join(Panda::Config[:private_tmp_path], self.id)+'*'].each do |fn|
+        Store.set(File.basename(fn), fn) unless File.extname(fn) == '.log' # Except logs. TODO: nicer way to do this
+      end
     end
   
     def fetch_from_store
