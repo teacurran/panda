@@ -8,3 +8,4 @@
 * Split api auth into a separate gem
 * Move git clone git://github.com/dctanner/rvideo.git to newbamboo account
 * Move panda_gem to jeweler
+* Look into yamdi instead of flvtool

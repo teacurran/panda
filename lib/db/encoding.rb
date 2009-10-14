@@ -138,6 +138,9 @@ class Encoding
       :output_file => output_file,
       :resolution_and_padding => self.ffmpeg_resolution_and_padding_no_cropping,
       
+      :width => self.width,
+      :height => self.height,
+      
       :id => self.id,
       :videos_domain => Panda::Config[:videos_domain],
       
