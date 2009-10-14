@@ -143,6 +143,7 @@ class Encoding
       
       :id => self.id,
       :videos_domain => Panda::Config[:videos_domain],
+      :private_tmp_path => Panda::Config[:private_tmp_path],
       
       :progress_sample_rate => 1,
       :progress_timeout => 60
