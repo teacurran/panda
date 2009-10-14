@@ -190,8 +190,7 @@ class Encoding
   end
   
   def cleanup
-    FileUtils.rm self.tmp_log_filepath, :force => true
-    FileUtils.rm self.tmp_filepath, :force => true
+    self.all_files_matching_id.each {|fn| FileUtils.rm fn, :force => true }
     FileUtils.rm self.video.tmp_filepath, :force => true
   end
 end
