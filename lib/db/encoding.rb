@@ -141,7 +141,7 @@ class Encoding
       :width => self.width,
       :height => self.height,
       
-      :id => self.id,
+      :record_id => self.id,
       :videos_domain => Panda::Config[:videos_domain],
       :private_tmp_path => Panda::Config[:private_tmp_path],
       

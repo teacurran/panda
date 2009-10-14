@@ -63,7 +63,7 @@ p.category = "iphone-stream"
 p.width = 320
 p.height = 240
 p.extname = ".ts"
-p.command = "ffmpeg -i $input_file$ -t 100 -f mpegts -acodec libmp3lame -ar 48000 -ab 64k -s $width$x$height$ -vcodec libx264 -b 96k -flags +loop -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 5 -trellis 1 -refs 1 -coder 0 -me_range 16 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -bt 200k -maxrate 96k -bufsize 96k -rc_eq 'blurCplx^(1-qComp)' -qcomp 0.6 -qmin 10 -qmax 51 -qdiff 4 -level 30 -aspect $width$:$height$ -g 30 -async 2 -threads 4 $resolution_and_padding$ -y $output_file$\nsegmenter $output_file$ 10 $private_tmp_path$/$id$ $private_tmp_path$/$id$.m3u8 http://$videos_domain$/"
+p.command = "ffmpeg -i $input_file$ -t 100 -f mpegts -acodec libmp3lame -ar 48000 -ab 64k -s $width$x$height$ -vcodec libx264 -b 96k -flags +loop -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 5 -trellis 1 -refs 1 -coder 0 -me_range 16 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -bt 200k -maxrate 96k -bufsize 96k -rc_eq 'blurCplx^(1-qComp)' -qcomp 0.6 -qmin 10 -qmax 51 -qdiff 4 -level 30 -aspect $width$:$height$ -g 30 -async 2 -threads 4 $resolution_and_padding$ -y $output_file$\nsegmenter $output_file$ 10 $private_tmp_path$/$record_id$ $private_tmp_path$/$record_id$.m3u8 http://$videos_domain$/"
 p.save
 
 Setting up upload from your app
