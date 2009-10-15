@@ -6,6 +6,7 @@ database.yml
 schema.rb
 videos/*
 config/panda.rb
+config/panda*.rb
 public/images/tmp/*jpg
 public/store
 public/tmp
