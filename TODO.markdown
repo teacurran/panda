@@ -26,6 +26,7 @@ Beta R2
 * Callbacks with api auth
 * Custom params passthrough
 * PHP and Python libs
+* pandastream.com/support
 
 Plugins
 -------

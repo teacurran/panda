@@ -87,7 +87,7 @@ describe 'API' do
   it "posts /videos.json and doesn't recognise video format" do
     request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'not_valid_video.mp4'), "application/octet-stream", true), :upload_key => UUID.timestamp_create().to_s}))
     last_response.status.should == 422
-    JSON.parse(last_response.body).should eql_hash({:message => "Video data in file not recognised", :error => "FormatNotRecognised"})
+    JSON.parse(last_response.body).should eql_hash({:message => "Video data in file not recognized", :error => "FormatNotRecognised"})
   end
   
   it "posts /videos.json and requires a file extension" do
@@ -106,6 +106,12 @@ describe 'API' do
   
   it "gets /videos/:id.json" do
     request_with_auth(:get, "/videos/#{@video.id}.json")
+    last_response.should be_ok
+    JSON.parse(last_response.body).should eql_hash(@video_hash)
+  end
+    
+  it "gets /videos/upload/:upload_key.json" do
+    request_with_auth(:get, "/videos/upload/#{@video.upload_key}.json")
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@video_hash)
   end
@@ -141,12 +147,12 @@ describe 'API' do
     JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
   end
   
-  it "gets /encodings/:status.json" do
-    request_with_auth(:get, "/encodings/error.json")
+  it "gets /encodings.json?status=:status" do
+    request_with_auth(:get, "/encodings.json?status=error")
     last_response.should be_ok
     Encoding.find(:all, :conditions => ["status=?",'error']).size.should == 0
     
-    request_with_auth(:get, "/encodings/queued.json")
+    request_with_auth(:get, "/encodings.json?status=queued")
     last_response.should be_ok
     JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
   end

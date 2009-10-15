@@ -106,7 +106,7 @@ class Video
     Log.info "#{self.id}: Reading metadata of video file"
     
     inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
-    raise(FormatNotRecognised, "Video data in file not recognised") unless inspector.valid? and inspector.video?
+    raise(FormatNotRecognised, "Video data in file not recognized") unless inspector.valid? and inspector.video?
     
     [:duration, :fps, :width, :height, :video_codec, :audio_codec].each do |k|
       self.send("#{k}=", (inspector.send(k) rescue nil))
@@ -143,7 +143,6 @@ class Video
   # class NotificationError < StandardError; end
   
   # 422
-  class NotValid < VideoError; end
   class NoFileSubmitted < VideoError; end
   class FormatNotRecognised < VideoError; end
 end

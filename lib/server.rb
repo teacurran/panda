@@ -5,7 +5,7 @@ module Panda
   class BadRequest < StandardError; end
   class RecordNotFound < StandardError; end
   class CannotDelete < StandardError; end
-  class NotAuthorised < StandardError; end
+  class NotAuthorized < StandardError; end
   
   class Server < Sinatra::Base
     # TODO: Auth similar to Amazon where we hash all the form params plus the api key and send a signature
@@ -43,7 +43,7 @@ module Panda
       display_error 500
     end
     
-    error NotAuthorised do
+    error NotAuthorized do
       display_error 401
     end
     
@@ -55,10 +55,6 @@ module Panda
     
     error BadRequest do
       display_error 400
-    end
-    
-    error Video::NotValid do
-      display_error 422
     end
     
     error Video::FormatNotRecognised do
@@ -100,7 +96,7 @@ module Panda
       params_to_hash['access_key'] = Panda::Config[:access_key]
       
       signature = ApiAuthentication.authenticate(request.env['REQUEST_METHOD'], request.env['PATH_INFO'], request.env['SERVER_NAME'], Panda::Config[:secret_key], params_to_hash)
-      raise(NotAuthorised, "Signatures do not match") unless signature == params['signature']
+      raise(NotAuthorized, "Signatures do not match") unless signature == params['signature']
     end
     
     # Videos
@@ -157,15 +153,17 @@ module Panda
     # Encodings
 
     get '/encodings.*' do
-      display_response(Encoding.find(:all), params[:splat].first)
+      if Encoding.aasm_states.map {|s| s.name.to_s }.include?(params[:status])
+        encodings = Encoding.find(:all, :conditions => ["status=?",params[:status]])
+      else
+        encodings = Encoding.find(:all)
+      end
+      
+      display_response(encodings, params[:splat].first)
     end
 
-    get '/encodings/:idorstatus.*' do
-      if Encoding.aasm_states.map {|s| s.name.to_s }.include?(params[:idorstatus])
-        display_response(Encoding.find(:all, :conditions => ["status=?",params[:idorstatus]]), params[:splat].first)
-      else
-        display_response(Encoding.find(params[:idorstatus]), params[:splat].first)
-      end
+    get '/encodings/:id.*' do
+      display_response(Encoding.find(params[:idorstatus]), params[:splat].first)
     end
 
     post '/encodings.*' do
@@ -198,19 +196,19 @@ module Panda
     
     post '/profiles.*' do
       required_params(params, :width, :height, :category, :title, :extname, :command)
-      profile = Profile.create(select_params(params, :width, :height, :category, :title, :extname, :command))
+      profile = Profile.create(select_params(params, :width, :height, :category, :title, :extname, :command, :status))
       display_response(profile, params[:splat].first)
     end
     
     put '/profiles/:id.*' do
       profile = Profile.find(params[:id])
-      profile.update_attributes(select_params(params, :width, :height, :category, :title, :extname, :command))
+      profile.update_attributes(select_params(params, :width, :height, :category, :title, :extname, :command, :status))
       display_response(profile, params[:splat].first)
     end
     
     delete '/profiles/:id.*' do 
       profile = Profile.find(params[:id])
-      raise(CannotDelete, "Couldn't delete Profile with ID=#{params[:id]} as it has associated encodings which must be deleted first") unless profile.encodings.empty?
+      raise(CannotDelete, "Couldn't delete Profile with ID=#{params[:id]} as it has associated encodings which must be deleted first. Maybe you want to disable the Profile instead by updating its status attribute to 'disabled'?") unless profile.encodings.empty?
       profile.destroy
       status 200
     end
