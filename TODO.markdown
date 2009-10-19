@@ -4,7 +4,10 @@ Private beta release
 * [done in new-bamboo/simple_record fork] Rename update and created to have _at in simple record
 * [done] Test post /videos
 * [done] Fix the output .m3u8 file from the segmenter so it doesn't include the dir path in it and just uses the filename. http://www.ioncannon.net/programming/452/iphone-http-streaming-with-ffmpeg-and-an-open-source-segmenter/comment-page-1/#comments
-* Api docs
+* [done] Api docs
+
+** Test Rails app **
+
 * Non-flash file upload. Write js (extract stuff from jquery.form.js) which submits file in an iframe and processes response.
 ** Ability to get status of upload via api (for html upload)
 ** Support errors in upload_redirect_url like http://mypandasite.com/videos/done?id=$id&error=$error&error_message=$error_message
