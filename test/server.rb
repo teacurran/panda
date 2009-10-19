@@ -75,7 +75,7 @@ describe 'API' do
   it "posts /videos.json and requires all params" do
     request_with_auth(:post, "/videos.json", {:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'panda.mp4'), "application/octet-stream", true), :upload_key => UUID.timestamp_create().to_s})
     last_response.status.should == 400
-    JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied: upload_key, upload_redirect_url, state_update_url", :error => "BadRequest"})
+    JSON.parse(last_response.body).should eql_hash({:message => "All required parameters were not supplied: upload_key, state_update_url", :error => "BadRequest"})
   end
   
   it "posts /videos.json and requires file to be submitted" do

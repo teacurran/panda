@@ -51,7 +51,8 @@ Panda::Config.use(:production) do |p|
 end
 
 Panda::Config.use(:test) do |p|
-  p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
+  p[:access_key]            = ""
+  p[:secret_key]            = ""
   p[:database]              = :sqlite
   p[:sqlite_dbfile]         = 'db/test.sqlite3.db'
   p[:videos_store]          = :filesystem

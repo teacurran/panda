@@ -13,20 +13,15 @@ module Panda
     # mime :json, "application/json"
         
     def display_response(object, ext)
-      if request.env['panda.iframe']
-        content_type :html
-        return "<textarea>#{object.to_json}</textarea>"
+      case ext.to_sym
+      when :json
+        content_type :json
+        return object.to_json
+      # when :xml
+      #   content_type :xml
+      #   r = object.to_xml
       else
-        case ext.to_sym
-        when :json
-          content_type :json
-          return object.to_json
-        # when :xml
-        #   content_type :xml
-        #   r = object.to_xml
-        else
-          raise BadRequest, "Currently only .json is supported as a format"
-        end
+        raise BadRequest, "Currently only .json is supported as a format"
       end
     end
     
@@ -117,13 +112,9 @@ module Panda
     # TODO: allow url param with location of external video
     # Allows both /videos.json and /videos.html
     post '/videos.*' do
-      # puts params.inspect
-      # puts request.env.inspect
-      request.env['panda.iframe'] = params[:iframe].to_bool
+      required_params(params, :upload_key, :state_update_url)
       
-      required_params(params, :upload_key, :upload_redirect_url, :state_update_url)
-      
-      video = Video.create_from_upload(params[:file], params[:state_update_url],  params[:upload_redirect_url])
+      video = Video.create_from_upload(params[:file], params[:upload_key], params[:state_update_url],  params[:upload_redirect_url])
       
       # if PANDA_ENV == :test
       #   video.upload_to_store
@@ -135,6 +126,7 @@ module Panda
         # end
       # end
       
+      # TODO: redirect on html upload with reponse (e.g. error) in params
       display_response(video, params[:splat].first)
     end
     

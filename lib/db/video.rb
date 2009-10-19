@@ -83,10 +83,10 @@ class Video
     fn.split("\\").last
   end
   
-  def self.create_from_upload(file, state_update_url = nil, upload_redirect_url = nil)
+  def self.create_from_upload(file, upload_key, state_update_url = nil, upload_redirect_url = nil)
     raise(NoFileSubmitted, "No file was submitted") if !file || file.blank?
     
-    video = Video.create(:extname => File.extname(file[:filename]), :original_filename => self.strip_windows_windows_path(file[:filename]), :state_update_url => state_update_url, :upload_redirect_url => upload_redirect_url)
+    video = Video.create(:extname => File.extname(file[:filename]), :original_filename => self.strip_windows_windows_path(file[:filename]), :state_update_url => state_update_url, :upload_redirect_url => upload_redirect_url, :upload_key => upload_key)
     raise(FormatNotRecognised, "Filename has no extension") if video.extname.blank?
     
     # Move file into tmp location

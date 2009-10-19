@@ -8,6 +8,7 @@ class CreateSchema < ActiveRecord::Migration
       t.string :thumbnail_position
       t.string :upload_redirect_url
       t.string :state_update_url
+      t.string :upload_key
       
       t.integer :duration
       t.integer :width
