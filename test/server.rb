@@ -22,12 +22,13 @@ describe 'API' do
   before do
     [Video, Encoding, Profile].each {|m| m.find(:all).each {|v| v.delete } }
     
-    @video_hash = {:duration => 99, :width => 320, :height => 240, :fps => 24, :extname => '.mp4', :original_filename => 'panda.mp4', :video_codec => 'h264', :audio_codec => 'aac', :thumbnail_position => '50', :upload_redirect_url => 'http://localhost/upload_redirect_url/$id', :state_update_url => 'http://localhost/state_update_url/$id'}
+    @video_hash = {:duration => 99, :width => 320, :height => 240, :fps => 24, :extname => '.mp4', :original_filename => 'panda.mp4', :video_codec => 'h264', :audio_codec => 'aac', :thumbnail_position => '50', :upload_redirect_url => 'http://localhost/upload_redirect_url/$id', :state_update_url => 'http://localhost/state_update_url/$id', :upload_key => 'abc123'}
     @video = Video.create(@video_hash)
     
     @video_upload_hash = {:file => Rack::Test::UploadedFile.new(File.join(File.dirname(__FILE__),'panda.mp4'), "application/octet-stream", true), 
       :upload_redirect_url => 'http://localhost/upload_redirect_url/$id',
-      :state_update_url => 'http://localhost/state_update_url/$id' }
+      :state_update_url => 'http://localhost/state_update_url/$id',
+      :upload_key => 'abc123' }
     
     @profile_hash = {:category => "Flash flv", :title => "Medium", :width => 320, :height => 240, :extname => ".flv", :command => "ffmpeg -i $input_file$ -ar 22050 -ab 64k -f flv -b 256k $resolution_and_padding$ -y $output_file$\nflvtool2 -U $output_file$"}
     @profile = Profile.create(@profile_hash)
@@ -56,14 +57,14 @@ describe 'API' do
   # Video upload
   
   it "posts /videos.json and also create encodings" do
-    request_with_auth(:post, "/videos.json", @video_upload_hash.merge({:upload_key => UUID.timestamp_create().to_s}))
+    request_with_auth(:post, "/videos.json", @video_upload_hash)
     
     last_request.POST["file"][:filename].should == "panda.mp4"
     last_request.POST["file"][:type].should == "application/octet-stream"
     last_response.should be_ok
     # TODO: test windows filenames stripiing
     created_video_hash = JSON.parse(last_response.body)
-    created_video_hash.should eql_hash({:duration => 14000, :width => 300, :height => 240, :fps => 29, :extname => '.mp4', :original_filename => 'panda.mp4', :video_codec => 'h264', :audio_codec => 'aac', :thumbnail_position => nil, :upload_redirect_url => 'http://localhost/upload_redirect_url/$id', :state_update_url => 'http://localhost/state_update_url/$id'})
+    created_video_hash.should eql_hash({:duration => 14000, :width => 300, :height => 240, :fps => 29, :extname => '.mp4', :original_filename => 'panda.mp4', :video_codec => 'h264', :audio_codec => 'aac', :thumbnail_position => nil, :upload_redirect_url => 'http://localhost/upload_redirect_url/$id', :state_update_url => 'http://localhost/state_update_url/$id', :upload_key => 'abc123'})
     
     request_with_auth(:get, "/videos/#{created_video_hash['id']}/encodings.json")
     created_encoding_hash = JSON.parse(last_response.body).first
@@ -109,12 +110,6 @@ describe 'API' do
     last_response.should be_ok
     JSON.parse(last_response.body).should eql_hash(@video_hash)
   end
-    
-  it "gets /videos/upload/:upload_key.json" do
-    request_with_auth(:get, "/videos/upload/#{@video.upload_key}.json")
-    last_response.should be_ok
-    JSON.parse(last_response.body).should eql_hash(@video_hash)
-  end
   
   it "puts /videos/:id.json" do
     request_with_auth(:put, "/videos/#{@video.id}.json", {:upload_redirect_url => "xxx"})
@@ -148,11 +143,11 @@ describe 'API' do
   end
   
   it "gets /encodings.json?status=:status" do
-    request_with_auth(:get, "/encodings.json?status=error")
+    request_with_auth(:get, "/encodings.json", {:status => 'error'})
     last_response.should be_ok
     Encoding.find(:all, :conditions => ["status=?",'error']).size.should == 0
     
-    request_with_auth(:get, "/encodings.json?status=queued")
+    request_with_auth(:get, "/encodings.json", {:status => 'queued'})
     last_response.should be_ok
     JSON.parse(last_response.body).first.should eql_hash(@encoding_hash)
   end
@@ -237,7 +232,7 @@ describe 'API' do
    request_with_auth(:delete, "/profiles/#{@profile.id}.json")
    Profile.find(:all, :conditions => ["id=?",@profile.id]).size.should == 1
    last_response.status.should == 422
-   JSON.parse(last_response.body).should eql_hash({:message => "Couldn't delete Profile with ID=#{@profile.id} as it has associated encodings which must be deleted first", :error => "CannotDelete"})
+   JSON.parse(last_response.body).should eql_hash({:message => "Couldn't delete Profile with ID=#{@profile.id} as it has associated encodings which must be deleted first. Maybe you want to disable the Profile instead by updating its status attribute to 'disabled'?", :error => "CannotDelete"})
   end
   
   it "deletes /profiles/:id.json" do

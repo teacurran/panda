@@ -155,7 +155,7 @@ module Panda
     end
 
     get '/encodings/:id.*' do
-      display_response(Encoding.find(params[:idorstatus]), params[:splat].first)
+      display_response(Encoding.find(params[:id]), params[:splat].first)
     end
 
     post '/encodings.*' do

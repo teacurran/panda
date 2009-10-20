@@ -27,6 +27,7 @@ Private beta release
 
 Beta R2
 -------
+* Statues for profiles
 * Migration script
 * Split api auth into a separate gem
 * Look into yamdi instead of flvtool
