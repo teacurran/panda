@@ -584,11 +584,12 @@ RESPONSE
       # A bit of a hacker here, because on some EC2 instances it won't save to /mnt for some reason. In the long term we won't need MP4Box because newer ffmpeg versions include aac support.
       tmp_mp4box_filepath = "/tmp/#{self.filename}"
       FileUtils.rm(tmp_mp4box_filepath) if File.exists?(tmp_mp4box_filepath) # rm, otherwise we end up with multiple video streams when we encode a few times!!
-      %x(MP4Box -add #{temp_video_output_file}#video #{tmp_mp4box_filepath})
-      %x(MP4Box -add #{temp_audio_output_file}#audio #{tmp_mp4box_filepath})
 
-      # Interleave meta data
-      %x(MP4Box -inter 500 #{tmp_mp4box_filepath})
+      FileUtils.cd(Panda::Config[:private_tmp_path]) do #so any temp files get put in the right directory
+        %x(MP4Box -add #{temp_video_output_file}#video #{tmp_mp4box_filepath})
+        %x(MP4Box -add #{temp_audio_output_file}#audio #{tmp_mp4box_filepath})
+        %x(MP4Box -inter 500 #{tmp_mp4box_filepath})
+      end
       FileUtils.mv(tmp_mp4box_filepath, self.tmp_filepath)
       Merb.logger.info "Squashing done"
     else
