@@ -32,3 +32,10 @@ desc "Add new files to subversion"
 task :svn_add do
    system "svn status | grep '^\?' | sed -e 's/? *//' | sed -e 's/ /\ /g' | xargs svn add"
 end
+
+RAILS_ROOT = Merb.root
+
+Dir.glob("lib/tasks/*.rake").each do |rakefile|
+  puts "Adding Rake tasks from #{rakefile}"
+  load rakefile
+end
