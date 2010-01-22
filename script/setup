@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+$pwd = `pwd`.chomp
 require 'rubygems'
 puts "Installing any gems missing..."
 ['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid'].each do |dep|
@@ -21,7 +22,7 @@ else
   system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/tags/REL-0.9.3 rvideo")
   system("cd rvideo; alias sudo=\"sudo env PATH=$PATH\"; sudo rake install_gem; cd ..")
 end
-Dir.chdir(ENV['HOME'])
+Dir.chdir($pwd)
 
 system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
 system("cp config/mailer.rb.example config/mailer.rb")
