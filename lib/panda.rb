@@ -1,3 +1,5 @@
+require 's3_store'
+require 'local_store'
 module Panda
   class ConfigError < RuntimeError; end
   

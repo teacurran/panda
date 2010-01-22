@@ -173,7 +173,7 @@ namespace :dev do
 
   task :bootstrap do
     Merb.start_environment(:environment => 'development', :adapter => 'runner')
-    Panda::Setup.create_s3_bucket
+    Panda::Setup.create_s3_bucket if Panda::Config[:use_s3]
     Panda::Setup.create_sdb_domains
     
     Store.set('player.swf', 'public/player.swf')
