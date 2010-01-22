@@ -19,7 +19,7 @@ namespace :dev do
       warn "Please run this command as root!"
       exit
     end
-    system("mkdir -p ~/src")
+    system("mkdir -p ~/src; chmod 777 ~/src")
     Dir.chdir("#{ENV['HOME']}/src")
     if File.exists?("jpeg-6b/Makefile")
       puts "Already installed libjpeg. (to reinstall please `rm -rf ~/src/jpeg-6b`)"
@@ -42,7 +42,7 @@ namespace :dev do
     system("sudo env PATH=$PATH \"#{installer}\" install ffmpeg")
 
     # More gd stuff
-    system("mkdir -p ~/src")
+    system("mkdir -p ~/src; chmod 777 ~/src")
     Dir.chdir("#{ENV['HOME']}/src")
     if File.exists?("gd-2.0.35/Makefile")
       puts "Already installed gd (to reinstall please `rm -rf ~/src/gd-2.0.35`)"
@@ -64,7 +64,7 @@ namespace :dev do
         exit
       end
 
-      system("mkdir -p ~/src")
+      system("mkdir -p ~/src; chmod 777 ~/src")
       Dir.chdir("#{ENV['HOME']}/src")
 
       puts "Installing nginx..."

@@ -13,7 +13,7 @@ puts "Installing any gems missing..."
   end
 end
 
-system("mkdir -p ~/src")
+system("mkdir -p ~/src; chmod 777 ~/src")
 Dir.chdir("#{ENV['HOME']}/src")
 if File.directory?('rvideo')
   puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
