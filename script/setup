@@ -19,8 +19,8 @@ if File.directory?('rvideo')
   puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
 else
   puts "Installing rvideo"
-  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/tags/REL-0.9.3 rvideo")
-  system("cd rvideo; alias sudo=\"sudo env PATH=$PATH\"; sudo rake install_gem; cd ..")
+  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
+  system("cd rvideo; sudo env PATH=$PATH rake install_gem; sudo env PATH=$PATH gem install pkg/rvideo-0.9.4.gem; cd ..")
 end
 Dir.chdir($pwd)
 
