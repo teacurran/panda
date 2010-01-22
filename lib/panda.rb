@@ -1,11 +1,10 @@
-require 's3_store'
-require 'local_store'
 module Panda
   class ConfigError < RuntimeError; end
   
   class Setup
     class << self
       def create_s3_bucket
+        require 's3_store'
         S3Store.create_bucket
       end
       
