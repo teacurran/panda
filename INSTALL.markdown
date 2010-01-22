@@ -19,3 +19,9 @@ Another possibly helpful resource:
 ## Run the automatic stuff
 
     ./script/setup
+
+## Run the merb processes
+
+    merb -p 4000
+    merb -r bin/encoder.rb -p 5001 -e encoder
+    merb -r bin/notifier.rb -p 6001 -e notifier
