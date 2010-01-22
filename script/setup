@@ -1,2 +1,2 @@
-#!bash
+#!/usr/bin/env bash
 sudo env PATH=$PATH rake dev:setup
