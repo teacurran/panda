@@ -11,7 +11,7 @@ namespace :dev do
       exit
     end
 
-    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc RubyInline amazon_sdb aws-s3 flvtool2")
+    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc RubyInline aws-s3 flvtool2")
   end
 
   task :install_libjpeg do
@@ -83,8 +83,9 @@ namespace :dev do
         puts "Already installed nginx (to reinstall please `rm -rf ~/src/nginx-0.6.32`)"
       else
         system("wget http://github.com/masterzen/nginx-upload-progress-module/tarball/v0.7; tar xvfz masterzen-nginx-upload-progress-module-ac62a29.tar.gz") unless File.exists?("masterzen-nginx-upload-progress-module-ac62a29.tar.gz")
+        $UPM = File.expand_path('masterzen-nginx-upload-progress-module-ac62a29/ngx_http_uploadprogress_module.c')
         system("curl -O http://sysoev.ru/nginx/nginx-0.6.32.tar.gz; tar xvfz nginx-0.6.32.tar.gz") unless File.exists?("nginx-0.6.32.tar.gz")
-        system("cd nginx-0.6.32; ./configure --prefix=/usr/local --with-http_ssl_module --add-module=$UPM && make && sudo make install && growlnotify -m \"Done Installing NGINX\"; cd ..")
+        system("cd nginx-0.6.32; ./configure --prefix=/usr/local --with-http_ssl_module --add-module=#{$UPM} && make && sudo make install && growlnotify -m \"Done Installing NGINX\"; cd ..")
       end
 
       # If /usr/local/sbin is not in $PATH, notify the user that they need it in their path.

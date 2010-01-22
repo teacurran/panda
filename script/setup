@@ -3,7 +3,7 @@
 $pwd = `pwd`.chomp
 require 'rubygems'
 puts "Installing any gems missing..."
-['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid'].each do |dep|
+['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb'].each do |dep|
   lib, gemname, version = dep.split(':')
   gemname ||= lib
   begin
