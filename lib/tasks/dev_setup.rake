@@ -145,7 +145,7 @@ namespace :dev do
     if $using_s3 == 'S'
       $s3_bucket = get_input("Enter the S3 Bucket you'll be using") # S3_BUCKET
     else
-      $videos_domain = $panda_domain
+      $videos_domain = $panda_domain || get_input("Enter the domain this Panda should be accessible at")
     end
     $access_key_id = get_input("Your AWS access key")
     $secret_access_key = get_input("Your AWS secret key")
