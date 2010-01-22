@@ -138,7 +138,7 @@ namespace :dev do
 
   task :panda_config_wizard do
     $api_key = get_input("Please enter an API key for this Panda installation. (Record it somewhere to use in your API implementation)")
-    $upload_redirect_url = get_input("Enter the URL Panda should redirect [the user iframe] to after an upload is finished")
+    $upload_redirect_url = get_input("Enter the URL Panda should redirect [the user iframe] to after an upload is finished (use $id for the video id)")
     # private tmp path is okay, but it needs to exist and be writable
     system("sudo mkdir -p /var/tmp/videos; sudo chmod 777 /var/tmp/videos")
     $using_s3 = get_input("Will you be using [S]3 or [F]ilesystem? (S/F)")
@@ -154,16 +154,14 @@ namespace :dev do
     puts "Configuring Panda..."
     panda_config = File.read('config/panda_init.rb.example')
     panda_config.gsub!(/SECRET_KEY_FOR_PANDA_API/, $api_key)
-    panda_config.gsub!(/p[:upload_redirect_url]   = \"http:\/\/localhost:4000\/videos\/$id\/done\"/, $upload_redirect_url)
-    panda_config.gsub!(/p[:use_s3] = true/, ("p[:use_s3] = " + ($using_s3 == 'S' ? 'true' : 'false')))
+    panda_config.gsub!(/UPLOAD_REDIRECT_URL/, $upload_redirect_url)
+    panda_config.gsub!(/USE_S3/, (($using_s3 == 'S' ? 'true' : 'false')))
     panda_config.gsub!(/S3_BUCKET/, $s3_bucket) if $s3_bucket
-    panda_config.gsub!(/p[:videos_domain]         = \"localhost:4000\/store\"/, "p[:videos_domain]         = \"#{$videos_domain}/store\"") if $videos_domain
+    panda_config.gsub!(/VIDEOS_DOMAIN/, $videos_domain)
     panda_config.gsub!(/AWS_ACCESS_KEY/, $access_key_id)
     panda_config.gsub!(/AWS_SECRET_ACCESS_KEY/, $secret_access_key)
-    panda_config.gsub!(/p[:sdb_videos_domain]     = \"panda_videos\"/, "p[:sdb_videos_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_videos\"")
-    panda_config.gsub!(/p[:sdb_users_domain]      = \"panda_users\"/, "p[:sdb_users_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_users\"")
-    panda_config.gsub!(/p[:sdb_profiles_domain]   = \"panda_profiles\"/, "p[:sdb_profiles_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_profiles\"")
-    panda_config.gsub!(/p[:state_update_url]      = "http:\/\/YOUR_APP\/videos\/$id\/status_update\"/, "p[:state_update_url]      = \"$state_update_url\"")
+    panda_config.gsub!(/SDBPREFIX/, $sdb_prefix)
+    panda_config.gsub!(/STATE_UPDATE_URL/, $state_update_url)
     File.open('config/panda_init.rb', 'w') {|f| f << panda_config }
   end
 

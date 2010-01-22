@@ -14,7 +14,8 @@ Panda::Config.use do |p|
   # application. The $id in the url will be replaced by the videos' key.
   
   p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
-  p[:upload_redirect_url]   = "http://localhost:4000/videos/$id/done"
+  # p[:upload_redirect_url]   = "http://localhost:4000/videos/$id/done"
+  p[:upload_redirect_url]   = "UPLOAD_REDIRECT_URL"
   
   # ============================================================
   # Local storage. Public should be accessible from the internet
@@ -30,7 +31,8 @@ Panda::Config.use do |p|
   # ================================================
   
   # true = s3, false = filesystem
-  p[:use_s3] = true
+  # p[:use_s3] = true
+  p[:use_s3] = USE_S3
 
   if p[:use_s3]
     # For S3 storage:
@@ -40,7 +42,8 @@ Panda::Config.use do |p|
   else
     # For local filesystem storage:
     p[:videos_store]          = :filesystem
-    p[:videos_domain]         = "localhost:4000/store"
+    # p[:videos_domain]         = "localhost:4000/store"
+    p[:videos_domain]         = "VIDEOS_DOMAIN/store"
     p[:public_videos_dir]     = Merb.root / "public" / "store"
   end
   
@@ -54,9 +57,12 @@ Panda::Config.use do |p|
   
   # SimpleDB domains (you need only change these if you have multiple Panda 
   # instances using your AWS account):
-  p[:sdb_videos_domain]     = "panda_videos"
-  p[:sdb_users_domain]      = "panda_users"
-  p[:sdb_profiles_domain]   = "panda_profiles"
+  # p[:sdb_videos_domain]     = "panda_videos"
+  # p[:sdb_users_domain]      = "panda_users"
+  # p[:sdb_profiles_domain]   = "panda_profiles"
+  p[:sdb_videos_domain]     = "SDBPREFIX_panda_videos"
+  p[:sdb_users_domain]      = "SDBPREFIX_panda_users"
+  p[:sdb_profiles_domain]   = "SDBPREFIX_panda_profiles"
   
   # ================================================
   # Thumbnail
@@ -77,7 +83,8 @@ Panda::Config.use do |p|
   
   # p[:notification_retries]  = 6
   # p[:notification_frequency]= 10
-  p[:state_update_url]      = "http://YOUR_APP/videos/$id/status_update"
+  # p[:state_update_url]      = "http://YOUR_APP/videos/$id/status_update"
+  p[:state_update_url]      = "STATE_UPDATE_URL"
   
   # ================================================
   # Get emailed error messages
