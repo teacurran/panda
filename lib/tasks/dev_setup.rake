@@ -25,7 +25,7 @@ namespace :dev do
       puts "Already installed libjpeg. (to reinstall please `rm -rf ~/src/jpeg-6b`)"
     else
       puts "Installing libjpeg..."
-      system("curl -O ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6b.tar.gz; tar zxvf jpegsrc.v6b.tar.gz") unless File.exists?("jpegsrc.v6b.tar.gz")
+      system("curl -O ftp://ftp.aai.ee/pub/unix/jpegsrc.v6b.tar.gz; tar zxvf jpegsrc.v6b.tar.gz") unless File.exists?("jpegsrc.v6b.tar.gz")
       system("cd jpeg-6b; ./configure '--with-jpeg=/usr/local' '--with-png=/usr/local' '--with-zlib-dir=/usr/local' && make && sudo make install && sudo make install-lib; cd ..")
     end
   end
