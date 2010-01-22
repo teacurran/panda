@@ -14,7 +14,7 @@ This was taken from a combination of the following documents:
 
 ## Run the automatic stuff
 
-    sudo rake dev:setup
+    sudo env PATH=$PATH rake dev:setup
 
 ## Configure Panda
 

@@ -11,8 +11,7 @@ namespace :dev do
       exit
     end
 
-    gemcmd = `which gem`.chomp
-    system("sudo \"#{gemcmd}\" install RubyInline amazon_sdb aws-s3 flvtool2")
+    system("sudo env PATH=$PATH gem install RubyInline amazon_sdb aws-s3 flvtool2")
   end
 
   task :install_libjpeg do
@@ -39,8 +38,8 @@ namespace :dev do
     # Install gd2. apt-get, port, whatever works for your system
     installer = `which port`.chomp
     installer = `which apt-get`.chomp if installer == ''
-    system("sudo \"#{installer}\" install gd2")
-    system("sudo \"#{installer}\" install ffmpeg")
+    system("sudo env PATH=$PATH \"#{installer}\" install gd2")
+    system("sudo env PATH=$PATH \"#{installer}\" install ffmpeg")
 
     # More gd stuff
     system("mkdir -p ~/src")
@@ -61,14 +60,13 @@ namespace :dev do
     end
 
     # Install rvideo
-    svn = `which svn`
     system("mkdir -p ~/src")
     Dir.chdir("#{ENV['HOME']}/src")
     if File.directory?('rvideo')
       puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
     else
       puts "Installing rvideo"
-      system("sudo \"#{svn}\" checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
+      system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
       system("cd rvideo; sudo rake install_gem; cd ..")
     end
   end
