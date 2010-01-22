@@ -26,6 +26,7 @@ namespace :dev do
     else
       puts "Installing libjpeg..."
       system("curl -O ftp://ftp.aai.ee/pub/unix/jpegsrc.v6b.tar.gz; tar zxvf jpegsrc.v6b.tar.gz") unless File.exists?("jpegsrc.v6b.tar.gz")
+      system("sudo mkdir -p /usr/local/man/man1/")
       system("cd jpeg-6b; ./configure '--with-jpeg=/usr/local' '--with-png=/usr/local' '--with-zlib-dir=/usr/local' && make && sudo make install && sudo make install-lib; cd ..")
     end
   end
