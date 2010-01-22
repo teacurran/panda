@@ -11,7 +11,7 @@ namespace :dev do
       exit
     end
 
-    system("sudo env PATH=$PATH gem install RubyInline amazon_sdb aws-s3 flvtool2")
+    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc RubyInline amazon_sdb aws-s3 flvtool2")
   end
 
   task :install_libjpeg do
@@ -39,8 +39,8 @@ namespace :dev do
     # Install gd2. apt-get, port, whatever works for your system
     installer = `which port`.chomp
     installer = `which apt-get`.chomp if installer == ''
-    system("sudo env PATH=$PATH \"#{installer}\" install gd2")
-    system("sudo env PATH=$PATH \"#{installer}\" install ffmpeg")
+    # system("sudo env PATH=$PATH \"#{installer}\" install gd2 -y")
+    system("sudo env PATH=$PATH \"#{installer}\" install ffmpeg -y")
 
     # More gd stuff
     system("mkdir -p ~/src; chmod 777 ~/src")

@@ -22,8 +22,8 @@ else
   $pstdout = $stdout
   $pstderr = $stderr
   $stdout = $stderr = File.open('/dev/null', 'w')
-  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
-  system("cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..")
+  `sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo`
+  `cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..`
   $stdout = $pstdout
   $stderr = $pstderr
   system("cd rvideo; sudo env PATH=$PATH gem install pkg/rvideo-0.9.4.gem; cd ..")
