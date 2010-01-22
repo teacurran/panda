@@ -1,6 +1,6 @@
 namespace :dev do
   desc "Sets up dependencies and configures nginx, which should be running correctly out of the box once installed!"
-  task :setup => [:gems, :install_libjpeg, :install_gd2, :install_rvideo, :nginx] do
+  task :setup => [:gems, :install_libjpeg, :install_gd2, :nginx] do
     puts "Setup complete!"
   end
 
@@ -50,24 +50,6 @@ namespace :dev do
       puts "Installing gd..."
       system("curl -O http://www.libgd.org/releases/gd-2.0.35.tar.gz; tar zxvf gd-2.0.35.tar.gz") unless File.exists?("gd-2.0.35.tar.gz")
       system("cd gd-2.0.35 && ./configure && make && sudo make install && cd ..")
-    end
-  end
-
-  task :install_rvideo do
-    if !File.writable?("/")
-      warn "Please run this command as root!"
-      exit
-    end
-
-    # Install rvideo
-    system("mkdir -p ~/src")
-    Dir.chdir("#{ENV['HOME']}/src")
-    if File.directory?('rvideo')
-      puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
-    else
-      puts "Installing rvideo"
-      system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
-      system("cd rvideo; sudo rake install_gem; cd ..")
     end
   end
 

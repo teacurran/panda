@@ -1,2 +1,17 @@
-#!/usr/bin/env bash
-sudo env PATH=$PATH rake dev:setup
+#!/usr/bin/env ruby
+
+system("sudo env PATH=$PATH gem install rspec merb-core rubigen merb-assets merb-mailer merb_helpers uuid")
+
+system("mkdir -p ~/src")
+Dir.chdir("#{ENV['HOME']}/src")
+if File.directory?('rvideo')
+  puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
+else
+  puts "Installing rvideo"
+  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
+  system("cd rvideo; sudo rake install_gem; cd ..")
+end
+
+system("cp config/panda_init.rb.example config/panda_init.rb")
+system("cp config/mailer.rb.example config/mailer.rb")
+system("sudo env PATH=$PATH rake dev:setup")
