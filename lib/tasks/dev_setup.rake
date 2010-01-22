@@ -1,7 +1,76 @@
 namespace :dev do
-  desc "Sets up nginx, which should be running correctly out of the box once installed!"
-  task :setup => [:nginx] do
+  desc "Sets up dependencies and configures nginx, which should be running correctly out of the box once installed!"
+  task :setup => [:gems, :install_libjpeg, :install_gd2, :install_rvideo, :nginx] do
     puts "Setup complete!"
+  end
+
+  desc "Install the rubygems Panda depends on."
+  task :gems do
+    if !File.writable?("/")
+      warn "Please run this command as root!"
+      exit
+    end
+
+    gemcmd = `which gem`.chomp
+    system("sudo \"#{gemcmd}\" install RubyInline amazon_sdb aws-s3 flvtool2")
+  end
+
+  task :install_libjpeg do
+    if !File.writable?("/")
+      warn "Please run this command as root!"
+      exit
+    end
+    system("mkdir -p ~/src")
+    Dir.chdir("#{ENV['HOME']}/src")
+    if File.exists?("jpeg-6b/Makefile")
+      puts "Already installed libjpeg. (to reinstall please `rm -rf ~/src/jpeg-6b`)"
+    else
+      puts "Installing libjpeg..."
+      system("curl -O ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6b.tar.gz; tar zxvf jpegsrc.v6b.tar.gz") unless File.exists?("jpegsrc.v6b.tar.gz")
+      system("cd jpeg-6b; ./configure '--with-jpeg=/usr/local' '--with-png=/usr/local' '--with-zlib-dir=/usr/local' && make && sudo make install && sudo make install-lib; cd ..")
+    end
+  end
+
+  task :install_gd2 do
+    if !File.writable?("/")
+      warn "Please run this command as root!"
+      exit
+    end
+    # Install gd2. apt-get, port, whatever works for your system
+    installer = `which port`.chomp
+    installer = `which apt-get`.chomp if installer == ''
+    system("sudo \"#{installer}\" install gd2")
+    system("sudo \"#{installer}\" install ffmpeg")
+
+    # More gd stuff
+    system("mkdir -p ~/src")
+    Dir.chdir("#{ENV['HOME']}/src")
+    if File.exists?("gd-2.0.35/Makefile")
+      puts "Already installed gd (to reinstall please `rm -rf ~/src/gd-2.0.35`)"
+    else
+      puts "Installing gd..."
+      system("curl -O http://www.libgd.org/releases/gd-2.0.35.tar.gz; tar zxvf gd-2.0.35.tar.gz") unless File.exists?("gd-2.0.35.tar.gz")
+      system("cd gd-2.0.35 && ./configure && make && sudo make install && cd ..")
+    end
+  end
+
+  task :install_rvideo do
+    if !File.writable?("/")
+      warn "Please run this command as root!"
+      exit
+    end
+
+    # Install rvideo
+    svn = `which svn`
+    system("mkdir -p ~/src")
+    Dir.chdir("#{ENV['HOME']}/src")
+    if File.directory?('rvideo')
+      puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
+    else
+      puts "Installing rvideo"
+      system("sudo \"#{svn}\" checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
+      system("cd rvideo; sudo rake install_gem; cd ..")
+    end
   end
 
   desc "Install and Configure nginx."
@@ -10,7 +79,7 @@ namespace :dev do
   namespace :nginx do
     desc "Install nginx with http-upload-progress support."
     task :install do
-      if !File.writable?("/usr/local/conf/nginx.conf")
+      if !File.writable?("/")
         warn "Please run this command as root!"
         exit
       end
@@ -23,6 +92,7 @@ namespace :dev do
       if File.exists?("pcre-7.7/Makefile")
         puts "Already installed PCRE (to reinstall please `rm -rf ~/src/pcre-7.7`)"
       else
+        puts "Installing PCRE..."
         system("curl -O http://ftp.exim.llorien.org/pcre/pcre-7.7.tar.gz; tar xvfz pcre-7.7.tar.gz") unless File.exists?("pcre-7.7.tar.gz")
         system("cd pcre-7.7; ./configure --prefix=/usr/local && make && sudo make install; cd ..")
       end
@@ -49,7 +119,7 @@ namespace :dev do
 
     desc "Configure nginx for me automatically."
     task :configure do
-      if !File.writable?("/usr/local/conf/nginx.conf")
+      if !File.writable?("/")
         warn "Please run this command as root!"
         exit
       end
