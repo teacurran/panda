@@ -21,6 +21,29 @@ else
   puts "Installing rvideo"
   system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
   system("cd rvideo; sudo env PATH=$PATH rake install_gem; sudo env PATH=$PATH gem install pkg/rvideo-0.9.4.gem; cd ..")
+
+  begin # Generate the correct passenger gem location
+  gemname = 'rvideo'
+  paths = $:.to_a.dup
+  begin
+    gem gemname
+    new_paths = $:.to_a.dup - paths
+    where = new_paths.last
+  rescue Gem::LoadError
+    begin
+      where = `gem which #{gemname}`.chomp
+    rescue LoadError
+      warn "Can't find ruby library file or shared library #{gemname}"
+      exit
+    end
+  end
+  if match = where.match(/(.*\/gems\/[^\/]+)/)
+    where = match[1]
+  end
+  end # Found the passenger gem location...
+
+  system("cd rvideo; sudo cp lib/rvideo/tools/*.rb \"#{where}/lib/rvideo/tools/.\"; cd ..")
+
 end
 Dir.chdir($pwd)
 
