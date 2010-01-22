@@ -171,7 +171,7 @@ namespace :dev do
     system("rake dev:bootstrap")
   end
 
-  task :bootstrap do
+  task :bootstrap => :merb_env do
     Panda::Setup.create_s3_bucket
     Panda::Setup.create_sdb_domains
     
