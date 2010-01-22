@@ -1,3 +1,4 @@
+require 'file_store'
 module LocalStore
   
   def self.ensure_directories_exist
