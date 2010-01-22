@@ -1,6 +1,6 @@
 namespace :dev do
   desc "Sets up dependencies and configures nginx, which should be running correctly out of the box once installed!"
-  task :setup => [:gems, :install_libjpeg, :install_gd, :nginx, :panda_config_wizard] do
+  task :setup => [:gems, :install_libjpeg, :install_gd, :nginx, :panda_config_wizard, :auto_bootstrap] do
     puts "Setup complete!"
   end
 
@@ -163,6 +163,31 @@ namespace :dev do
     panda_config.gsub!(/SDBPREFIX/, $sdb_prefix)
     panda_config.gsub!(/STATE_UPDATE_URL/, $state_update_url)
     File.open('config/panda_init.rb', 'w') {|f| f << panda_config }
+    system("cp config/mailer.rb.example config/mailer.rb")
+  end
+
+  task :auto_bootstrap do
+    # Because it has to re-load everything after configuration to work correctly.
+    system("rake dev:bootstrap")
+  end
+
+  task :bootstrap do
+    Panda::Setup.create_s3_bucket
+    Panda::Setup.create_sdb_domains
+    
+    Store.set('player.swf', 'public/player.swf')
+    Store.set('swfobject2.js', 'public/javascripts/swfobject2.js')
+    Store.set('expressInstall.swf', 'public/expressInstall.swf')
+    # Set up an Admin user
+    u = User.new
+    u.login = 'admin'
+    u.email = get_input("Your email address please, for the admin user.")
+    u.set_password('password')
+    u.save
+    puts "\n  ** Admin user is 'admin', and password is 'password'. **"
+    
+    # Create an encoding profile. More can be found at the first url at the top of this document.
+    Profile.create!(:title => "Flash video SD",  :container => "flv", :video_bitrate => 300, :audio_bitrate => 48, :width => 320, :height => 240, :fps => 24, :position => 0, :player => "flash")
   end
 
   task :start_panda do
