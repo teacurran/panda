@@ -1,3 +1,4 @@
+require 'abstract_store'
 class FileStore < AbstractStore
   include FileUtils
   
