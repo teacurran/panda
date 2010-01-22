@@ -1,6 +1,6 @@
 namespace :dev do
   desc "Sets up dependencies and configures nginx, which should be running correctly out of the box once installed!"
-  task :setup => [:gems, :install_libjpeg, :install_gd2, :nginx] do
+  task :setup => [:gems, :install_libjpeg, :install_gd, :nginx, :panda_config_wizard] do
     puts "Setup complete!"
   end
 
@@ -31,7 +31,7 @@ namespace :dev do
     end
   end
 
-  task :install_gd2 do
+  task :install_gd do
     if !File.writable?("/")
       warn "Please run this command as root!"
       exit
@@ -111,13 +111,11 @@ namespace :dev do
       else
         puts "Configuring nginx..."
 
-        $stdout << "Please enter the host name for configuring nginx: "
-        $stdout.flush
-        $hostname = $stdin.readline.dup.chomp
+        $panda_domain = get_input("Enter the domain this Panda should be accessible at")
 
         # Open textmate to configure nginx: open the real config and the sample.
         nginx_config = File.read("lib/tasks/dev-setup-sample-configs/nginx.conf")
-        nginx_config.gsub!(/HOSTNAME/, $hostname)
+        nginx_config.gsub!(/HOSTNAME/, $panda_domain)
         File.open('/usr/local/conf/nginx.conf', 'w') {|f| f << nginx_config }
         # Have user hit ENTER when they have nginx configured...
 
@@ -137,4 +135,51 @@ namespace :dev do
       end
     end
   end
+
+  task :panda_config_wizard do
+    $api_key = get_input("Please enter an API key for this Panda installation. (Record it somewhere to use in your API implementation)")
+    $upload_redirect_url = get_input("Enter the URL Panda should redirect [the user iframe] to after an upload is finished")
+    # private tmp path is okay, but it needs to exist and be writable
+    system("sudo mkdir -p /var/tmp/videos; sudo chmod 777 /var/tmp/videos")
+    $using_s3 = get_input("Will you be using [S]3 or [F]ilesystem? (S/F)")
+    if $using_s3 == 'S'
+      $s3_bucket = get_input("Enter the S3 Bucket you'll be using") # S3_BUCKET
+    else
+      $videos_domain = $panda_domain
+    end
+    $access_key_id = get_input("Your AWS access key")
+    $secret_access_key = get_input("Your AWS secret key")
+    $sdb_prefix = get_input("An optional prefix to your Panda domains on SDB (Enter for none)")
+    $state_update_url = get_input("The URL Panda should ping with notification updates, such as encoding events (use $id for the video id)")
+    puts "Configuring Panda..."
+    panda_config = File.read('config/panda_init.rb.example')
+    panda_config.gsub!(/SECRET_KEY_FOR_PANDA_API/, $api_key)
+    panda_config.gsub!(/p[:upload_redirect_url]   = \"http:\/\/localhost:4000\/videos\/$id\/done\"/, $upload_redirect_url)
+    panda_config.gsub!(/p[:use_s3] = true/, ("p[:use_s3] = " + ($using_s3 == 'S' ? 'true' : 'false')))
+    panda_config.gsub!(/S3_BUCKET/, $s3_bucket) if $s3_bucket
+    panda_config.gsub!(/p[:videos_domain]         = \"localhost:4000\/store\"/, "p[:videos_domain]         = \"#{$videos_domain}/store\"") if $videos_domain
+    panda_config.gsub!(/AWS_ACCESS_KEY/, $access_key_id)
+    panda_config.gsub!(/AWS_SECRET_ACCESS_KEY/, $secret_access_key)
+    panda_config.gsub!(/p[:sdb_videos_domain]     = \"panda_videos\"/, "p[:sdb_videos_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_videos\"")
+    panda_config.gsub!(/p[:sdb_users_domain]      = \"panda_users\"/, "p[:sdb_users_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_users\"")
+    panda_config.gsub!(/p[:sdb_profiles_domain]   = \"panda_profiles\"/, "p[:sdb_profiles_domain]   = \"#{$sdb_prefix}#{'-' if $sdb_prefix != ''}panda_profiles\"")
+    panda_config.gsub!(/p[:state_update_url]      = "http:\/\/YOUR_APP\/videos\/$id\/status_update\"/, "p[:state_update_url]      = \"$state_update_url\"")
+    File.open('config/panda_init.rb', 'w') {|f| f << panda_config }
+  end
+
+  task :start_panda do
+    system("merb -p 4000 -d")
+    system("merb -r bin/encoder.rb -p 5001 -e encoder &")
+    system("merb -r bin/notifier.rb -p 6001 -e notifier &")
+  end
+
+  task :stop_panda do
+    
+  end
+end
+
+def get_input(msg)
+  $stdout << "#{msg}: "
+  $stdout.flush
+  return $stdin.readline.dup.chomp # SECRET_KEY_FOR_PANDA_API
 end

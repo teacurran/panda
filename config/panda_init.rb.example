@@ -29,15 +29,20 @@ Panda::Config.use do |p|
   # Storage location for uploaded and encoded videos
   # ================================================
   
-  # For S3 storage:
-  p[:videos_store]          = :s3
-  p[:videos_domain]         = "s3.amazonaws.com/S3_BUCKET"
-  p[:s3_videos_bucket]      = "S3_BUCKET"
-  
-  # For local filesystem storage:
-  # p[:videos_store]          = :filesystem
-  # p[:videos_domain]         = "localhost:4000/store"
-  # p[:public_videos_dir]     = Merb.root / "public" / "store"
+  # true = s3, false = filesystem
+  p[:use_s3] = true
+
+  if p[:use_s3]
+    # For S3 storage:
+    p[:videos_store]          = :s3
+    p[:videos_domain]         = "s3.amazonaws.com/S3_BUCKET"
+    p[:s3_videos_bucket]      = "S3_BUCKET"
+  else
+    # For local filesystem storage:
+    p[:videos_store]          = :filesystem
+    p[:videos_domain]         = "localhost:4000/store"
+    p[:public_videos_dir]     = Merb.root / "public" / "store"
+  end
   
   # ================================================
   # AWS Details
