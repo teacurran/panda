@@ -7,10 +7,10 @@ This was taken from a combination of the following documents:
 
 ## Download and checkout Panda itself
 
-    cd /var/local/www
     git clone git://github.com/dyn/panda.git
     cd panda
-    git checkout origin/stable
+    # git checkout origin/stable
+    git checkout -b origin/auto-install
 
 ## Run the automatic stuff
 
