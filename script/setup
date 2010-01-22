@@ -21,6 +21,7 @@ else
   system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/tags/REL-0.9.3 rvideo")
   system("cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..")
 end
+Dir.chdir(ENV['HOME'])
 
 system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
 system("cp config/mailer.rb.example config/mailer.rb")
