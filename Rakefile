@@ -22,6 +22,7 @@ Merb::Plugins.rakefiles.each { |r| require r }
 desc "start runner environment"
 task :merb_env do
   Merb.start_environment(:environment => init_env, :adapter => 'runner')
+  require 'panda'
 end
 
 ##############################################################################

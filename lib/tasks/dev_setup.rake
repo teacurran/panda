@@ -171,7 +171,8 @@ namespace :dev do
     system("rake dev:bootstrap")
   end
 
-  task :bootstrap => :merb_env do
+  task :bootstrap do
+    Merb.start_environment(:environment => 'development', :adapter => 'runner')
     Panda::Setup.create_s3_bucket
     Panda::Setup.create_sdb_domains
     
