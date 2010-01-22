@@ -1,6 +1,16 @@
 #!/usr/bin/env ruby
 
-system("sudo env PATH=$PATH gem install rspec merb-core rubigen merb-assets merb-mailer merb_helpers uuid")
+require 'rubygems'
+puts "Installing any gems missing..."
+['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid'].each do |dep|
+  lib, gemname, version = dep.split(':')
+  gemname ||= lib
+  begin
+    require lib
+  rescue LoadError
+    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc #{gemname}#{' --version '+version if version}")
+  end
+end
 
 system("mkdir -p ~/src")
 Dir.chdir("#{ENV['HOME']}/src")
@@ -8,10 +18,10 @@ if File.directory?('rvideo')
   puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
 else
   puts "Installing rvideo"
-  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo")
-  system("cd rvideo; sudo rake install_gem; cd ..")
+  system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/tags/REL-0.9.3 rvideo")
+  system("cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..")
 end
 
-system("cp config/panda_init.rb.example config/panda_init.rb")
+system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
 system("cp config/mailer.rb.example config/mailer.rb")
 system("sudo env PATH=$PATH rake dev:setup")
