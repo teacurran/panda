@@ -19,7 +19,7 @@ if File.directory?('rvideo')
 else
   puts "Installing rvideo"
   system("sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/tags/REL-0.9.3 rvideo")
-  system("cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..")
+  system("cd rvideo; alias sudo=\"sudo env PATH=$PATH\"; sudo rake install_gem; cd ..")
 end
 Dir.chdir(ENV['HOME'])
 
