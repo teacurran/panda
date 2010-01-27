@@ -25,3 +25,21 @@ Another possibly helpful resource:
     merb -p 4000
     merb -r bin/encoder.rb -p 5001 -e encoder
     merb -r bin/notifier.rb -p 6001 -e notifier
+
+## Starting / Stopping Daemons
+
+The config/rc-scripts/ directory houses default init scripts for panda, it's encoder, and it's notifier processes.
+
+### Installing locally
+
+The following rake task will copy these into your /etc/init.d/ directory:
+
+  rake dev:install_system_daemons
+
+### Installing remotely
+
+The following cap task will run the above rake task on the remote server:
+
+  cap deploy:install_system_daemons
+
+

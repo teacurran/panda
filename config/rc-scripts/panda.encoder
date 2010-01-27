@@ -1,0 +1,65 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          panda
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the panda merb web server
+# Description:       starts panda using start-stop-daemon
+### END INIT INFO
+
+PANDA_HOME=/home/prod/public_html/rw-panda/current
+PATH=/opt/ruby-enterprise-1.8.7-2009.10/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME="panda.encoder"
+DESC="panda encoder"
+CURRENT_PWD=`pwd`
+PIDFILE=/var/run/$NAME.pid
+
+DAEMON=/opt/ruby-enterprise-1.8.7-2009.10/bin/merb
+DAEMON_OPTS="--daemonize --pid $PIDFILE -r bin/encoder.rb -p 5001 -e encoder"
+
+test -x $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --quiet --pidfile $PIDFILE -d $PANDA_HOME \
+		--exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	if [ -f $PIDFILE ]; then
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE --signal INT
+	fi
+	echo "$NAME."
+	;;
+  restart|force-reload)
+	echo -n "Restarting $DESC: "
+	if [ -f $PIDFILE ]; then
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE --signal INT
+	fi
+	sleep 1
+	start-stop-daemon --start --quiet --pidfile $PIDFILE -d $PANDA_HOME \
+		--exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  reload)
+	echo -n "Reloading $DESC configuration: "
+	if [ -f $PIDFILE ]; then
+		start-stop-daemon --stop --signal HUP --quiet --pidfile $PIDFILE
+	fi
+	echo "$NAME."
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
