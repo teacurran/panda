@@ -32,7 +32,7 @@ Panda::Config.use do |p|
   
   # true = s3, false = filesystem
   # p[:use_s3] = true
-  p[:use_s3] = USE_S3
+  p[:use_s3] = 'USE_S3'
 
   if p[:use_s3]
     # For S3 storage:

@@ -156,7 +156,7 @@ namespace :dev do
     panda_config = File.read('config/panda_init.rb.example')
     panda_config.gsub!(/SECRET_KEY_FOR_PANDA_API/, $api_key)
     panda_config.gsub!(/UPLOAD_REDIRECT_URL/, $upload_redirect_url)
-    panda_config.gsub!(/USE_S3/, (($using_s3 == 'S' ? 'true' : 'false')))
+    panda_config.gsub!(/'USE_S3'/, (($using_s3 == 'S' ? 'true' : 'false')))
     panda_config.gsub!(/S3_BUCKET/, $s3_bucket) if $s3_bucket
     panda_config.gsub!(/VIDEOS_DOMAIN/, $videos_domain)
     panda_config.gsub!(/AWS_ACCESS_KEY/, $access_key_id)
