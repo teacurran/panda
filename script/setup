@@ -3,55 +3,17 @@
 $pwd = `pwd`.chomp
 require 'rubygems'
 puts "Installing any gems missing..."
-['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb'].each do |dep|
+['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb', 'rvideo:mhs-rvideo:0.9.4'].each do |dep|
   lib, gemname, version = dep.split(':')
   gemname ||= lib
   begin
     require lib
   rescue LoadError
+    puts "Installing #{gemname}..."
     system("sudo env PATH=$PATH gem install --no-ri --no-rdoc #{gemname}#{' --version '+version if version}")
   end
 end
-
-system("mkdir -p ~/src; chmod 777 ~/src")
-Dir.chdir("#{ENV['HOME']}/src")
-if File.directory?('rvideo')
-  puts "Already installed rvideo (to reinstall please `rm -rf ~/src/rvideo`)"
-else
-  puts "Installing rvideo"
-  $pstdout = $stdout
-  $pstderr = $stderr
-  $stdout = $stderr = File.open('/dev/null', 'w')
-  `sudo env PATH=$PATH svn checkout svn://rubyforge.org/var/svn/rvideo/trunk rvideo`
-  `cd rvideo; sudo env PATH=$PATH rake install_gem; cd ..`
-  $stdout = $pstdout
-  $stderr = $pstderr
-  system("cd rvideo; sudo env PATH=$PATH gem install pkg/rvideo-0.9.4.gem; cd ..")
-
-  begin # Generate the correct passenger gem location
-  gemname = 'rvideo'
-  paths = $:.to_a.dup
-  begin
-    gem gemname
-    new_paths = $:.to_a.dup - paths
-    where = new_paths.last
-  rescue Gem::LoadError
-    begin
-      where = `gem which #{gemname}`.chomp
-    rescue LoadError
-      warn "Can't find ruby library file or shared library #{gemname}"
-      exit
-    end
-  end
-  if match = where.match(/(.*\/gems\/[^\/]+)/)
-    where = match[1]
-  end
-  end # Found the passenger gem location...
-
-  system("cd rvideo; sudo cp lib/rvideo/tools/*.rb \"#{where}/lib/rvideo/tools/.\"; cd ..")
-
-end
-Dir.chdir($pwd)
+puts "Done with gems."
 
 system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
 system("cp config/mailer.rb.example config/mailer.rb")
