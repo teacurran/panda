@@ -192,14 +192,19 @@ namespace :dev do
     Profile.create!(:title => "Flash video SD",  :container => "flv", :video_bitrate => 300, :audio_bitrate => 48, :width => 320, :height => 240, :fps => 24, :position => 0, :player => "flash")
   end
 
+  desc "Start Panda, encoder, and notifier"
   task :start_panda do
     system("merb -p 4000 -d")
     system("merb -r bin/encoder.rb -p 5001 -e encoder &")
     system("merb -r bin/notifier.rb -p 6001 -e notifier &")
   end
 
-  task :stop_panda do
-    
+  desc "Adds Panda, encoder, and notifier to the rc.d startup sequence."
+  task :install_system_daemons do
+    system("sudo cp config/rc-scripts/* /etc/init.d")
+    system("sudo update-rc.d panda defaults")
+    system("sudo update-rc.d panda.encoder defaults")
+    system("sudo update-rc.d panda.notifier defaults")
   end
 end
 
