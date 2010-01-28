@@ -30,7 +30,7 @@ set :scm_verbose, true
 
 after "deploy:setup", "create_shared_config"
 after "deploy", "deploy:install_gems"
-# after "deploy", "deploy:ensure_bootstrapped"
+after "deploy", "deploy:bootstrap"
 
 role(:app) { domain }
 role(:web) { domain }
