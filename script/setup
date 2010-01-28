@@ -1,20 +1,8 @@
 #!/usr/bin/env ruby
 
 $pwd = `pwd`.chomp
-require 'rubygems'
-puts "Installing any gems missing..."
-['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb', 'rvideo:mhs-rvideo:0.9.4'].each do |dep|
-  lib, gemname, version = dep.split(':')
-  gemname ||= lib
-  begin
-    require lib
-  rescue LoadError
-    puts "Installing #{gemname}..."
-    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc #{gemname}#{' --version '+version if version}")
-  end
-end
-puts "Done with gems."
 
+system("script/install_gems")
 system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
 system("cp config/mailer.rb.example config/mailer.rb")
 system("sudo env PATH=$PATH rake dev:setup")
