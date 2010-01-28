@@ -1,17 +1,7 @@
 namespace :dev do
   desc "Sets up dependencies and configures nginx, which should be running correctly out of the box once installed!"
-  task :setup => [:gems, :install_libjpeg, :install_gd, :nginx, :panda_config_wizard, :auto_bootstrap] do
+  task :setup => [:install_libjpeg, :install_gd, :nginx, :panda_config_wizard, :auto_bootstrap] do
     puts "Setup complete!"
-  end
-
-  desc "Install the rubygems Panda depends on."
-  task :gems do
-    if !File.writable?("/")
-      warn "Please run this command as root!"
-      exit
-    end
-
-    system("sudo env PATH=$PATH gem install --no-ri --no-rdoc RubyInline aws-s3 flvtool2")
   end
 
   task :install_libjpeg do
@@ -164,7 +154,6 @@ namespace :dev do
     panda_config.gsub!(/SDBPREFIX/, $sdb_prefix)
     panda_config.gsub!(/STATE_UPDATE_URL/, $state_update_url)
     File.open('config/panda_init.rb', 'w') {|f| f << panda_config }
-    system("cp config/mailer.rb.example config/mailer.rb")
   end
 
   task :auto_bootstrap do

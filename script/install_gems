@@ -2,7 +2,7 @@
 require 'rubygems'
 
 puts "Installing any gems missing..."
-['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb', 'rvideo:mhs-rvideo:0.9.4'].each do |dep|
+['spec:rspec', 'merb-core', 'rubigen', 'merb-assets', 'merb-mailer', 'merb_helpers', 'uuid', 'mongrel', 'amazon_sdb', 'rvideo:mhs-rvideo:0.9.4', 'inline:RubyInline', 'aws/s3:aws-s3', 'flv:flvtool2'].each do |dep|
   lib, gemname, version = dep.split(':')
   gemname ||= lib
   begin

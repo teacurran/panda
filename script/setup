@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-$pwd = `pwd`.chomp
-
-system("script/install_gems")
-system("echo `pwd`; cp config/panda_init.rb.example config/panda_init.rb")
-system("cp config/mailer.rb.example config/mailer.rb")
-system("sudo env PATH=$PATH rake dev:setup")

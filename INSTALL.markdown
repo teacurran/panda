@@ -16,9 +16,17 @@ Another possibly helpful resource:
     # git checkout origin/stable
     git checkout -b origin/auto-install
 
-## Run the automatic stuff
+## Run all of the development setup
 
-    ./script/setup
+    ./script/install_gems
+    cp config/mailer.rb.example config/mailer.rb
+    sudo env PATH=$PATH rake dev:setup
+
+While that's running, you can open up another terminal and configure Panda:
+
+    rake dev:panda_config_wizard
+
+You can edit config/panda_init.rb further to your liking if you want, or just read it over to make sure the config wizard did its job.
 
 ## Run the merb processes
 
@@ -41,5 +49,4 @@ The following rake task will copy these into your /etc/init.d/ directory:
 The following cap task will run the above rake task on the remote server:
 
   cap deploy:install_system_daemons
-
 
