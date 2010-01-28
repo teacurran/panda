@@ -162,23 +162,7 @@ namespace :dev do
   end
 
   task :bootstrap do
-    Merb.start_environment(:environment => 'development', :adapter => 'runner')
-    Panda::Setup.create_s3_bucket if Panda::Config[:use_s3]
-    Panda::Setup.create_sdb_domains
-    
-    Store.set('player.swf', 'public/player.swf')
-    Store.set('swfobject2.js', 'public/javascripts/swfobject2.js')
-    Store.set('expressInstall.swf', 'public/expressInstall.swf')
-    # Set up an Admin user
-    u = User.new
-    u.login = 'admin'
-    u.email = get_input("Your email address please, for the admin user.")
-    u.set_password('password')
-    u.save
-    puts "\n  ** Admin user is 'admin', and password is 'password'. **"
-    
-    # Create an encoding profile. More can be found at the first url at the top of this document.
-    Profile.create!(:title => "Flash video SD",  :container => "flv", :video_bitrate => 300, :audio_bitrate => 48, :width => 320, :height => 240, :fps => 24, :position => 0, :player => "flash")
+    system("./script/bootstrap")
   end
 
   desc "Start Panda, encoder, and notifier"
