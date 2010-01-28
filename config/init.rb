@@ -23,8 +23,10 @@ dependency 'uuid'
 dependency 'amazon_sdb'
 dependency 'activesupport'
 dependency 'mhs-rvideo', :require_as => 'rvideo'
+dependency 'aws-s3', :require_as => 'aws/s3'
 
 # Dependencies in lib - not autoloaded in time so require them explicitly
+require 's3_store'
 require 'simple_db'
 require 'local_store'
 
