@@ -11,10 +11,9 @@ $(document).ready(function() {
     
 	<div id="uploader">
 		<form id="upload" enctype="multipart/form-data" action="/videos/upload?X-Progress-ID=<%= @progress_id %>&amp;<%= params.except('controller', 'action', 'format').to_query %>" method="post">
-			<input name="file" type="file" />
+			<input id="file_upload" name="file" type="file" />
       <!-- for jquery.form to pick up and create the uploader iframe -->
 			<input name="iframe" type="hidden" value="true" />
-			<input type="submit" value="Upload" />
 		</form>
 	</div>
 
