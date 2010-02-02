@@ -165,13 +165,6 @@ namespace :dev do
     system("./script/bootstrap")
   end
 
-  desc "Start Panda, encoder, and notifier"
-  task :start_panda do
-    system("merb -p 4000 -d")
-    system("merb -r bin/encoder.rb -p 5001 -e encoder &")
-    system("merb -r bin/notifier.rb -p 6001 -e notifier &")
-  end
-
   desc "Adds Panda, encoder, and notifier to the rc.d startup sequence."
   task :install_system_daemons do
     system("sudo cp config/rc-scripts/* /etc/init.d")
