@@ -1,0 +1,1 @@
+merb -r bin/encoder.rb -d -p 5001 -e encoder
