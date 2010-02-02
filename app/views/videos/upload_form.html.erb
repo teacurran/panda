@@ -3,26 +3,28 @@
 var error_redirect_url = "<%= params[:error_redirect_url] %>";
 
 $(document).ready(function() {
-  jQuery.nginxUploadProgress({uuid: "<%= @progress_id %>"}); // Everything happens in jquery.nginxUploadProgress.js
+  // Everything happens in jquery.nginxUploadProgress.js
+  jQuery.nginxUploadProgress({uuid: "<%= @progress_id %>"}); 
 });
 </script>
 <% end %>
 
 <div id="pandaloader">
-    <div id="error"></div>
-    
-	<div id="uploader">
-		<form id="upload" enctype="multipart/form-data" action="/videos/upload?X-Progress-ID=<%= @progress_id %>&amp;<%= params.except('controller', 'action', 'format').to_query %>" method="post">
-			<input id="file_upload" name="file" type="file" />
-      <!-- for jquery.form to pick up and create the uploader iframe -->
-			<input name="iframe" type="hidden" value="true" />
-		</form>
-	</div>
+  <div id="error"></div>
 
-	<div id="uploading" style="display:none;">
-		<div id="progress" class="bar">
-			<div id="progressbar">&nbsp;</div>
-		</div>
-		<div id="eta"></div>
-	</div>
+  <div id="uploader">
+    <form id="upload" enctype="multipart/form-data" action="/videos/upload?X-Progress-ID=<%= @progress_id %>&amp;<%= params.except('controller', 'action', 'format').to_query %>" method="post">
+      <input id="file_upload" name="file" type="file" />
+      <!-- for jquery.form to pick up and create the uploader iframe -->
+      <input name="iframe" type="hidden" value="true" />
+    </form>
+  </div>
+
+  <div id="uploading" style="display:none">
+    <div id="progress" class="bar">
+      <div id="progressbar">&nbsp;</div>
+    </div>
+    <div class="filename">Lorem ipsum dolor sit amet.mov</div>
+    <div id="eta"></div>
+  </div>
 </div>
