@@ -116,11 +116,11 @@ class Video < SimpleDB::Base
   end
   
   def upload_redirect_url
-    Panda::Config[:upload_redirect_url].gsub(/\$id/,self.key)
+    Panda::Config[:upload_redirect_url].gsub(/\:panda_id/,self.key)
   end
   
   def state_update_url
-    Panda::Config[:state_update_url].gsub(/\$id/,self.key)
+    Panda::Config[:state_update_url].gsub(/\:panda_id/,self.key)
   end
   
   def duration_str

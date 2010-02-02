@@ -11,10 +11,10 @@ Panda::Config.use do |p|
   # 
   # When a video has been uploaded panda (through the iframe or popup) Panda 
   # will redirect to upload_redirect_url. This URL should exist on your 
-  # application. The $id in the url will be replaced by the videos' key.
+  # application. The :panda_id in the url will be replaced by the videos' key.
   
   p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
-  # p[:upload_redirect_url]   = "http://localhost:4000/videos/$id/done"
+  # p[:upload_redirect_url]   = "http://localhost:4000/videos/:panda_id/done"
   p[:upload_redirect_url]   = "UPLOAD_REDIRECT_URL"
   
   # ============================================================
@@ -83,7 +83,7 @@ Panda::Config.use do |p|
   
   # p[:notification_retries]  = 6
   # p[:notification_frequency]= 10
-  # p[:state_update_url]      = "http://YOUR_APP/videos/$id/status_update"
+  # p[:state_update_url]      = "http://YOUR_APP/videos/:panda_id/status_update"
   p[:state_update_url]      = "STATE_UPDATE_URL"
   
   # ================================================
