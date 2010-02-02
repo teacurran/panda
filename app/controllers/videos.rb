@@ -123,21 +123,27 @@ private
     rescue Amazon::SDB::RecordNotFoundError
       # No empty video object exists
       self.status = 404
-      render_error($!.to_s.gsub(/Amazon::SDB::/,""))
+      # render_error($!.to_s.gsub(/Amazon::SDB::/,""))
+      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'404-not-found'))
     rescue Video::NotValid
       # Video object is not empty. Likely a video has already been uploaded.
       self.status = 404
-      render_error($!.to_s.gsub(/Video::/,""))
+      # render_error($!.to_s.gsub(/Video::/,""))
+      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'404-not-found'))
+    rescue Video::FormatNotRecognised
+      self.status = 500
+      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'415-unsupported-media-type'))
     rescue Video::VideoError
       # Generic Video error
       self.status = 500
-      render_error($!.to_s.gsub(/Video::/,""))
+      # render_error($!.to_s.gsub(/Video::/,""))
+      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'500-other-error'))
     rescue => e
       # Other error
       self.status = 500
-      render_error("InternalServerError", e)
+      # render_error("InternalServerError", e)
+      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'500-other-error'))
     else
-      puts "Upload Redirect: " + params[:upload_redirect_url]
       redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key) : video.upload_redirect_url
       render_then_call(iframe_params(:location => redirect_url)) do
         video.finish_processing_and_queue_encodings
