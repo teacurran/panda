@@ -3,6 +3,8 @@ class Videos < Application
   before :set_video, :only => [:show, :destroy, :add_to_queue]
   before :set_video_with_nice_errors, :only => [:done, :state]
 
+  ERROR_MESSAGES = YAML.load_file(Merb.root / 'config' / 'error_messages.yml')
+
   def index
     provides :html, :xml, :yaml
     
@@ -78,7 +80,7 @@ class Videos < Application
   #   @video = Video.find(params[:id])
   #   receive_upload_for(@video)
   # end
-  
+
   # POST /videos/upload
   # This receives an upload of a new video before any associated record was received.
   def upload
@@ -100,7 +102,7 @@ class Videos < Application
 private
 
   def render_error(msg, exception = nil)
-    Merb.logger.error "#{params[:id]}: (500 returned to client) #{msg}" + (exception ? "#{exception}\n#{exception.backtrace.join("\n")}" : '')
+    Merb.logger.error "#{params[:id]}: (error returned to client) #{msg}" + (exception ? "#{exception}\n#{exception.backtrace.join("\n")}" : '')
 
     case content_type
     when :html
@@ -120,29 +122,12 @@ private
   def receive_upload_for(video)
     begin
       video.initial_processing(params[:file])
-    rescue Amazon::SDB::RecordNotFoundError
-      # No empty video object exists
-      self.status = 404
-      # render_error($!.to_s.gsub(/Amazon::SDB::/,""))
-      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'404-not-found'))
-    rescue Video::NotValid
-      # Video object is not empty. Likely a video has already been uploaded.
-      self.status = 404
-      # render_error($!.to_s.gsub(/Video::/,""))
-      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'404-not-found'))
+    rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
+      render_iframe_error(404)
     rescue Video::FormatNotRecognised
-      self.status = 500
-      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'415-unsupported-media-type'))
-    rescue Video::VideoError
-      # Generic Video error
-      self.status = 500
-      # render_error($!.to_s.gsub(/Video::/,""))
-      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'500-other-error'))
-    rescue => e
-      # Other error
-      self.status = 500
-      # render_error("InternalServerError", e)
-      iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,'500-other-error'))
+      render_iframe_error(415)
+    rescue => e # Other error
+      render_iframe_error(500)
     else
       redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key) : video.upload_redirect_url
       render_then_call(iframe_params(:location => redirect_url)) do
@@ -160,9 +145,14 @@ private
     begin
       @video = Video.find(params[:id])
     rescue Amazon::SDB::RecordNotFoundError
-      self.status = 404
-      throw :halt, render_error($!.to_s.gsub(/Amazon::SDB::/,""))
+      # throw :halt, render_error($!.to_s.gsub(/Amazon::SDB::/,""))
+      throw :halt, render_iframe_error(404)
     end
+  end
+  
+  def render_iframe_error(code)
+    self.status = code
+    iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,code.to_s).gsub(/:error_message/, ERROR_MESSAGES[code]))
   end
   
   # Textarea hack to get around the fact that the form is submitted with a 
