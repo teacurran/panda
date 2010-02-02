@@ -129,7 +129,7 @@ private
     rescue => e # Other error
       render_iframe_error(500)
     else
-      redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key) : video.upload_redirect_url
+      redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key).gsub(/:panda_filename/, video.original_filename) : video.upload_redirect_url
       render_then_call(iframe_params(:location => redirect_url)) do
         video.finish_processing_and_queue_encodings
       end
