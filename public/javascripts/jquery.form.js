@@ -227,7 +227,11 @@ $.fn.ajaxSubmit = function(options) {
 		}
 
 		// take a breath so that pending repaints get some cpu time before the upload starts
-    setTimeout(function() {
+		// **********
+		// firefox 3.5.7 (and maybe other versions) fails to let setTimeout callbacks be 
+		// called within iframes, so we comment out the setTimeout call below
+		//
+    // setTimeout(function() { 
 			// make sure form attrs are set
 			var t = $form.attr('target'), a = $form.attr('action');
 
@@ -270,7 +274,7 @@ $.fn.ajaxSubmit = function(options) {
 				t ? form.setAttribute('target', t) : $form.removeAttr('target');
 				$(extraInputs).remove();
 			}
-    }, 10);
+    // }, 10);
 
 		var domCheckCount = 50;
 
