@@ -9,6 +9,14 @@ input { font-size: 11px; }
   position: absolute;
   top: 2px;
   left: 4px;
+}
+
+#pandaloader #uploading .cancel {
+  float: left;
+}
+
+#pandaloader #uploading .filename,
+#pandaloader #uploading .cancel {
   color: #222;
   line-height: 1.5;
   font-size: 11px;
@@ -29,11 +37,12 @@ input { font-size: 11px; }
 
 #progress.bar {
   float: left;
-  width: 100%;
+  width: 64%;
   height: 18px;
 }
 
 #progressbar {
+  float: left;
   display: block;
   height: 18px;
   width: 0px;

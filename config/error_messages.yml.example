@@ -1,4 +1,4 @@
 --- 
 500: An unknown error occurred.
-415: The uploaded file was not a recognized type of video.
+415: The uploaded file was not a recognized type of video. Please upload a different file.
 404: This video was not found.

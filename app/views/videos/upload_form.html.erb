@@ -24,7 +24,8 @@ $(document).ready(function() {
     <div id="progress" class="bar">
       <div id="progressbar">&nbsp;</div>
     </div>
-    <div class="filename">Lorem ipsum dolor sit amet.mov</div>
+    <a class="cancel" href="<%= request.full_uri + '?' + request.query_string %>">cancel upload</a>
+    <div class="filename"></div>
     <div id="eta"></div>
   </div>
 </div>

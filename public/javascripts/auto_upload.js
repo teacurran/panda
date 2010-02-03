@@ -1,8 +1,6 @@
 jQuery(function(){
   $('#file_upload').change(function(){
-    var value = $('#file_upload').val();
-    setTimeout(function(){
-      if($('#file_upload').val() == value) $('#upload').submit();
-    }, 6500);
+    $('#uploading div.filename').text("Uploading "+$('#file_upload').val()+"...");
+    $('#upload').submit();
   });
 });
