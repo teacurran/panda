@@ -18,5 +18,12 @@ module Merb
     def message
       %(<div class="notice">#{request.message[:notice]}</div>) if request.message[:notice]
     end
+
+    def javascript_include_tag(*names)
+      names.inject('') do |tag,name|
+        stamp = File.mtime("public/javascripts/#{name}.js").to_i
+        tag << "<script type=\"text/javascript\" charset=\"utf-8\" src=\"/javascripts/#{name}.js?#{stamp}\"></script>\n"
+      end
+    end
   end
 end    
