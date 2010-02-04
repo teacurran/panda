@@ -70,7 +70,7 @@ class Videos < Application
   
   # Use: HQ, API, iframe upload
   def upload_form
-    @progress_id = String.random(32)
+    @progress_id = String.random(24)
     render :layout => :uploader
   end
   
