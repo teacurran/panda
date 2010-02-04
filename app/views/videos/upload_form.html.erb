@@ -1,10 +1,11 @@
 <% throw_content(:head) do %>
 <script type="text/javascript" charset="utf-8">
 var error_redirect_url = "<%= params[:error_redirect_url] %>";
+var upload_progress_uuid = "<%= @progress_id %>";
 
 $(document).ready(function() {
   // Everything happens in jquery.nginxUploadProgress.js
-  jQuery.nginxUploadProgress({uuid: "<%= @progress_id %>"}); 
+  jQuery.nginxUploadProgress({uuid: upload_progress_uuid});
 });
 </script>
 <% end %>
