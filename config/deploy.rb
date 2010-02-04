@@ -30,8 +30,8 @@ set :scm, "git"
 set :scm_verbose, true
 
 after "deploy:setup", "create_shared_config"
-before "deploy:restart", "deploy:install_gems"
-before "deploy:restart", "deploy:bootstrap"
+after "deploy:update", "deploy:install_gems"
+after "deploy:update", "deploy:bootstrap"
 
 role(:app) { domain }
 role(:web) { domain }
