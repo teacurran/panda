@@ -1,4 +1,5 @@
 --- 
 500: An unknown error occurred.
+422: The uploaded file could not be processed. Please make sure it is a valid video.
 415: The uploaded file was not a recognized type of video. Please upload a different file.
 404: This video was not found.
