@@ -2,6 +2,10 @@
 <script type="text/javascript" charset="utf-8">
 var error_redirect_url = "<%= params[:error_redirect_url] %>";
 var upload_progress_uuid = "<%= @progress_id %>";
+var uploading_iframe_url = null;
+<% if params[:uploading_iframe_url] %>
+uploading_iframe_url = "<%= params[:uploading_iframe_url] %>";
+<% end %>
 
 $(document).ready(function() {
   // Everything happens in jquery.nginxUploadProgress.js
@@ -14,8 +18,8 @@ $(document).ready(function() {
   <div id="error"></div>
 
   <div id="uploader">
-    <form id="upload" enctype="multipart/form-data" action="/videos/upload?X-Progress-ID=<%= @progress_id %>&amp;<%= params.except('controller', 'action', 'format').to_query %>" method="post">
-      <input id="file_upload" name="file" type="file" />
+    <form id="upload" enctype="multipart/form-data" action="/videos/upload?X-Progress-ID=<%= @progress_id %>&amp;<%= params.except('controller', 'action', 'format', 'cancel_url').to_query %>" method="post">
+      <input id="file_upload" name="file" type="file" /><% if params[:cancel_url] %> or <a class="cancel" href="<%= params[:cancel_url] %>">keep <%= params[:existing_filename] ? params[:existing_filename] : 'my original file' %></a><% end %>
       <!-- for jquery.form to pick up and create the uploader iframe -->
       <input name="iframe" type="hidden" value="true" />
     </form>
@@ -30,3 +34,5 @@ $(document).ready(function() {
     <div id="eta"></div>
   </div>
 </div>
+
+<iframe id="uploading_notifier_iframe" src="" style="display:none"></iframe>
