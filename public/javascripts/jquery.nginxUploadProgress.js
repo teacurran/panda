@@ -82,7 +82,7 @@ jQuery.nginxUploadProgressFetch = function(e, nginx_progress_url, progress_bar_i
           eta_str = '' + Math.ceil(eta_seconds/(60*60)) + ' hours';
         }
 
-        if(w === 100) $('div.status').text("Processing file...");
+        if(w === 100) $('div.status').text("Uploaded. Processing file...");
         else $('#uploading div.status').html("<div class='eta'>"+eta_str+"</div><div class='filename'>Uploading "+$('#file_upload').val()+"...</div>");
       } else if (upload.state == 'error') { 
         if (upload.status == 413) {
