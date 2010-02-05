@@ -75,7 +75,7 @@ namespace :dev do
         system("wget http://github.com/masterzen/nginx-upload-progress-module/tarball/v0.8; tar xvfz masterzen-nginx-upload-progress-module-2bf172d.tar.gz") unless File.exists?("masterzen-nginx-upload-progress-module-2bf172d.tar.gz")
         $UPM = File.expand_path('masterzen-nginx-upload-progress-module-2bf172d')
         system("curl -O http://nginx.org/download/nginx-0.7.65.tar.gz; tar xvfz nginx-0.7.65.tar.gz") unless File.exists?("nginx-0.7.65.tar.gz")
-        system("cd nginx-0.7.65; ./configure --with-debug --prefix=/usr/local --with-http_ssl_module --add-module=#{$UPM} && make && sudo make install; cd ..")
+        system("cd nginx-0.7.65; ./configure --prefix=/usr/local --with-http_ssl_module --add-module=#{$UPM} && make && sudo make install; cd ..")
       end
 
       # If /usr/local/sbin is not in $PATH, notify the user that they need it in their path.
