@@ -11,7 +11,7 @@ jQuery.nginxUploadProgress = function(settings) {
       $('#uploading').show();
       console.log("Uploading... ");
       if(uploading_iframe_url) console.log(uploading_iframe_url);
-      if(uploading_iframe_url) $('#uploading_notifier_iframe')[0].src = uploading_iframe_url;
+      if(uploading_iframe_url) $('#uploading_notifier_iframe')[0].src = uploading_iframe_url + '?' + Math.floor(Math.random()*11);
       
       this.timer = setInterval(function() { jQuery.nginxUploadProgressFetch(this, settings['nginx_progress_url'], settings['progress_bar_id'], settings['uuid']); }, settings['interval']);
       return true; 
