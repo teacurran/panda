@@ -349,6 +349,7 @@ class Video < SimpleDB::Base
   # 500
   class NoFileSubmitted < VideoError; end
   class FormatNotRecognised < VideoError; end
+  class ClippingError < VideoError; end
   
   # API
   # ===

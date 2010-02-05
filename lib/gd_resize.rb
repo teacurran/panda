@@ -13,6 +13,11 @@ class GDResize
 
     ext = filename_in.match(/\.(\w+)$/).to_a.last.downcase
     raise "#{ext} extension not recognised. We only support #{SUPPORTED_FORMATS.join(", ")}" unless SUPPORTED_FORMATS.include?(ext)
+    
+    # if there is no input file do not attempt to resize_image as it will currently segfault
+    unless File.exists?(filename_in)
+      raise Errno::ENOENT, "No such file or directory - #{filename_in}"
+    end
     resize_image(filename_in, filename_out, size[0], size[1], SUPPORTED_FORMATS.index(ext), options[:jpeg_quality])
   end
 
@@ -31,6 +36,11 @@ class GDResize
 
         /* Load original file */
         in = fopen(filename_in, "rb");
+        
+        if(NULL == in){
+          rb_raise(rb_eIOError, "No such file: %s", filename_in);
+          return;
+        }
 
         /* Support diff image types: jpg jpeg png gif */
         switch(image_type) {

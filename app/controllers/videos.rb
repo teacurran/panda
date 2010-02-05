@@ -119,20 +119,22 @@ private
     end
   end
   
+  # TODO: figure how to #finish_processing_and_queue_encodings using #render_then_call while still capturing Video::ClippingErrors which occur during processing
   def receive_upload_for(video)
     begin
       video.initial_processing(params[:file])
+      video.finish_processing_and_queue_encodings
     rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
       render_iframe_error(404)
     rescue Video::FormatNotRecognised
       render_iframe_error(415)
+    rescue Video::ClippingError
+      render_iframe_error(422)
     rescue => e # Other error
       render_iframe_error(500)
     else
       redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key).gsub(/:panda_filename/, video.original_filename) : video.upload_redirect_url
-      render_then_call(iframe_params(:location => redirect_url)) do
-        video.finish_processing_and_queue_encodings
-      end
+      render iframe_params(:location => redirect_url)
     end
   end
   

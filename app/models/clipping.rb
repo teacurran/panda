@@ -1,7 +1,6 @@
 # Clipping for a given encoding or parent video.
 # 
 class Clipping
-  
   include LocalStore
   
   def initialize(video, position = nil)
@@ -36,9 +35,10 @@ class Clipping
   
   def capture
     raise RuntimeError, "Video must exist to call capture" unless File.exists?(@video.tmp_filepath)
-        
     t = RVideo::Inspector.new(:file => @video.tmp_filepath)
     t.capture_frame("#{position}%", tmp_path(:screenshot))
+  rescue RVideo::TranscoderError => ex
+    raise ::Video::ClippingError, ex.message
   end
   
   def resize
