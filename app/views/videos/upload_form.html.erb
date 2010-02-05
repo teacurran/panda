@@ -32,8 +32,7 @@ $(document).ready(function() {
     <% if params[:cancel_url] %>
     <a class="cancel" href="<%= params[:cancel_url] %>?<%= request.full_uri + '?' + request.query_string %>">cancel upload</a>
     <% end %>
-    <div class="filename"></div>
-    <div id="eta"></div>
+    <div class="status"></div>
   </div>
 </div>
 

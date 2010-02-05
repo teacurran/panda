@@ -1,6 +1,10 @@
+var report_error = function(code, message){
+  location.href = error_redirect_url.replace(":error_code", code).replace(":error_message", message);
+};
+
 jQuery.nginxUploadProgress = function(settings) {
   settings = jQuery.extend({
-    interval: 2000,
+    interval: 1800,
     progress_bar_id: "progressbar",
     nginx_progress_url: "/progress"
   }, settings);
@@ -11,25 +15,13 @@ jQuery.nginxUploadProgress = function(settings) {
       $('#uploading').show();
       if(uploading_iframe_url) $('#uploading_notifier_iframe')[0].src = uploading_iframe_url + '?' + Math.floor(Math.random()*11);
       
-      this.timer = setInterval(function() { jQuery.nginxUploadProgressFetch(this, settings['nginx_progress_url'], settings['progress_bar_id'], settings['uuid']); }, settings['interval']);
+      this.timer = setInterval(function() { jQuery.nginxUploadProgressFetch(this, settings['nginx_progress_url'], settings['progress_bar_id'], settings['uuid']); }, settings['interval']/3);
       return true; 
     },
     complete: function(xhr, statusText)  {
       data = $.httpData(xhr, "json");
-      if (data.location) { // # TODO check http status!
-        location.href = data.location;
-      } else {
-        $('#uploading').hide();
-        if (data.error == "NotValid") {
-          $('#error').html("This video upload was not valid. Please try beginning the upload process again.");
-        } else if (data.error == "FormatNotRecognised") {
-          $('#uploader').show();
-          $('#error').html('The video format was not recognised. Please ensure that your video follows the <a href="http://pandastream.com/docs/upload_format_guidelines" target="_blank">upload format guidelines</a>.');
-        } else {
-          $('#uploader').show();
-          $('#error').html('Unfortunately there was an error uploading your video. We have been notified of this issue. Please try uploading your video again shortly.');
-        }
-      }
+      if(data.location) location.href = data.location;
+      else if(console && console.error) console.error(data);
     },
     dataType: 'json'        // 'xml', 'script', or 'json' (expected server response type)
   };
@@ -39,10 +31,23 @@ jQuery.nginxUploadProgress = function(settings) {
 };
 
 jQuery.nginxUploadProgress.inum = 0;
+jQuery.nginxUploadProgress.last_chunk = 6;
+jQuery.nginxUploadProgress.last_percent = 0;
 
 jQuery.nginxUploadProgressFetch = function(e, nginx_progress_url, progress_bar_id, uuid) {
+  var bar = $('#'+progress_bar_id);
+
   // window.console.log("fetcing progress for "+uuid)
   jQuery.nginxUploadProgress.inum++;
+  if(jQuery.nginxUploadProgress.inum % 3 == 1){
+    var bump = jQuery.nginxUploadProgress.last_chunk / 3;
+    bump = jQuery.nginxUploadProgress.last_percent + bump;
+    if(jQuery.nginxUploadProgress.last_percent == 100) bump = 100;
+    else if(bump > 100) bump = 99;
+    bar.width('' + bump + '%');
+    return;
+  }
+  if(jQuery.nginxUploadProgress.inum % 3 == 0) return;
 
   $.ajax({
     type: "GET",
@@ -58,45 +63,32 @@ jQuery.nginxUploadProgressFetch = function(e, nginx_progress_url, progress_bar_i
     success: function(upload) {
       /* change the width if the inner progress-bar */
       if (upload.state == 'uploading') {
-        bar = $('#'+progress_bar_id);
-        w = Math.floor((upload.received / upload.size)*100);
+        var w = Math.floor((upload.received / upload.size)*100);
+        jQuery.nginxUploadProgress.last_chunk = w - jQuery.nginxUploadProgress.last_percent;
+        jQuery.nginxUploadProgress.last_percent = w;
         bar.width(w + '%');
 
         // Panda specific
         bar.show();
 
         // Update ETA
-        eta_seconds = ((upload.size / upload.received) * jQuery.nginxUploadProgress.inum) - jQuery.nginxUploadProgress.inum;
+        eta_seconds = ((upload.size / upload.received) * (jQuery.nginxUploadProgress.inum/3)) - (jQuery.nginxUploadProgress.inum/3);
 
         if (eta_seconds < 60) {
-          eta_str = "under a minute";
-        } else if (eta_seconds < (60*5)) {
-          eta_str = "a few minutes";
-        } else if (eta_seconds < (60*15)) {
-          eta_str = "fifteen minutes";
-        } else if (eta_seconds < (60*30)) {
-          eta_str = "about half an hour";
-        } else if (eta_seconds < (60*45)) {
-          eta_str = "around 45 minutes";
-        } else if (eta_seconds < (60*60)) {
-          eta_str = "less than an hour";
-        } else if (eta_seconds > (60*60)) {
-          eta_str = "over an hour";
-        } else if (eta_seconds > (60*60*2)) {
-          eta_str = "a few hours";
-        } else if (eta_seconds > (60*60*3)) {
-          eta_str = "several hours";
-        } else if (eta_seconds > (60*60*6)) {
-          eta_str = "quite a long time... at least 6 hours";
+          eta_str = '' + Math.ceil(eta_seconds) + 's';
+        } else if (eta_seconds < 60*60) {
+          eta_str = '' + Math.ceil(eta_seconds/60) + 'm';
+        } else {
+          eta_str = '' + Math.ceil(eta_seconds/(60*60)) + ' hours';
         }
 
-        $("#eta").html(eta_str);
+        if(w === 100) $('div.status').text("Processing file...");
+        else $('#uploading div.status').html("<div class='eta'>"+eta_str+"</div><div class='filename'>Uploading "+$('#file_upload').val()+"...</div>");
       } else if (upload.state == 'error') { 
-        $('#uploading').hide();
         if (upload.status == 413) {
-          $('#error').html("Sorry, that video file is too large. Could you resave it as a smaller one (under 60MB) please?");
+          report_error('413', "Sorry, that video file is too big. Please try to reduce its size (by exporting or converting it) and try again.");
         } else {
-          $('#error').html('Unfortunately there was an error uploading your video. We have been notified of this issue. Please try uploading your video again shortly.');
+          report_error('500', 'There was an error uploading your video. Please try again in a couple of minutes.');
         }
       }
     }

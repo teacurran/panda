@@ -101,24 +101,6 @@ class Videos < Application
   
 private
 
-  def render_error(msg, exception = nil)
-    Merb.logger.error "#{params[:id]}: (error returned to client) #{msg}" + (exception ? "#{exception}\n#{exception.backtrace.join("\n")}" : '')
-
-    case content_type
-    when :html
-      if params[:iframe] == "true"
-        iframe_params(:error => msg)
-      else
-        @exception = msg
-        render(:template => "exceptions/video_exception", :layout => false) # TODO: Why is :action setting 404 instead of 500?!?!
-      end
-    when :xml
-      {:error => msg}.to_simple_xml
-    when :yaml
-      {:error => msg}.to_yaml
-    end
-  end
-  
   # TODO: figure how to #finish_processing_and_queue_encodings using #render_then_call while still capturing Video::ClippingErrors which occur during processing
   def receive_upload_for(video)
     begin
@@ -147,7 +129,6 @@ private
     begin
       @video = Video.find(params[:id])
     rescue Amazon::SDB::RecordNotFoundError
-      # throw :halt, render_error($!.to_s.gsub(/Amazon::SDB::/,""))
       throw :halt, render_iframe_error(404)
     end
   end

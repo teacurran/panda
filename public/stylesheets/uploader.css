@@ -3,19 +3,22 @@ input { font-size: 11px; }
 
 #pandaloader #uploading {
   position: relative;
+  width:100%;
 }
 
-#pandaloader #uploading .filename {
+#pandaloader #uploading .status {
   position: absolute;
   top: 2px;
   left: 4px;
+  width:380px;
 }
 
 #pandaloader #uploading .cancel {
   float: left;
+  margin-left:.6em;
 }
 
-#pandaloader #uploading .filename,
+#pandaloader #uploading .status,
 #pandaloader #uploading .cancel,
 #pandaloader #uploader .cancel {
   color: #222;
@@ -33,12 +36,19 @@ input { font-size: 11px; }
 }
 
 #progress {
-  background: url("/images/bar_bg.gif") top left no-repeat;
+  background: url("/images/bar-bg.gif") top left repeat-x;
+  width:380px;
+}
+#uploading .status .filename {
+  float:left;
+}
+#uploading .status .eta {
+  float:right;
+  margin-right:.6em;
 }
 
 #progress.bar {
   float: left;
-  width: 64%;
   height: 18px;
 }
 
