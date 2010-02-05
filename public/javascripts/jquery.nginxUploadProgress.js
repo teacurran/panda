@@ -9,7 +9,10 @@ jQuery.nginxUploadProgress = function(settings) {
     beforeSubmit: function(formData, jqForm, options) {
       $('#uploader').hide();
       $('#uploading').show();
+      console.log("Uploading... ");
+      if(uploading_iframe_url) console.log(uploading_iframe_url);
       if(uploading_iframe_url) $('#uploading_notifier_iframe')[0].src = uploading_iframe_url;
+      
       this.timer = setInterval(function() { jQuery.nginxUploadProgressFetch(this, settings['nginx_progress_url'], settings['progress_bar_id'], settings['uuid']); }, settings['interval']);
       return true; 
     },
