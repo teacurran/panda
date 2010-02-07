@@ -58,7 +58,7 @@ class Videos < Application
     
     case content_type
     when :html
-      redirect url(:upload_form_video, @video.key)
+      redirect "/videos/upload_form"
     when :xml
       headers.merge!({'Location'=> "/videos/#{@video.key}"})
       @video.create_response.to_simple_xml
