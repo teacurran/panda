@@ -1,6 +1,6 @@
 <% throw_content(:head) do %>
 <script type="text/javascript" charset="utf-8">
-var error_redirect_url = "<%= params[:error_redirect_url] %>";
+var error_url = "<%= params[:error_url] %>";
 var upload_progress_uuid = "<%= @progress_id %>";
 var uploading_iframe_url = null;
 <% if params[:uploading_iframe_url] %>

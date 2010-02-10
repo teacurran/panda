@@ -1,5 +1,6 @@
 var report_error = function(code, message){
-  location.href = error_redirect_url.replace(":error_code", code).replace(":error_message", message);
+  // Redirect to the error_url with error_code and error_message appended.
+  location.href = error_url + (error_url.match(/\?/) ? '&' : '?') + 'error_code=' + code + '&error_message=' + message;
 };
 
 jQuery.nginxUploadProgress = function(settings) {

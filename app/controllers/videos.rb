@@ -70,8 +70,12 @@ class Videos < Application
   
   # Use: HQ, API, iframe upload
   def upload_form
-    @progress_id = String.random(24)
-    render :layout => :uploader
+    if params[:success_url] && params[:error_url]
+      @progress_id = String.random(24)
+      render :layout => :uploader
+    else
+      raise BadRequest, "You must include success_url and error_url in your query!"
+    end
   end
   
   # POST /videos/:id/upload
@@ -88,7 +92,7 @@ class Videos < Application
     receive_upload_for(@video)
   end
   
-  # Default upload_redirect_url (set in panda_init.rb) goes here.
+  # Default success_url (set in panda_init.rb) goes here.
   def done
     render :layout => :uploader
   end
@@ -113,10 +117,10 @@ private
     rescue Video::ClippingError
       render_iframe_error(422)
     rescue => e # Other error
+      # Should log this error.
       render_iframe_error(500)
     else
-      redirect_url = params[:upload_redirect_url] != '' ? params[:upload_redirect_url].gsub(/:panda_id/, video.key).gsub(/:panda_filename/, video.original_filename) : video.upload_redirect_url
-      render iframe_params(:location => redirect_url)
+      render iframe_params(:location => url_with_params(params[:success_url], {:video_file_id => video.key, :video_filename => video.original_filename}))
     end
   end
   
@@ -135,7 +139,15 @@ private
   
   def render_iframe_error(code)
     self.status = code
-    iframe_params(:location => params[:error_redirect_url].gsub(/:error_code/,code.to_s).gsub(/:error_message/, ERROR_MESSAGES[code]))
+    render iframe_params(:location => url_with_params(params[:error_url], {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]}))
+  end
+  
+  def url_with_params(url, params)
+    params.each do |key,value|
+      url << (url =~ /\?/ ? '&' : '?')
+      url << CGI.escape(key.to_s) << '=' << CGI.escape(value)
+    end
+    url
   end
   
   # Textarea hack to get around the fact that the form is submitted with a 

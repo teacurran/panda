@@ -115,10 +115,6 @@ class Video < SimpleDB::Base
     self.status == 'empty'
   end
   
-  def upload_redirect_url
-    Panda::Config[:upload_redirect_url].gsub(/\:panda_id/,self.key)
-  end
-  
   def state_update_url
     Panda::Config[:state_update_url].gsub(/\:panda_id/,self.key)
   end

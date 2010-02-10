@@ -129,7 +129,6 @@ namespace :dev do
 
   task :panda_config_wizard do
     $api_key = get_input("Please enter an API key for this Panda installation. (Record it somewhere to use in your API implementation)")
-    $upload_redirect_url = get_input("Enter the URL Panda should redirect [the user iframe] to after an upload is finished (use :panda_id for the video id)")
     # private tmp path is okay, but it needs to exist and be writable
     system("sudo mkdir -p /var/tmp/videos; sudo chmod 777 /var/tmp/videos")
     $using_s3 = get_input("Will you be using [S]3 or [F]ilesystem? (S/F)")
@@ -145,7 +144,6 @@ namespace :dev do
     puts "Configuring Panda..."
     panda_config = File.read('config/panda_init.rb.example')
     panda_config.gsub!(/SECRET_KEY_FOR_PANDA_API/, $api_key)
-    panda_config.gsub!(/UPLOAD_REDIRECT_URL/, $upload_redirect_url)
     panda_config.gsub!(/'USE_S3'/, (($using_s3 == 'S' ? 'true' : 'false')))
     panda_config.gsub!(/S3_BUCKET/, $s3_bucket) if $s3_bucket
     panda_config.gsub!(/VIDEOS_DOMAIN/, $videos_domain)

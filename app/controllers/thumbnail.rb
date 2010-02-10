@@ -22,7 +22,7 @@ class Thumbnail < Application
     @video.save
     @video.add_to_queue
     
-    redirect @video.upload_redirect_url
+    redirect @video.success_url
   end
   
   def edit

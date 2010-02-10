@@ -55,7 +55,6 @@ module Panda
       
       def check
         check_present(:api_key, "Please specify a secret api_key")
-        check_present(:upload_redirect_url)
         check_present(:state_update_url)
         
         %w{sdb_videos_domain sdb_users_domain sdb_profiles_domain}.each do |d|
