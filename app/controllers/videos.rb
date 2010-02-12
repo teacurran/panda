@@ -139,7 +139,7 @@ private
   
   def render_iframe_error(code)
     self.status = code
-    render iframe_params(:location => url_with_params(params[:error_url], {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]}))
+    render iframe_params(:location => url_with_params(params[:error_url], {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]})), :layout => false
   end
   
   def url_with_params(url, params)
