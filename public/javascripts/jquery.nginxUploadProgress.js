@@ -86,6 +86,10 @@ jQuery.nginxUploadProgressFetch = function(e, nginx_progress_url, progress_bar_i
         if(w === 100) $('div.status').text("Uploaded. Processing file...");
         else $('#uploading div.status').html("<div class='eta'>"+eta_str+"</div><div class='filename'>Uploading "+$('#file_upload').val()+"...</div>");
       } else if (upload.state == 'error') { 
+        
+        if(typeof console != "undefined" && console.log) 
+          console.log(upload);
+
         if (upload.status == 413) {
           report_error('413', "Sorry, that video file is too big. Please try to reduce its size (by exporting or converting it) and try again.");
         } else {
