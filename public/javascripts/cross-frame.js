@@ -20,7 +20,7 @@
 YAHOO.util.CrossFrame = (function () {
 
     var r1 = /^(((top|parent|frames\[((['"][a-zA-Z\d-_]*['"])|\d+)\]))(\.|$))+/;
-    var r2 = /top|parent|frames\[(?:(?:['"][a-zA-Z]*['"])|\d+)\]/;
+    var r2 = /top|parent|frames\[(?:(?:['"][a-zA-Z\d-_]*['"])|\d+)\]/;
 
     function parseQueryString(s) {
 
@@ -38,13 +38,13 @@ YAHOO.util.CrossFrame = (function () {
         return r;
     }
 
-    if (YAHOO.env.ua.opera) {
-
+    if (window.postMessage || document.postMessage) {
         // Opera does not allow reading any property (including parent, frames)
         // if the domain of the caller and the domain of the target window do
         // not match. We work around this by chaining calls, and using Opera's
         // postMessage function...
-        document.addEventListener("message", function (evt) {
+        window.addEventListener("message", function (evt) {
+          console.log("cross frame received mesage");
             var o = parseQueryString(evt.data);
             if (YAHOO.lang.hasOwnProperty(o, "target") &&
                     YAHOO.lang.hasOwnProperty(o, "message") &&
@@ -80,7 +80,6 @@ YAHOO.util.CrossFrame = (function () {
          * @param {string} message The message to send.
          */
         send: function (proxy, target, message) {
-
             var m, t, d, u, s, el;
 
             // Match things like parent.frames["aaa"].top.frames[0].frames['bbb']
@@ -88,8 +87,8 @@ YAHOO.util.CrossFrame = (function () {
                 throw new Error("Invalid target: " + target);
             }
 
-            if (YAHOO.env.ua.opera) {
-
+            if (window.postMessage || document.postMessage) {
+              console.log("send via postMessage: " + target);
                 // Opera is the only A-grade browser that does not allow
                 // reading properties like parent.frames when this document and
                 // its parent are on separate domains. The solution is to use
@@ -98,10 +97,10 @@ YAHOO.util.CrossFrame = (function () {
 
                 m = r2.exec(target);
                 // safe to eval...
-                t = eval(m[0]).document;
-
+                t = eval(m[0]);
+                
                 // Remove one element from the target chain.
-                target = target.substr(m[0].length + 1);
+                //target = target.substr(m[0].length + 1);
 
                 // Compose the message...
                 d = arguments.length > 3 ? arguments[3] : document.domain;
@@ -112,9 +111,12 @@ YAHOO.util.CrossFrame = (function () {
                     "&uri=" + escape(u);
 
                 // ...and send it!
-                t.postMessage(s);
+                // t.postMessage(s, target.replace( /([^:]+:\/\/[^\/]+).*/, '$1' ));
+                console.log(t);
+                t.postMessage(s, '*');
 
             } else {
+              console.log("send via iframe");
                 // Create a new hidden iframe.
                 el = document.createElement("iframe");
                 el.style.position = "absolute";
@@ -137,7 +139,7 @@ YAHOO.util.CrossFrame = (function () {
                 s = "target=" + escape(target) +
                     "&message=" + escape(message) +
                     "&domain=" + escape(document.domain) +
-                    "&uri=" + escape(location.href);
+                    "&uri=" + escape(location.href.split('?')[0]);
 
                 // Set its src first...
                 el.src = proxy + "#" + s;

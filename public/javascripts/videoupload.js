@@ -147,7 +147,7 @@ Remix.Video.trackUploadProgress = function(settings){
 
   var timer = setInterval(function() { 
     jQuery.ajax({
-      url: "http://video.remix.local/progress",
+      url: "http://video.staging.iremix.org/progress",
       dataType: "jsonp",
       beforeSend: function(xhr) {
         xhr.setRequestHeader("X-Progress-ID", progress_id);
