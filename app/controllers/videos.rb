@@ -92,25 +92,25 @@ class Videos < Application
     receive_upload_for(@video)
   end
   
-  require 'ruby-debug'
   def upload_via_api
     begin
+      @results = {}
       @state = "error"
-      video = Video.create_empty
-      video.initial_processing(params[:file])
-      video.finish_processing_and_queue_encodings
+      @video = Video.create_empty
+      @video.initial_processing(params[:file])
+      @video.finish_processing_and_queue_encodings
     rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
-      @errors = error_hash(404)
+      @results.merge! error_hash(404)
     rescue Video::FormatNotRecognised
-      @errors = error_hash(415)
+      @results.merge! error_hash(415)
     rescue Video::ClippingError
-      @errors = error_hash(422)
+      @results.merge! error_hash(422)
     rescue => e # Other error
       # TODO: Should log this error.
-      @errors = error_hash(500)
+      @results.merge! error_hash(500)
     else
       @state = "success"
-      @errors = {}
+      @results.merge! :video_file_id => @video.key
     end
     render :action => "upload_via_api", :layout => false
   end
