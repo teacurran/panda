@@ -1,16 +1,20 @@
-YAHOO.util.CrossFrame.onMessageEvent.subscribe(function (type, args, obj) {
-  var message = args[0];
-  var domain = args[1];
-  var json = JSON.parse(message);
-  
-  if(typeof json.callback == "string"){
-    if(typeof json.arguments == "string"){
-      eval(json.callback + '(' + json.arguments + ')');
-    }else{
-      eval(json.callback + '()');
+$(document).ready(function(){
+  jQuery.receiveMessage(function(message){
+    var json = JSON.parse(message.data);
+    if(typeof json.callback == "string"){
+      if(typeof json.arguments == "string"){
+        var args = JSON.parse(json.arguments);
+
+        if(/^[A-z0-9_.]+$/.test(json.callback)){
+          eval(json.callback)(args);
+        } else {
+          throw new Error("Invalid callback: " + callback);
+        }
+      }else{
+        eval(json.callback + '()');
+      }
     }
-  }
-  
+  });
 });
 
 if(!Remix) var Remix = {};
@@ -35,10 +39,12 @@ Remix.Video.upload = function(settings){
   
   // Setup form action
   var form = $(settings.form);
-  var action = $(form).attr("action");
+  var action = form.attr("action");
   var progress_id = Remix.Video.randomUUID();
   jQuery(form).attr("action", action.split(/\?/)[0] + "?X-Progress-ID=" + progress_id);
-  
+  form.children("input[name=destination]").val(settings["respondToDestination"]);
+  form.children("input[name=target]").val(settings["respondToTarget"]);
+
   // Setup cross-frame callback method and arguments
   var callback = "Remix.Video.trackUploadProgress";
   var arguments = JSON.stringify({
@@ -46,47 +52,45 @@ Remix.Video.upload = function(settings){
     respondToDestination: settings['respondToDestination'],
     respondToTarget: settings['respondToTarget']
   });
-  
-  // Communicate across frames
-  YAHOO.util.CrossFrame.send(
-    settings.destination, 
-    settings.target, 
-    JSON.stringify({callback: callback, arguments: arguments})
+
+  jQuery.postMessage(
+    JSON.stringify({callback: callback, arguments: arguments}), 
+    settings["destination"], 
+    settings["target"]
   );
-  
+
   return true;
 };
 
 Remix.Video.start = function(callback){
   if(typeof callback == "function"){
-    this._startingCallback = callback;
-  } else if(this._startingCallback) {
-    this._startingCallback(arguments);
+    Remix.Video._startingCallback = callback;
+  } else if(Remix.Video._startingCallback) {
+    Remix.Video._startingCallback(arguments);
   }
 };
 
 Remix.Video.progress = function(callback){
   if(typeof callback == "function"){
-    this._progressCallback = callback;
-  } else if(this._progressCallback) {
-    this._progressCallback(arguments);
+    Remix.Video._progressCallback = callback;
+  } else if(Remix.Video._progressCallback) {
+    Remix.Video._progressCallback(arguments);
   }
 };
 
 Remix.Video.error = function(callback){
   if(typeof callback == "function"){
-    this._errorCallback = callback;
-  } else if(this._errorCallback) {
-    this._errorCallback(arguments);
+    Remix.Video._errorCallback = callback;
+  } else if(Remix.Video._errorCallback) {
+    Remix.Video._errorCallback(arguments);
   }
 };
 
-
 Remix.Video.success = function(callback){
   if(typeof callback == "function"){
-    this._successCallback = callback;
-  } else if(this._successCallback) {
-    this._successCallback(arguments);
+    Remix.Video._successCallback = callback;
+  } else if(Remix.Video._successCallback) {
+    Remix.Video._successCallback(arguments);
   }
 };
 
@@ -132,10 +136,10 @@ Remix.Video.trackUploadProgress = function(settings){
   var started = false;
   
   var sendMsg = function(callback, args){
-    YAHOO.util.CrossFrame.send(
+    jQuery.postMessage(
+      JSON.stringify({callback: callback, arguments: JSON.stringify(args) }),
       respondToDestination,
-      respondToTarget,
-      JSON.stringify({callback: callback, arguments: JSON.stringify(args) })
+      respondToTarget
     );
   };
   
@@ -153,7 +157,7 @@ Remix.Video.trackUploadProgress = function(settings){
         sendMsg("Remix.Video.error", data);
       },
       complete: function(xhr, statusText) {
-        // no-op, handled by success
+        // no-op
       },
       success: function(data) {
         if(data.state == "starting" && !started) {
@@ -162,11 +166,12 @@ Remix.Video.trackUploadProgress = function(settings){
           sendMsg("Remix.Video.start", data);
         } else if(data.state == "done"){
           clearInterval(timer);
-          sendMsg("Remix.Video.success", data);
+          // no-op, the success message will be fired when 
+          // the video has initialized with the app.
         } else if(data.state == "error"){
           clearInterval(timer);
           sendMsg("Remix.Video.error", data);
-        } else {
+        } else if(data.state == "uploading"){
           if(!started){
             started = true;
             sendMsg("Remix.Video.start", data);

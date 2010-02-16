@@ -92,23 +92,26 @@ class Videos < Application
     receive_upload_for(@video)
   end
   
+  require 'ruby-debug'
   def upload_via_api
-    @video = Video.create_empty
-    # begin
-    #   video.initial_processing(params[:file])
-    #   video.finish_processing_and_queue_encodings
-    # rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
-    #   render_iframe_error(404)
-    # rescue Video::FormatNotRecognised
-    #   render_iframe_error(415)
-    # rescue Video::ClippingError
-    #   render_iframe_error(422)
-    # rescue => e # Other error
-    #   # TODO: Should log this error.
-    #   render_iframe_error(500)
-    # else
-    #   render iframe_params(:location => url_with_params(params[:success_url], {:video_file_id => video.key, :video_filename => video.original_filename}))
-    # end
+    begin
+      @state = "error"
+      video = Video.create_empty
+      video.initial_processing(params[:file])
+      video.finish_processing_and_queue_encodings
+    rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
+      @errors = error_hash(404)
+    rescue Video::FormatNotRecognised
+      @errors = error_hash(415)
+    rescue Video::ClippingError
+      @errors = error_hash(422)
+    rescue => e # Other error
+      # TODO: Should log this error.
+      @errors = error_hash(500)
+    else
+      @state = "success"
+      @errors = {}
+    end
     render :action => "upload_via_api", :layout => false
   end
   
@@ -156,10 +159,14 @@ private
       throw :halt, render_iframe_error(404)
     end
   end
+
+  def error_hash(code)
+    {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]}
+  end
   
   def render_iframe_error(code)
     self.status = code
-    render iframe_params(:location => url_with_params(params[:error_url], {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]})), :layout => false
+    render iframe_params(:location => url_with_params(params[:error_url], error_hash(code))), :layout => false
   end
   
   def url_with_params(url, params)
