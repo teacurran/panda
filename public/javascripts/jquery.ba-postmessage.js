@@ -116,10 +116,8 @@
     
     // Default to parent if unspecified.
     target = target || parent;
-    console.log("--- in post message ---");
-    console.log(target);
     
-    if ( false && has_postMessage ) {
+    if ( has_postMessage ) {
       // The browser supports window.postMessage, so call it with a targetOrigin
       // set appropriately, based on the target_url parameter.
       target[postMessage]( message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1' ) );
@@ -181,7 +179,7 @@
   //  Nothing!
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
-    if ( false && has_postMessage ) {
+    if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.
       

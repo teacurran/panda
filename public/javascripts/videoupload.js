@@ -25,7 +25,7 @@ if(!Remix.Video){
 Remix.Video.upload = function(settings){
   settings = jQuery.extend({
     form: "<form object> - required",
-    destination: "http://video.remix.local/proxy.html",
+    destination: "http://video.staging.iremix.org/proxy.html",
     target: "frames['rw_progress']",
     respondToDestination: "http://yourapp.com/proxy.html",
     respondToTarget: "top"
@@ -134,7 +134,7 @@ Remix.Video.trackUploadProgress = function(settings){
   var respondToDestination = settings['respondToDestination'];
   var respondToTarget = settings['respondToTarget'];
   var started = false;
-  
+
   var sendMsg = function(callback, args){
     jQuery.postMessage(
       JSON.stringify({callback: callback, arguments: JSON.stringify(args) }),
