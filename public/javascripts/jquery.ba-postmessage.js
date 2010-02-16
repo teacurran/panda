@@ -100,34 +100,60 @@
 
     var r1 = /^(((top|parent|frames\[((['"][a-zA-Z\d-_]*['"])|\d+)\]))(\.|$))+/;
 
-    if(typeof target == "string"){ 
-      // Match things like parent.frames["aaa"].top.frames[0].frames['bbb']
-      if(r1.test(target)){
-        target = eval("window." + target);
-      } else {
-        throw new Error("Invalid target: " + target);
-      }
-    }
-
     // Serialize the message if not a string. Note that this is the only real
     // jQuery dependency for this script. If removed, this script could be
     // written as very basic JavaScript.
     message = typeof message === 'string' ? message : $.param( message );
     
-    // Default to parent if unspecified.
-    target = target || parent;
-    
     if ( has_postMessage ) {
+      if(typeof target == "string"){ 
+        // Match things like parent.frames["aaa"].top.frames[0].frames['bbb']
+        if(r1.test(target)){
+          // Safe to eval...
+          target = eval("window." + target);
+        } else {
+          throw new Error("Invalid target: " + target);
+        }
+      }
+
+      // Default to parent if unspecified.
+      target = target || parent;
+
       // The browser supports window.postMessage, so call it with a targetOrigin
       // set appropriately, based on the target_url parameter.
       target[postMessage]( message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1' ) );
       
     } else if ( target_url ) {
-      // The browser does not support window.postMessage, so set the location
-      // of the target to target_url#message. A bit ugly, but it works! A cache
-      // bust parameter is added to ensure that repeat messages trigger the
-      // callback.
-    //  target.location = target_url.replace( /#.*$/, '' ) + '#' + (+new Date) + (cache_bust++) + '&' + message;
+      // The browser does not support window.postMessage
+      if(typeof target != "string" || !r1.test(target)){ 
+        throw new Error("Invalid target: " + target);
+      }
+
+      var proxy = target_url;
+      var el = document.createElement("iframe");
+      el.style.position = "absolute";
+      el.style.visibility = "hidden";
+      el.style.top = el.style.left = "0";
+      el.style.width = el.style.height = "0";
+
+      // Listen for the onload event.
+      $(el).load(function(){
+        $(el).unbind("load");
+        setTimeout(function() { document.body.removeChild(el); });
+      });
+
+      // Compose the message...
+      var s = "target=" + escape(target) +
+          "&message=" + escape(message) +
+          "&domain=" + escape(document.domain) +
+          "&uri=" + escape(location.href.split('?')[0]) +
+          "&_=" + escape(+new Date);
+
+      // Set its src first...
+      el.src = proxy + "#" + s;
+
+      // ...and then append it to the body of the document.
+      document.body.appendChild(el);
     }
   };
   
@@ -205,28 +231,14 @@
       }
       
     } else {
-      // Since the browser sucks, a polling loop will be started, and the
-      // callback will be called whenever the location.hash changes.
-      
-      interval_id && clearInterval( interval_id );
-      interval_id = null;
-      
-      if ( callback ) {
-        delay = typeof source_origin === 'number'
-          ? source_origin
-          : typeof delay === 'number'
-            ? delay
-            : 100;
-        
-        interval_id = setInterval(function(){
-          var hash = document.location.hash,
-            re = /^#?\d+&/;
-          if ( hash !== last_hash && re.test( hash ) ) {
-            last_hash = hash;
-            callback({ data: hash.replace( re, '' ) });
-          }
-        }, delay );
-      }
+      // The browser doesn't support postMessage so mimic it with jQuery.
+      $(window).bind("onmessage", function(event, message){
+        // Wrap the callback in an anonymous function since jQuery#trigger forces
+        // the first parameter to a callback to be the event, which we don't want
+        // since jQuery doesn't know at the time we bound the event what data we
+        // wanted passed with the event. 
+        callback(message);
+      });
     }
   };
   

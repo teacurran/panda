@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  jQuery.receiveMessage(function(message){
+  jQuery.receiveMessage(function(message, e){
     var json = JSON.parse(message.data);
     if(typeof json.callback == "string"){
       if(typeof json.arguments == "string"){
@@ -24,11 +24,11 @@ if(!Remix.Video){
 
 Remix.Video.upload = function(settings){
   settings = jQuery.extend({
-    form: "<form object> - required",
-    destination: "http://video.staging.iremix.org/proxy.html",
-    target: "frames['rw_progress']",
-    respondToDestination: "http://yourapp.com/proxy.html",
-    respondToTarget: "top"
+    form: null, // must be supplied by caller
+    destination: null, // must be supplied by caller
+    target: "frames['rw_progress']", //d default
+    respondToDestination: "http://yourapp.com/proxy.html", // must be supplied by caller
+    respondToTarget: "top" // default
   }, settings);
   
   // Define callbacks
@@ -45,10 +45,14 @@ Remix.Video.upload = function(settings){
   form.children("input[name=destination]").val(settings["respondToDestination"]);
   form.children("input[name=target]").val(settings["respondToTarget"]);
 
+  // Build progress_url based-off from destination
+  var progress_url = settings["destination"].replace(/\/[^\/]+$/, '/progress');
+
   // Setup cross-frame callback method and arguments
   var callback = "Remix.Video.trackUploadProgress";
   var arguments = JSON.stringify({
     progress_id: progress_id, 
+    progress_url: progress_url,
     respondToDestination: settings['respondToDestination'],
     respondToTarget: settings['respondToTarget']
   });
@@ -130,6 +134,7 @@ Remix.Video.randomUUID = function(){
 };
 
 Remix.Video.trackUploadProgress = function(settings){
+  var progress_url = settings['progress_url'];
   var progress_id = settings['progress_id'];
   var respondToDestination = settings['respondToDestination'];
   var respondToTarget = settings['respondToTarget'];
@@ -147,7 +152,7 @@ Remix.Video.trackUploadProgress = function(settings){
 
   var timer = setInterval(function() { 
     jQuery.ajax({
-      url: "http://video.staging.iremix.org/progress",
+      url: progress_url,
       dataType: "jsonp",
       beforeSend: function(xhr) {
         xhr.setRequestHeader("X-Progress-ID", progress_id);
