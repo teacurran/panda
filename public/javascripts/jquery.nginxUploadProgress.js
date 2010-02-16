@@ -53,7 +53,7 @@ jQuery.nginxUploadProgressFetch = function(e, nginx_progress_url, progress_bar_i
   $.ajax({
     type: "GET",
     url: nginx_progress_url,
-    dataType: "json",
+    dataType: "jsonp",
     beforeSend: function(xhr) {
       xhr.setRequestHeader("X-Progress-ID", uuid);
       // window.console.log("setting headers: "+uuid)

@@ -92,6 +92,26 @@ class Videos < Application
     receive_upload_for(@video)
   end
   
+  def upload_via_api
+    @video = Video.create_empty
+    # begin
+    #   video.initial_processing(params[:file])
+    #   video.finish_processing_and_queue_encodings
+    # rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
+    #   render_iframe_error(404)
+    # rescue Video::FormatNotRecognised
+    #   render_iframe_error(415)
+    # rescue Video::ClippingError
+    #   render_iframe_error(422)
+    # rescue => e # Other error
+    #   # TODO: Should log this error.
+    #   render_iframe_error(500)
+    # else
+    #   render iframe_params(:location => url_with_params(params[:success_url], {:video_file_id => video.key, :video_filename => video.original_filename}))
+    # end
+    render :action => "upload_via_api", :layout => false
+  end
+  
   # Default success_url (set in panda_init.rb) goes here.
   def done
     render :layout => :uploader
@@ -117,7 +137,7 @@ private
     rescue Video::ClippingError
       render_iframe_error(422)
     rescue => e # Other error
-      # Should log this error.
+      # TODO: Should log this error.
       render_iframe_error(500)
     else
       render iframe_params(:location => url_with_params(params[:success_url], {:video_file_id => video.key, :video_filename => video.original_filename}))
@@ -143,6 +163,7 @@ private
   end
   
   def url_with_params(url, params)
+    return if url.blank?
     params.each do |key,value|
       url << (url =~ /\?/ ? '&' : '?')
       url << CGI.escape(key.to_s) << '=' << CGI.escape(value)
