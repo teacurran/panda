@@ -161,7 +161,7 @@ private
   end
 
   def error_hash(code)
-    {:error_code => code.to_s, :error_message => ERROR_MESSAGES[code]}
+    {:status => code.to_s, :message => ERROR_MESSAGES[code]}
   end
   
   def render_iframe_error(code)
