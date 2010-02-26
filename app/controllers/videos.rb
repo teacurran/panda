@@ -133,7 +133,7 @@ private
     begin
       video.initial_processing(params[:file])
       video.finish_processing_and_queue_encodings
-      response_data = {:video_file_id => video.key, :video_filename => video.original_filename}
+      response_data = {:status => '200', :video_file_id => video.key, :video_filename => video.original_filename}
       if params[:return_to]
         redirect_to return_to_with_params(response_data)
       else
