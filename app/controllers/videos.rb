@@ -133,6 +133,12 @@ private
     begin
       video.initial_processing(params[:file])
       video.finish_processing_and_queue_encodings
+      response_data = {:video_file_id => video.key, :video_filename => video.original_filename}
+      if params[:return_to]
+        redirect_to return_to_with_params(response_data)
+      else
+        render iframe_params(:location => url_with_params(params[:success_url], response_data))
+      end
     rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
       render_iframe_error(404)
     rescue Video::FormatNotRecognised
@@ -142,8 +148,6 @@ private
     rescue => e # Other error
       # TODO: Should log this error.
       render_iframe_error(500)
-    else
-      render iframe_params(:location => url_with_params(params[:success_url], {:video_file_id => video.key, :video_filename => video.original_filename}))
     end
   end
   
@@ -163,7 +167,15 @@ private
   def error_hash(code)
     {:status => code.to_s, :message => ERROR_MESSAGES[code]}
   end
-  
+
+  def render_error(code)
+    if params[:return_to]
+      redirect_to return_to_with_params(error_hash(code))
+    else
+      render_iframe_error(code)
+    end
+  end
+
   def render_iframe_error(code)
     self.status = code
     render iframe_params(:location => url_with_params(params[:error_url], error_hash(code))), :layout => false
@@ -183,5 +195,9 @@ private
   # This works with jquery.form.
   def iframe_params(options)
     "<textarea>" + options.to_json + "</textarea>"
+  end
+
+  def return_to_with_params(options)
+    params[:return_to] + (params[:return_to] =~ /\?/ ? '&' : '?') + "json=" + CGI.escape(options.to_json)
   end
 end
