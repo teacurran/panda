@@ -140,14 +140,14 @@ private
         render iframe_params(:location => url_with_params(params[:success_url], response_data))
       end
     rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
-      render_iframe_error(404)
+      render_error(404)
     rescue Video::FormatNotRecognised
-      render_iframe_error(415)
+      render_error(415)
     rescue Video::ClippingError
-      render_iframe_error(422)
+      render_error(422)
     rescue => e # Other error
       # TODO: Should log this error.
-      render_iframe_error(500)
+      render_error(500)
     end
   end
   
