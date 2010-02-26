@@ -135,7 +135,7 @@ private
       video.finish_processing_and_queue_encodings
       response_data = {:status => '200', :video_file_id => video.key, :video_filename => video.original_filename}
       if params[:return_to]
-        redirect_to return_to_with_params(response_data)
+        redirect return_to_with_params(response_data)
       else
         render iframe_params(:location => url_with_params(params[:success_url], response_data))
       end
@@ -170,7 +170,7 @@ private
 
   def render_error(code)
     if params[:return_to]
-      redirect_to return_to_with_params(error_hash(code))
+      redirect return_to_with_params(error_hash(code))
     else
       render_iframe_error(code)
     end
