@@ -5,3 +5,13 @@ Merb::Config.use { |c|
   c[:reload_time] = 0.5
   c[:log_auto_flush ] = true
 }
+
+Merb::BootLoader.after_app_loads do
+  Merb::Mailer.delivery_method = :sendmail
+end
+
+Panda::Config.use do |p|
+  p[:sdb_videos_domain]     = "panda_local_panda_videos"
+  p[:sdb_users_domain]      = "panda_local_panda_users"
+  p[:sdb_profiles_domain]   = "panda_local_panda_profiles"
+end

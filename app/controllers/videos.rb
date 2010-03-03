@@ -107,6 +107,7 @@ class Videos < Application
       @results.merge! error_hash(422)
     rescue => e # Other error
       # TODO: Should log this error.
+      Merb.logger.info "Upload error: #{e.to_s}, #{e.backtrace[0..8].join("\n")}"
       @results.merge! error_hash(500)
     else
       @state = "success"

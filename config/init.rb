@@ -6,6 +6,8 @@ Gem.path.unshift(Merb.root / "gems")
 $LOAD_PATH.unshift(Merb.root / "lib")
 Merb.push_path(:lib, Merb.root / "lib") # uses **/*.rb as path glob.
 
+require 'ruby-debug'
+
 Merb::Config.use do |c|
   c[:session_id_key] = 'panda'
   c[:session_secret_key]  = '4d5e9b90d9e92c236a2300d718059aef3a9b9cbe'
@@ -30,13 +32,27 @@ require 's3_store'
 require 'simple_db'
 require 'local_store'
 
-# Check panda config
-Panda::Config.check
-
 Merb::BootLoader.after_app_loads do
+  # Check panda config
+  Panda::Config.check
+  
   unless Merb.environment == "test"
     require "config" / "aws"
-    require "config" / "mailer"
+    Panda::Setup.create_sdb_domains # This can run many times, it doesn't re-create them.
+    # Create an encoding profile. More can be found at the first url at the top of this document.
+    # Using new().save form (explicitly setting the record-key) allows us to run this as many
+    # times as we want and it just creates the same record.
+    Profile.new('Flash video SD',
+      :title => "Flash video SD",
+      :container => "flv",
+      :video_bitrate => 300,
+      :audio_bitrate => 48,
+      :width => 320,
+      :height => 240,
+      :fps => 24,
+      :position => 0,
+      :player => "flash"
+    ).save
   end
   
   Store = case Panda::Config[:videos_store]
@@ -46,6 +62,10 @@ Merb::BootLoader.after_app_loads do
     FileStore.new
   else
     raise RuntimeError, "You have specified an invalid videos_store configuration option. Valid options are :s3 and :filesystem"
+  end
+  
+  if Panda::Config[:notification_email].nil? or Panda::Config[:noreply_from].nil?
+    Merb.logger.warn "No notification_email or noreply_from set in panda_init.rb - so errors will only written to the log and not emailed."
   end
   
   LocalStore.ensure_directories_exist
