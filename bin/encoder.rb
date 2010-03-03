@@ -5,29 +5,17 @@ Merb.logger.info 'Encoder awake!'
 loop do
   sleep 3
   Merb.logger.debug "Checking for messages... #{Time.now}"
-  if video = Video.next_job
-    begin
-      # Wait for stuff to show up on S3 and SimpleDB
-      sleep 10
-      video.encode
-    rescue  
-      begin
-        ErrorSender.log_and_email("encoding error", "Error encoding #{video.key}
-
-#{$!}
-
-PARENT ATTRS
-
-#{"="*60}\n#{video.parent_video.attributes.to_h.to_yaml}\n#{"="*60}
-
-ENCODING ATTRS
-
-#{"="*60}\n#{video.attributes.to_h.to_yaml}\n#{"="*60}")
-      rescue
-        Merb.logger.error "Error sending error using ErrorSender.log_and_email - very erroneous! (#{$!})"
-      end
-    end
-  end
+  Video.encode_next(
+    :processing => lambda { |video|
+      NotificationQueue.add_video(video)
+    },
+    :error => lambda { |video|
+      NotificationQueue.add_video(vide)
+    },
+    :done => lambda { |video|
+      NotificationQueue.add_video(video)
+    }
+  )
 end
 
 # recipe = "ffmpeg -i $input_file$ -ar 22050 -ab 48 -vcodec h264 -f mp4 -b #{video[:video_bitrate]} -r #{inspector.fps} -s" 

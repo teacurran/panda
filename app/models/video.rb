@@ -1,9 +1,64 @@
 class Video < SimpleDB::Base
-  
+  class VideoError < StandardError; end
+  class NotValid < VideoError; end
+  class NoFileSubmitted < VideoError; end
+  class FormatNotRecognised < VideoError; end
+  class ClippingError < VideoError; end
+  class EncodingError < VideoError; end
+
   include LocalStore
   
   set_domain Panda::Config[:sdb_videos_domain]
   properties :filename, :original_filename, :parent, :status, :duration, :container, :width, :height, :video_codec, :video_bitrate, :fps, :audio_codec, :audio_bitrate, :audio_sample_rate, :profile, :profile_title, :player, :queued_at, :started_encoding_at, :encoding_time, :encoded_at, :last_notification_at, :notification, :updated_at, :created_at, :thumbnail_position
+
+  # Generally you'll want to call like this:
+  # Video.encode_next(
+  #   :processing => lambda { |video|
+  #     NotificationQueue.add_video(video)
+  #   },
+  #   :error => lambda { |video|
+  #     NotificationQueue.add_video(vide)
+  #   },
+  #   :done => lambda { |video|
+  #     NotificationQueue.add_video(video)
+  #   }
+  # )
+  def self.encode_next(callbacks={})
+    raise ArgumentError, "Video.encode_next receives a hash of callbacks: :begin, :success and :error." unless callbacks.is_a?(Hash)
+    raise ArgumentError, "callbacks should all receive one argument" callbacks.values.all? {|c| c.arity == 1}
+    if video = Video.next_job
+      # Wait a bit for the file to arrive on S3
+      sleep 12 if Panda::Config[:videos_store] == :s3
+      begin
+        callbacks[:begin].call(video) if callbacks.has_key?(:begin)
+        video.encode!
+        callbacks[:success].call(video) if callbacks.has_key?(:success)
+      rescue EncodingError
+        callbacks[:error].call(video) if callbacks.has_key?(:error)
+      rescue Object => e
+        Notification.add_program_error("Error encoding #{video.key}
+
+          PARENT ATTRS
+          ==================================================
+          #{video.parent_video.attributes.to_h.to_yaml}
+          ==================================================
+
+          ENCODING ATTRS
+          ==================================================
+          #{video.attributes.to_h.to_yaml}
+          ==================================================
+          
+
+          RUBY ERROR:
+          ==================================================
+          #{e.to_s}
+          #{e.backtrace[0..19].join("\n")}
+          ==================================================
+          ".gsub(/\n */,"\n")
+        )
+      end
+    end
+  end
   
   # TODO: state machine for status
   # An original video can either be 'empty' if it hasn't had the video file uploaded, or 'original' if it has
@@ -68,7 +123,8 @@ class Video < SimpleDB::Base
   end
   
   def self.outstanding_notifications
-    self.query("['notification' != 'success' and 'notification' != 'error'] intersection ['status' = 'success' or 'status' = 'error']") #  sort 'last_notification_at' asc
+    notify_for = [:processing, :success, :error]
+    self.query("['notification' != 'success' and 'notification' != 'error'] intersection [" + notify_for.map {|n| "'status' = '#{n}'"}.join(' or ') + "]") #  sort 'last_notification_at' asc
   end
   
   # def self.recently_completed_videos
@@ -334,19 +390,6 @@ class Video < SimpleDB::Base
     return true
   end
   
-  # Exceptions
-  
-  class VideoError < StandardError; end
-  class NotificationError < StandardError; end
-  
-  # 404
-  class NotValid < VideoError; end
-  
-  # 500
-  class NoFileSubmitted < VideoError; end
-  class FormatNotRecognised < VideoError; end
-  class ClippingError < VideoError; end
-  
   # API
   # ===
   
@@ -376,7 +419,7 @@ class Video < SimpleDB::Base
       r[:video][:encodings] = self.encodings.map {|e| e.show_response}
     end
     
-    # Reutrn extra attributes if the video is an encoding
+    # Return extra attributes if the video is an encoding
     if self.encoding?
       r[:video].merge! \
         [:parent, :profile, :profile_title, :encoded_at, :encoding_time].
@@ -403,56 +446,6 @@ class Video < SimpleDB::Base
   def time_to_send_notification?
     return true if self.last_notification_at.nil?
     Time.now > (self.last_notification_at + self.notification_wait_period)
-  end
-  
-  def send_notification
-    raise "You can only send the status of encodings" unless self.encoding?
-    
-    self.last_notification_at = Time.now
-    begin
-      self.parent_video.send_status_update_to_client
-      self.notification = 'success'
-      self.save
-      Merb.logger.info "Notification successful"
-    rescue
-      # Increment num retries
-      if self.notification.to_i >= Panda::Config[:notification_retries]
-        self.notification = 'error'
-      else
-        self.notification = self.notification.to_i + 1
-      end
-      self.save
-      raise
-    end
-  end
-  
-  def send_status_update_to_client
-    Merb.logger.info "Sending notification to #{self.state_update_url}"
-    
-    params = {"video" => self.show_response.to_yaml}
-    
-    uri = URI.parse(self.state_update_url)
-    http = Net::HTTP.new(uri.host, uri.port)
-
-    req = Net::HTTP::Post.new(uri.path)
-    if uri.user and uri.password
-     req.basic_auth uri.user, uri.password
-    end
-    req.form_data = params
-    response = http.request(req)
-    
-    unless response.code.to_i == 200# and response.body.match /ok/
-      ErrorSender.log_and_email("notification error", "Error sending notification for parent video #{self.key} to #{self.state_update_url} (POST)
-
-REQUEST PARAMS
-#{"="*60}\n#{params.to_yaml}\n#{"="*60}
-
-RESPONSE
-#{response.code} #{response.message} (#{response.body.length})
-#{"="*60}\n#{response.body}\n#{"="*60}")
-      
-      raise NotificationError
-    end
   end
   
   # Encoding
@@ -641,7 +634,7 @@ RESPONSE
       FileUtils.rm parent_obj.tmp_filepath
       
       Merb.logger.info "Encoding successful"
-    rescue
+    rescue Object
       self.notification = 0
       self.status = "error"
       self.save
@@ -649,7 +642,7 @@ RESPONSE
       
       Merb.logger.error "Unable to transcode file #{self.key}: #{$!.class} - #{$!.message}"
         
-      raise
+      raise EncodingError
     end
   end
 

@@ -22,7 +22,13 @@ dependency 'merb-assets'
 dependency 'merb-mailer'
 dependency 'merb_helpers'
 dependency 'uuid'
+
 dependency 'amazon_sdb'
+dependency 'dm-core'
+dependency 'dm-migrations'
+dependency 'dm-types'
+dependency 'do_sqlite3'
+
 dependency 'activesupport'
 dependency 'mhs-rvideo', :require_as => 'rvideo'
 dependency 'aws-s3', :require_as => 'aws/s3'
@@ -33,6 +39,9 @@ require 'simple_db'
 require 'local_store'
 
 Merb::BootLoader.after_app_loads do
+  DataMapper.setup(:default, YAML.load_file("config/database.yml")[Merb.environment.to_sym])
+  Notification.auto_upgrade!
+
   # Check panda config
   Panda::Config.check
   

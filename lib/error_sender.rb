@@ -1,16 +1,28 @@
 class ErrorSender
-  def self.log_and_email(subj, text)
+  def self.email_and_log(subj, text)
+    email(subj, text)
+    Merb.logger.error "#{subj}\n#{text}"
+  end
+
+  def self.email(subj, text, to=nil)
+    to, subj, text = subj, text, to if !to.nil?
     if Panda::Config[:notification_email].nil? or Panda::Config[:noreply_from].nil?
-      Merb.logger.warn "No notification_email or noreply_from set in panda_init.rb so this error will only written to the log and not emailed."
+      begin
+        m = Merb::Mailer.new(
+          :to      => to || Panda::Config[:notification_email],
+          :from    => Panda::Config[:noreply_from],
+          :subject => "Panda [#{Panda::Config[:account_name]}] #{subj}",
+          :text    => text
+        )
+        m.deliver!
+        Merb.logger.info "Email notification sent to #{Panda::Config[:notification_email]}"
+      rescue Object
+        Merb.logger.error "!! Error - Email notification FAILED to send to #{Panda::Config[:notification_email]}!"
+        return false
+      end
+      return true
     else
-      m = Merb::Mailer.new :to      => Panda::Config[:notification_email],
-                           :from    => Panda::Config[:noreply_from],
-                           :subject => "Panda [#{Panda::Config[:account_name]}] #{subj}",
-                           :text    => text
-      m.deliver!
-      Merb.logger.info "Error email sent to #{Panda::Config[:notification_email]}"
+      return false
     end
-    
-    Merb.logger.error text
   end
 end

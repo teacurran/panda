@@ -7,16 +7,9 @@
 Merb.logger.info 'Notifier awake!'
 
 loop do
-  sleep 3
-  Merb.logger.debug "Checking for messages... #{Time.now}"
-  if encodings = Video.outstanding_notifications
-    encodings.each do |encoding|
-      begin
-        encoding.send_notification if encoding.time_to_send_notification?
-      rescue
-        Merb.logger.error "ERROR (#{$!.to_s}) sending notification for #{encoding.key}. Waiting #{encoding.notification_wait_period}s before trying again."
-      end
-      sleep 1
-    end
+  Merb.logger.debug "Checking for notifications... #{Time.now}"
+  Notifier.pending_notifications.each do |notification|
+    notification.send_notification!
   end
+  sleep 3
 end
