@@ -64,6 +64,7 @@ class SimpleDB
     end
 
     def put(key, value)
+      reload! if self.attributes.size == 0 and @new_record == false
       self.attributes.put(key, value, :replace => true)
     end
     
