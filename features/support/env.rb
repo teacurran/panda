@@ -20,4 +20,13 @@ require "merb_cucumber/world/webrat"
 def Spec.run? ; true; end
 
 Merb.start_environment(:testing => true, :adapter => 'runner', :environment => ENV['MERB_ENV'] || 'cucumber')
-  
+
+Before do
+  Video.query.each do |v|
+    v.delete_from_store
+    v.destroy!
+  end
+  Notification.all.each do |n|
+    n.destroy!
+  end
+end

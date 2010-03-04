@@ -6,6 +6,7 @@ class Notification
   property :id, Serial
   property :mode, Enum[:http_post, :email]
   property :uri, String
+  property :state, String
   property :body, Yaml
   property :retry_count, Integer, :default => 0
   property :last_retried_at, DateTime
@@ -15,18 +16,16 @@ class Notification
     def pending_notifications
       all(
         :sent_at => nil,
-        :retry_count.lt => Panda::Config[:notification_retries].to_i
-      ).select {|n|
-        # Select only fresh ones or those that have waited long enough to retry
-        n.last_retried_at.nil? || n.last_retried_at < Time.now - (Panda::Config[:notification_frequency] * n.retry_count)
-      }
+        :retry_count.lte => Panda::Config[:notification_retries].to_i
+      ).select {|n| n.retry? }
     end
     
     def add_video(video)
       create(
+        :state => video.status,
         :mode => :http_post,
-        :uri => video.state_update_url,
-        :body => {"video" => video.show_response.to_yaml}
+        :uri => video.parent_video.state_update_url,
+        :body => {"video" => video.parent_video.show_response.to_yaml}
       )
     end
 
@@ -41,7 +40,7 @@ class Notification
 
   def send_notification!
     begin
-      Merb.logger.info "Sending notification to #{self.state_update_url}"
+      Merb.logger.info "Sending notification to #{uri}"
       if send("send_#{mode}_notification!")
         self.sent_at = Time.now
       else
@@ -56,6 +55,10 @@ class Notification
     end
   end
 
+  def retry?
+    last_retried_at.nil? || last_retried_at < Time.now - (Panda::Config[:notification_frequency] * retry_count)
+  end
+  
   private
   
   def send_email_notification!

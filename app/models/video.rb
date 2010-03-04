@@ -9,33 +9,40 @@ class Video < SimpleDB::Base
   include LocalStore
   
   set_domain Panda::Config[:sdb_videos_domain]
-  properties :filename, :original_filename, :parent, :status, :duration, :container, :width, :height, :video_codec, :video_bitrate, :fps, :audio_codec, :audio_bitrate, :audio_sample_rate, :profile, :profile_title, :player, :queued_at, :started_encoding_at, :encoding_time, :encoded_at, :last_notification_at, :notification, :updated_at, :created_at, :thumbnail_position
+  properties :filename, :original_filename, :parent, :status, :duration, :container, :width, :height, :video_codec, :video_bitrate, :fps, :audio_codec, :audio_bitrate, :audio_sample_rate, :profile, :profile_title, :player, :queued_at, :started_encoding_at, :encoding_time, :encoded_at, :updated_at, :created_at, :thumbnail_position
 
   # Generally you'll want to call like this:
   # Video.encode_next(
   #   :processing => lambda { |video|
-  #     NotificationQueue.add_video(video)
+  #     Notification.add_video(video)
   #   },
   #   :error => lambda { |video|
-  #     NotificationQueue.add_video(vide)
+  #     Notification.add_video(vide)
   #   },
-  #   :done => lambda { |video|
-  #     NotificationQueue.add_video(video)
+  #   :success => lambda { |video|
+  #     Notification.add_video(video)
   #   }
   # )
   def self.encode_next(callbacks={})
     raise ArgumentError, "Video.encode_next receives a hash of callbacks: :begin, :success and :error." unless callbacks.is_a?(Hash)
-    raise ArgumentError, "callbacks should all receive one argument" callbacks.values.all? {|c| c.arity == 1}
+    raise ArgumentError, "callbacks should all receive one argument" unless callbacks.values.all? {|c| c.arity == 1}
+    # Wait a bit for SDB
+    sleep 4
     if video = Video.next_job
-      # Wait a bit for the file to arrive on S3
-      sleep 12 if Panda::Config[:videos_store] == :s3
+      # Wait longer for the file to arrive on S3
+      sleep 5 if Panda::Config[:videos_store] == :s3
       begin
-        callbacks[:begin].call(video) if callbacks.has_key?(:begin)
+        video.status = "processing"
+        video.save
+        callbacks[:processing].call(video) if callbacks.has_key?(:processing)
         video.encode!
         callbacks[:success].call(video) if callbacks.has_key?(:success)
+        return video
       rescue EncodingError
         callbacks[:error].call(video) if callbacks.has_key?(:error)
+        return false
       rescue Object => e
+        puts "#{e.inspect}\n#{e.backtrace.join("\n")}"
         Notification.add_program_error("Error encoding #{video.key}
 
           PARENT ATTRS
@@ -56,7 +63,10 @@ class Video < SimpleDB::Base
           ==================================================
           ".gsub(/\n */,"\n")
         )
+        return false
       end
+    else
+      return nil
     end
   end
   
@@ -122,17 +132,12 @@ class Video < SimpleDB::Base
     self.query("['status' = 'queued']").first
   end
   
-  def self.outstanding_notifications
-    notify_for = [:processing, :success, :error]
-    self.query("['notification' != 'success' and 'notification' != 'error'] intersection [" + notify_for.map {|n| "'status' = '#{n}'"}.join(' or ') + "]") #  sort 'last_notification_at' asc
-  end
-  
   # def self.recently_completed_videos
   #   self.query("['status' = 'success']")
   # end
   
   def parent_video
-    self.class.find(self.parent)
+    self.class.find(parent) if encoding? && !self.parent.nil?
   end
   
   def encodings
@@ -436,18 +441,6 @@ class Video < SimpleDB::Base
     }
   end
   
-  # Notifications
-  # =============
-  
-  def notification_wait_period
-    (Panda::Config[:notification_frequency] * self.notification.to_i)
-  end
-  
-  def time_to_send_notification?
-    return true if self.last_notification_at.nil?
-    Time.now > (self.last_notification_at + self.notification_wait_period)
-  end
-  
   # Encoding
   # ========
   
@@ -596,10 +589,8 @@ class Video < SimpleDB::Base
     transcoder.execute(recipe, recipe_options(self.parent_video.tmp_filepath, self.tmp_filepath))
   end
   
-  def encode
+  def encode!
     raise "You can only encode encodings" unless self.encoding?
-    self.status = "processing"
-    self.save
     
     begun_encoding = Time.now
     
@@ -623,7 +614,6 @@ class Video < SimpleDB::Base
       self.clipping.set_as_default
       self.upload_thumbnail_selection
       
-      self.notification = 0
       self.status = "success"
       self.encoded_at = Time.now
       self.encoding_time = (Time.now - begun_encoding).to_i
@@ -635,7 +625,6 @@ class Video < SimpleDB::Base
       
       Merb.logger.info "Encoding successful"
     rescue Object
-      self.notification = 0
       self.status = "error"
       self.save
       FileUtils.rm parent_obj.tmp_filepath
@@ -644,6 +633,15 @@ class Video < SimpleDB::Base
         
       raise EncodingError
     end
+  end
+
+  def inspect
+    attributes
+    super
+  end
+
+  def ==(other)
+    other.is_a?(Video) && key == other.key
   end
 
 end

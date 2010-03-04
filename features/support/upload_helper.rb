@@ -7,9 +7,11 @@ module Dyn
         webrat.post "/api/videos", "file" => video_file
         if webrat.response.body =~ /\{\"status\":\"(\d+)\",\"message\":\"([^\"]+)\"/
           # Inject the response status and message from the iframe JSON response. :)
-          webrat.response.instance_variable_set(:@status, $1.to_i)
+          status = $1.to_i
+          webrat.response.instance_variable_set(:@status, status)
           webrat.response.instance_variable_set(:@message, $2)
         end
+        return webrat.response
       end
     end
   end
