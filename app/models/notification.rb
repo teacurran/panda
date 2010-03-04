@@ -13,6 +13,12 @@ class Notification
   property :sent_at, DateTime
 
   class << self
+    def notify_all!
+      pending_notifications.each do |notification|
+        notification.send_notification!
+      end
+    end
+
     def pending_notifications
       all(
         :sent_at => nil,
@@ -62,8 +68,9 @@ class Notification
   private
   
   def send_email_notification!
-    ErrorSender.email(uri, "notification error", body)
+    ErrorSender.email(uri, "notification error", body.to_yaml)
   end
+  
   def notify_email_failure
     Merb.logger.error("notification error", "Error sending #{mode} notification:
       EMAIL
@@ -94,6 +101,7 @@ class Notification
       return false
     end
   end
+  
   def notify_http_post_failure
     ErrorSender.email_and_log("notification error", "Error sending #{mode} notification:
       REQUEST

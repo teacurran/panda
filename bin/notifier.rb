@@ -8,8 +8,6 @@ Merb.logger.info 'Notifier awake!'
 
 loop do
   Merb.logger.debug "Checking for notifications... #{Time.now}"
-  Notifier.pending_notifications.each do |notification|
-    notification.send_notification!
-  end
+  Notification.notify_all!
   sleep 3
 end

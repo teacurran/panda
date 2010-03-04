@@ -1,15 +1,14 @@
 class ErrorSender
   def self.email_and_log(subj, text)
-    email(subj, text)
+    email Panda::Config[:notification_email], subj, text
     Merb.logger.error "#{subj}\n#{text}"
   end
 
-  def self.email(subj, text, to=nil)
-    to, subj, text = subj, text, to if !to.nil?
+  def self.email(to, subj, text)
     if Panda::Config[:notification_email].nil? or Panda::Config[:noreply_from].nil?
       begin
         m = Merb::Mailer.new(
-          :to      => to || Panda::Config[:notification_email],
+          :to      => to,
           :from    => Panda::Config[:noreply_from],
           :subject => "Panda [#{Panda::Config[:account_name]}] #{subj}",
           :text    => text
