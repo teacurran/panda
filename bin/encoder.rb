@@ -7,13 +7,13 @@ loop do
   Merb.logger.debug "Checking for messages... #{Time.now}"
   Video.encode_next(
     :processing => lambda { |video|
-      NotificationQueue.add_video(video)
+      Notification.add_video(video)
     },
     :error => lambda { |video|
-      NotificationQueue.add_video(vide)
+      Notification.add_video(vide)
     },
-    :done => lambda { |video|
-      NotificationQueue.add_video(video)
+    :success => lambda { |video|
+      Notification.add_video(video)
     }
   )
 end

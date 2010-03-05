@@ -17,4 +17,4 @@ public/images/tmp/*jpg
 public/store
 public/tmp
 config/error_messages.yml
-config/notifications.sqlite
+*.sqlite

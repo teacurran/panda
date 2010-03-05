@@ -4,7 +4,7 @@ Feature: Sending notifications
   I want to be notified of things in Panda
   So that I know exactly what's going on with my videos
   
-  Scenario: Running the notifier
+  Scenario: Running the notifier with email notifications queued
     Given the following notifications have been queued:
       | mode  | state    | body                 | uri                   |
       | email | error    | There was an error   | bill@tedadventure.com |  

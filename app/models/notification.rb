@@ -39,7 +39,7 @@ class Notification
       create(
         :mode => :email,
         :uri => Panda::Config[:notification_email],
-        :body => msg
+        :body => {:message => msg}
       )
     end
   end
@@ -68,7 +68,7 @@ class Notification
   private
   
   def send_email_notification!
-    ErrorSender.email(uri, "notification error", body.to_yaml)
+    ErrorSender.email(uri, "notification error", body.is_a?(String) ? body : body.to_yaml)
   end
   
   def notify_email_failure
@@ -85,17 +85,18 @@ class Notification
   
   def send_http_post_notification!
     begin
-      uri = URI.parse(uri)
-      http = Net::HTTP.new(uri.host, uri.port)
-      req = Net::HTTP::Post.new(uri.path)
-      if uri.user and uri.password
-        req.basic_auth uri.user, uri.password
+      our_uri = URI.parse(uri)
+      http = Net::HTTP.new(our_uri.host, our_uri.port)
+      req = Net::HTTP::Post.new(our_uri.path)
+      if our_uri.user and our_uri.password
+        req.basic_auth our_uri.user, our_uri.password
       end
       req.form_data = body
       response = http.request(req)
 
       return response.code.to_i == 200
-    rescue Object
+    rescue Object => e
+      Merb.logger.error "ERROR Posting to #{uri}: #{e.inspect}\n#{e.backtrace[0..14].join("\n")}"
       # Any problems, return false.
       # Could have issue with ruby's Timeout class...?
       return false
@@ -109,14 +110,6 @@ class Notification
       #{uri}
 
       #{body.inspect}
-      ==================================================
-
-      RESPONSE
-      ==================================================
-      #{response.code} #{response.message}
-      Content-Length: #{response.body.length}
-
-      #{response.body}
       ==================================================
       ".gsub(/\n */,"\n")
     )
