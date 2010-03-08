@@ -627,7 +627,11 @@ class Video < SimpleDB::Base
     rescue Object
       self.status = "error"
       self.save
-      FileUtils.rm parent_obj.tmp_filepath
+      
+      if File.exists?(parent_obj.tmp_filepath)
+        FileUtils.rm parent_obj.tmp_filepath
+      end
+        
       
       Merb.logger.error "Unable to transcode file #{self.key}: #{$!.class} - #{$!.message}"
         
