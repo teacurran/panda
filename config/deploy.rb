@@ -13,7 +13,8 @@ set :deploy_via, :remote_cache
 set :symlinks, {
   "config/panda_init.rb" => "config/panda_init.rb",
   "config/mailer.rb" => "config/mailer.rb",
-  "config/error_messages.yml" => "config/error_messages.yml"
+  "config/error_messages.yml" => "config/error_messages.yml",
+  "db" => "db"
 }
 
 set :use_sudo, false

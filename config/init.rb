@@ -2,6 +2,9 @@
 Gem.clear_paths
 Gem.path.unshift(Merb.root / "gems")
 
+# Make sure the db/ directory exists, this will not overwrite symlinks
+FileUtils.mkdir_p(Merb.root / "db")
+
 # Autoload from lib
 $LOAD_PATH.unshift(Merb.root / "lib")
 Merb.push_path(:lib, Merb.root / "lib") # uses **/*.rb as path glob.
@@ -18,7 +21,7 @@ end
 require "config" / "panda_init"
 
 # Gem dependencies
-gem "activesupport", "= 2.1.0"
+gem "activesupport", "= 2.3.5"
 require "active_support"
 
 dependency 'merb-assets'
