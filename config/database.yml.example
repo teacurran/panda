@@ -1,0 +1,19 @@
+# This is a sample database file for the DataMapper ORM
+:development: &defaults
+  :adapter: sqlite3
+  :database: db/panda-dev.sqlite3
+
+:test: &test
+  <<: *defaults
+  :database: db/panda-test.sqlite3
+
+:cucumber:
+  <<: *test
+
+:staging:
+  <<: *defaults
+  :database: db/panda-staging.sqlite3
+
+:production:
+  <<: *defaults
+  :database: db/panda.sqlite3
