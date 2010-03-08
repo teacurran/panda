@@ -627,14 +627,19 @@ class Video < SimpleDB::Base
       FileUtils.rm parent_obj.tmp_filepath
       
       Merb.logger.info "Encoding successful"
-    rescue Object
+    rescue Exception => e
+      Merb.logger.info <<-EOT.gsub(/^\s+\|/, '')
+        |Exception caught: #{e}
+        |Backtrace:
+        |#{e.backtrace.join("\n")}
+      EOT
+
       self.status = "error"
       self.save
       
       if File.exists?(parent_obj.tmp_filepath)
         FileUtils.rm parent_obj.tmp_filepath
       end
-        
       
       Merb.logger.error "Unable to transcode file #{self.key}: #{$!.class} - #{$!.message}"
         
