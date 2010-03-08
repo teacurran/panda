@@ -18,6 +18,9 @@ end
 require "config" / "panda_init"
 
 # Gem dependencies
+gem "activesupport", "= 2.1.0"
+require "active_support"
+
 dependency 'merb-assets'
 dependency 'merb-mailer'
 dependency 'merb_helpers'
@@ -29,7 +32,6 @@ dependency 'dm-migrations'
 dependency 'dm-types'
 dependency 'do_sqlite3'
 
-dependency 'activesupport'
 dependency 'mhs-rvideo', :require_as => 'rvideo'
 dependency 'aws-s3', :require_as => 'aws/s3'
 
