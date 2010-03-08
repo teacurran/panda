@@ -177,7 +177,7 @@ class Video < SimpleDB::Base
   end
   
   def state_update_url
-    Panda::Config[:state_update_url].gsub(/\:panda_id/,self.key)
+    Panda::Config[:state_update_url].gsub(/\:video_file_id/,self.key)
   end
   
   def duration_str

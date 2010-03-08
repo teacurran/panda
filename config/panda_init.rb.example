@@ -10,12 +10,13 @@ Panda::Config.use do |p|
   # generate a random string to use as the key.
   
   p[:api_key]               = "SECRET_KEY_FOR_PANDA_API"
+  p[:upload_redirect_url]   = "http://panda.local/videos/:video_file_id/uploaded"
   
   # ============================================================
   # Local storage. Public should be accessible from the internet
   # ============================================================
   
-  p[:private_tmp_path]      = "/var/tmp/videos"
+  p[:private_tmp_path]      = Merb.root / "public/tmp/videos"
   # Defaults to tmp within the Panda public directory. Optionally configurable
   # p[:public_tmp_path]       = "/var/www/images"
   # p[:public_tmp_url]        = "http://images.app.com"
@@ -77,7 +78,7 @@ Panda::Config.use do |p|
   
   # p[:notification_retries]  = 6
   # p[:notification_frequency]= 10
-  # p[:state_update_url]      = "http://YOUR_APP/videos/:panda_id/status_update"
+  # p[:state_update_url]      = "http://YOUR_APP/videos/:video_file_id/status_update"
   p[:state_update_url]      = "STATE_UPDATE_URL"
   
   # ================================================
