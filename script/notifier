@@ -1,1 +1,1 @@
-merb -r bin/notifier.rb -d -p 6001 -e notifier
+merb -r bin/notifier.rb -d -p 6001
