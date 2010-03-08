@@ -403,6 +403,9 @@ class Video < SimpleDB::Base
   # See the specs for an example of what this returns
   # 
   def show_response
+    # reload all encodings to ensure statuses are up to date!
+    self.encodings.each{ |e| e.reload! }
+    
     r = {
       :video => {
         :id => self.key,
