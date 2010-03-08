@@ -7,10 +7,8 @@ Merb::Config.use { |c|
   c[:log_level] = :info
   c[:log_file] = Merb.log_path + "/encoder.log"
 }
-
-Merb::BootLoader.after_app_loads do
-  Merb::Mailer.delivery_method = :sendmail
-end
+Merb::BootLoader::Dependencies.update_logger
+Merb::Mailer.delivery_method = :sendmail
 
 Merb.logger.info "Starting encoder @ #{Time.now} in env #{Merb.env}"
 
