@@ -1,7 +1,5 @@
 # merb -r "panda/bin/encoder.rb"
 
-Merb.logger.info "Starting encoder @ #{Time.now}"
-
 Merb::Config.use { |c|
   c[:exception_details] = true
   c[:log_auto_flush ] = true
@@ -9,10 +7,12 @@ Merb::Config.use { |c|
   c[:log_level] = :info
   c[:log_file] = Merb.log_path + "/encoder.log"
 }
+
 Merb::BootLoader.after_app_loads do
   Merb::Mailer.delivery_method = :sendmail
 end
 
+Merb.logger.info "Starting encoder @ #{Time.now} in env #{Merb.env}"
 
 loop do
   sleep 3
