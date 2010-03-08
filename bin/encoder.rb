@@ -10,7 +10,7 @@ loop do
       Notification.add_video(video)
     },
     :error => lambda { |video|
-      Notification.add_video(vide)
+      Notification.add_video(video)
     },
     :success => lambda { |video|
       Notification.add_video(video)

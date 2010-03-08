@@ -72,7 +72,7 @@ class Notification
   end
   
   def notify_email_failure
-    Merb.logger.error("notification error", "Error sending #{mode} notification:
+    Merb.logger.error("notification error\nError sending #{mode} notification:
       EMAIL
       ==================================================
       #{uri}
