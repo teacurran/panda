@@ -9,8 +9,6 @@ FileUtils.mkdir_p(Merb.root / "db")
 $LOAD_PATH.unshift(Merb.root / "lib")
 Merb.push_path(:lib, Merb.root / "lib") # uses **/*.rb as path glob.
 
-require 'ruby-debug'
-
 Merb::Config.use do |c|
   c[:session_id_key] = 'panda'
   c[:session_secret_key]  = '4d5e9b90d9e92c236a2300d718059aef3a9b9cbe'
