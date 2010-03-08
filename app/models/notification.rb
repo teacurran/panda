@@ -46,7 +46,7 @@ class Notification
 
   def send_notification!
     begin
-      Merb.logger.info "Sending notification to #{uri}"
+      Merb.logger.info "Sending notification to #{uri}, state: #{state}"
       if send("send_#{mode}_notification!")
         self.sent_at = Time.now
       else
