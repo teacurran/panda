@@ -13,19 +13,27 @@ Merb::Mailer.delivery_method = :sendmail
 Merb.logger.info "Starting encoder @ #{Time.now} in env #{Merb.env}"
 
 loop do
-  sleep 3
-  Merb.logger.debug "Checking for messages... #{Time.now}"
-  Video.encode_next(
-    :processing => lambda { |video|
-      Notification.add_video(video)
-    },
-    :error => lambda { |video|
-      Notification.add_video(video)
-    },
-    :success => lambda { |video|
-      Notification.add_video(video)
-    }
-  )
+  begin
+    sleep 3
+    Merb.logger.debug "Checking for messages... #{Time.now}"
+    Video.encode_next(
+      :processing => lambda { |video|
+        Notification.add_video(video)
+      },
+      :error => lambda { |video|
+        Notification.add_video(video)
+      },
+      :success => lambda { |video|
+        Notification.add_video(video)
+      }
+    )
+  rescue Exception => e
+    Merb.logger.info <<-EOT.gsub(/^\s+\|/, '')
+      |Exception caught: #{e}
+      |Backtrace:
+      |#{e.backtrace.join("\n")}
+    EOT
+  end
 end
 
 # recipe = "ffmpeg -i $input_file$ -ar 22050 -ab 48 -vcodec h264 -f mp4 -b #{video[:video_bitrate]} -r #{inspector.fps} -s" 

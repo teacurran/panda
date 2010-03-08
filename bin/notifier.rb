@@ -17,7 +17,16 @@ Merb::Mailer.delivery_method = :sendmail
 Merb.logger.info "Starting notifier @ #{Time.now} in env #{Merb.env}"
 
 loop do
-  Merb.logger.debug "Checking for notifications... #{Time.now}"
-  Notification.notify_all!
-  sleep 3
+  begin
+    Merb.logger.debug "Checking for notifications... #{Time.now}"
+    Notification.notify_all!
+    sleep 3
+  rescue Exception => e
+    Merb.logger.info <<-EOT.gsub(/^\s+\|/, '')
+      |Exception caught: #{e}
+      |Backtrace:
+      |#{e.backtrace.join("\n")}
+    EOT
+  end
 end
+
