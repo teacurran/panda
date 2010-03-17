@@ -1,22 +1,30 @@
 namespace :deploy do
-  desc "Restart Merb"
-  task :restart, :roles => :app do
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda restart"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.encoder restart"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.notifier restart"
+  desc "Immortalize Merb & services (cron job makes sure they keep running)"
+  task :immortalize_daemons, :roles => :app do
+    sudo "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --log-location /home/prod/.immortalize setup"
   end
 
-  desc "Start Merb"
+  desc "Start Merb & services"
   task :start, :roles => :app do
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda start"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.encoder start"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.notifier start"
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4000 1>>log/#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4001 -r bin/encoder.rb 1>>log/encoder.#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4002 -r bin/notifier.rb 1>>log/notifier.#{merb_env}.log 2>&1\""
   end
   
-  desc "Stop Merb"
+  desc "Stop Merb & services"
   task :stop, :roles => :app do
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda stop"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.encoder stop"
-    sudo "MERB_ENV=#{merb_env} /etc/init.d/panda.notifier stop"
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4000 1>>log/#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4001 -r bin/encoder.rb 1>>log/encoder.#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4002 -r bin/notifier.rb 1>>log/notifier.#{merb_env}.log 2>&1\""
+  end
+
+  desc "Restart Merb & services"
+  task :restart, :roles => :app do
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4000 1>>log/#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4000 1>>log/#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4001 -r bin/encoder.rb 1>>log/encoder.#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4001 -r bin/encoder.rb 1>>log/encoder.#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize stop \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4002 -r bin/notifier.rb 1>>log/notifier.#{merb_env}.log 2>&1\""
+    run "/opt/ruby-enterprise-1.8.7-2009.10/bin/immortalize --notify=rw-staging@mutuallyhuman.com run \"cd \\\"#{current_path}\\\"; /opt/ruby-enterprise-1.8.7-2009.10/bin/merb -e #{merb_env} -p 4002 -r bin/notifier.rb 1>>log/notifier.#{merb_env}.log 2>&1\""
   end
 end

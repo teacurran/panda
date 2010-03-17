@@ -163,18 +163,6 @@ namespace :dev do
   task :bootstrap do
     system("./script/bootstrap")
   end
-
-  desc "Adds Panda, encoder, and notifier to the rc.d startup sequence."
-  task :install_system_daemons do
-    unless File.exists?("config/rcenv")
-      `echo -n staging > config/rcenv`
-      warn "config/rcenv not found. Created with default value 'staging'."
-    end
-    rcenv = File.read("config/rcenv").chomp
-    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4000 > log/#{rcenv}.log 2>&1\"")
-    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4001 -r bin/encoder.rb 1>/dev/null 2>&1\"")
-    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4002 -r bin/notifier.rb 1>/dev/null 2>&1\"")
-  end
 end
 
 
