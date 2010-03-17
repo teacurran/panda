@@ -40,6 +40,12 @@ You can edit config/panda_init.rb further to your liking if you want, or just re
 
 You will have to configure config/panda\_init.rb on the server, and optionally config/error\_messages.yml.
 
-There are no system daemons to install. There is just a cron job that can be automatically installed by running:
+There are no system daemons to install. There is just a cron job, called "immortalize" that monitors the
+processes, restarts them when they quit, and notifies you when they go down more than 5 times in an hour.
+First you will need the "immortalize" rubygem installed on the server:
+
+    sudo gem install immortalize
+
+Then you can install it to a cron job by running:
 
     cap deploy:immortalize\_daemons
