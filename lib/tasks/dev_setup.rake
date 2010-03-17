@@ -127,6 +127,7 @@ namespace :dev do
     end
   end
 
+  desc "Answer questions in a wizard to write out your Panda configuration."
   task :panda_config_wizard do
     $api_key = get_input("Please enter an API key for this Panda installation. (Record it somewhere to use in your API implementation)")
     # private tmp path is okay, but it needs to exist and be writable
@@ -140,7 +141,7 @@ namespace :dev do
     $access_key_id = get_input("Your AWS access key")
     $secret_access_key = get_input("Your AWS secret key")
     $sdb_prefix = get_input("An optional prefix to your Panda domains on SDB (Enter for none)")
-    $state_update_url = get_input("The URL Panda should ping with notification updates, such as encoding events (use :panda_id for the video id)")
+    $state_update_url = get_input("The URL Panda should ping with notification updates, such as encoding events (use :video_file_id for the video id)")
     puts "Configuring Panda..."
     panda_config = File.read('config/panda_init.rb.example')
     panda_config.gsub!(/SECRET_KEY_FOR_PANDA_API/, $api_key)
@@ -165,12 +166,40 @@ namespace :dev do
 
   desc "Adds Panda, encoder, and notifier to the rc.d startup sequence."
   task :install_system_daemons do
-    system("sudo cp config/rc-scripts/* /etc/init.d")
-    system("sudo update-rc.d panda defaults")
-    system("sudo update-rc.d panda.encoder defaults")
-    system("sudo update-rc.d panda.notifier defaults")
+    unless File.exists?("config/rcenv")
+      `echo -n staging > config/rcenv`
+      warn "config/rcenv not found. Created with default value 'staging'."
+    end
+    rcenv = File.read("config/rcenv").chomp
+    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4000 > log/#{rcenv}.log 2>&1\"")
+    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4001 -r bin/encoder.rb 1>/dev/null 2>&1\"")
+    system("sudo immortalize --notify=rw-staging@mutuallyhuman.com \"cd \\\"#{Merb.root}\\\"; merb -e #{rcenv} -p 4002 -r bin/notifier.rb 1>/dev/null 2>&1\"")
   end
 end
+
+
+desc "Starts the extra daemons"
+task :start_daemons do
+  encoder_res = `merb -r bin/encoder.rb -d -p 5001`
+  encoder_pid = encoder_res.gsub(/\D/,'').to_i
+  `echo #{encoder_pid} > log/encoder.pid`
+  puts "Started encoder."
+  notifier_res = `merb -r bin/notifier.rb -d -p 5002`
+  notifier_pid = notifier_res.gsub(/\D/,'').to_i
+  `echo #{notifier_pid} > log/notifier.pid`
+  puts "Started notifier."
+end
+
+desc "Stops the extra daemons"
+task :stop_daemons do
+  encoder_pid = `cat log/encoder.pid`.chomp
+  notifier_pid = `cat log/notifier.pid`.chomp
+  `kill -INT #{encoder_pid} & rm log/encoder.pid`
+  puts "Stopped encoder."
+  `kill -INT #{notifier_pid} & rm log/notifier.pid`
+  puts "Stopped notifier."
+end
+
 
 def get_input(msg)
   $stdout << "#{msg}: "

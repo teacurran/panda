@@ -6,8 +6,8 @@ describe Video do
     
     Panda::Config.use do |p|
       p[:private_tmp_path] = '/tmp'
-      p[:state_update_url] = "http://localhost:4000/videos/:panda_id/status"
-      p[:upload_redirect_url] = "http://localhost:4000/videos/:panda_id/done"
+      p[:state_update_url] = "http://localhost:4000/videos/:video_file_id/status"
+      p[:upload_redirect_url] = "http://localhost:4000/videos/:video_file_id/done"
       p[:videos_domain] = "videos.pandastream.com"
       p[:thumbnail_height_constrain] = 125
     end
