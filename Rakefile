@@ -8,7 +8,11 @@ require 'rake/testtask'
 require 'spec/rake/spectask'
 require 'fileutils'
 require 'merb-core'
+
+gem "activesupport", "= 2.3.5"
+gem "rubigen", "= 1.5.4"
 require 'rubigen'
+
 include FileUtils
 
 # Load the basic runtime dependencies; this will include 
