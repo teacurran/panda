@@ -16,3 +16,5 @@ Panda::Config.use do |p|
   p[:sdb_users_domain]      = "panda_local_panda_users-test"
   p[:sdb_profiles_domain]   = "panda_local_panda_profiles-test"
 end
+
+$FFMPEG = '/usr/local/bin/ffmpeg'

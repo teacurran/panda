@@ -78,18 +78,29 @@ class Videos < Application
     end
   end
   
-  # POST /videos/:id/upload
-  # Use: HQ, http/iframe upload
-  # def upload
-  #   @video = Video.find(params[:id])
-  #   receive_upload_for(@video)
-  # end
-
   # POST /videos/upload
   # This receives an upload of a new video before any associated record was received.
   def upload
     @video = Video.create_empty
-    receive_upload_for(@video)
+    begin
+      @video.initial_processing(params[:file])
+      @video.finish_processing_and_queue_encodings
+      response_data = {:status => '200', :video_file_id => @video.key, :video_filename => @video.original_filename}
+      if params[:return_to]
+        redirect return_to_with_params(response_data)
+      else
+        render iframe_params(:location => url_with_params(params[:success_url], response_data))
+      end
+    rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
+      render_error(404)
+    rescue Video::FormatNotRecognised
+      render_error(415)
+    rescue Video::ClippingError
+      render_error(422)
+    rescue => e # Other error
+      # TODO: Should log this error.
+      render_error(500)
+    end
   end
   
   def upload_via_api
@@ -107,7 +118,7 @@ class Videos < Application
       @results.merge! error_hash(422)
     rescue => e # Other error
       # TODO: Should log this error.
-      Merb.logger.info "Upload error: #{e.to_s}, #{e.backtrace[0..8].join("\n")}"
+      Merb.logger.error "Upload error: #{e.to_s}, #{e.backtrace[0..8].join("\n")}"
       @results.merge! error_hash(500)
     else
       @state = "success"
@@ -131,25 +142,6 @@ private
 
   # TODO: figure how to #finish_processing_and_queue_encodings using #render_then_call while still capturing Video::ClippingErrors which occur during processing
   def receive_upload_for(video)
-    begin
-      video.initial_processing(params[:file])
-      video.finish_processing_and_queue_encodings
-      response_data = {:status => '200', :video_file_id => video.key, :video_filename => video.original_filename}
-      if params[:return_to]
-        redirect return_to_with_params(response_data)
-      else
-        render iframe_params(:location => url_with_params(params[:success_url], response_data))
-      end
-    rescue Amazon::SDB::RecordNotFoundError, Video::NotValid # No empty video object exists
-      render_error(404)
-    rescue Video::FormatNotRecognised
-      render_error(415)
-    rescue Video::ClippingError
-      render_error(422)
-    rescue => e # Other error
-      # TODO: Should log this error.
-      render_error(500)
-    end
   end
   
   def set_video
