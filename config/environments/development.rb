@@ -9,5 +9,3 @@ Merb::Config.use { |c|
 Merb::BootLoader.after_app_loads do
   Merb::Mailer.delivery_method = :sendmail
 end
-
-$FFMPEG = '/usr/local/bin/ffmpeg'

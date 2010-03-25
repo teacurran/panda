@@ -17,6 +17,7 @@ end
 
 # Load Panda config
 require "config" / "panda_init"
+raise "$FFMPEG not set or not executable as set in config/panda_init.rb" unless File.exists?($FFMPEG.to_s) && File.executable?($FFMPEG.to_s)
 
 # Gem dependencies
 gem "activesupport", "= 2.3.5"

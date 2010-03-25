@@ -152,6 +152,8 @@ namespace :dev do
     panda_config.gsub!(/AWS_SECRET_ACCESS_KEY/, $secret_access_key)
     panda_config.gsub!(/SDBPREFIX/, $sdb_prefix)
     panda_config.gsub!(/STATE_UPDATE_URL/, $state_update_url)
+    ffmpeg_bin = `which ffmpeg`.chomp
+    panda_config.gsub!(/\$FFMPEG = '.*'$/, "$FFMPEG = '#{ffmpeg_bin}'")
     File.open('config/panda_init.rb', 'w') {|f| f << panda_config }
   end
 

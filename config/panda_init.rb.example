@@ -89,3 +89,5 @@ Panda::Config.use do |p|
   # p[:notification_email]    = "me@mydomain.com"
   # p[:noreply_from]          = "panda@mydomain.com"
 end
+
+$FFMPEG = '/usr/bin/ffmpeg'

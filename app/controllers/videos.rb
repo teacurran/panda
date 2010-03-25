@@ -80,6 +80,7 @@ class Videos < Application
   
   # POST /videos/upload
   # This receives an upload of a new video before any associated record was received.
+  # TODO: figure how to #finish_processing_and_queue_encodings using #render_then_call while still capturing Video::ClippingErrors which occur during processing
   def upload
     @video = Video.create_empty
     begin
@@ -140,10 +141,6 @@ class Videos < Application
   
 private
 
-  # TODO: figure how to #finish_processing_and_queue_encodings using #render_then_call while still capturing Video::ClippingErrors which occur during processing
-  def receive_upload_for(video)
-  end
-  
   def set_video
     # Throws Amazon::SDB::RecordNotFoundError if video cannot be found
     @video = Video.find(params[:id])
