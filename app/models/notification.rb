@@ -26,13 +26,24 @@ class Notification
       ).select {|n| n.retry? }
     end
     
+    # This will maintain only one notification record per video.
+    # As a new notification comes along, we can just forget any previously-missed
+    # notifications and simply start over with the newer, more up-to-date one.
     def add_video(video)
-      create(
-        :state => video.status,
+      notification = {
         :mode => :http_post,
         :uri => video.parent_video.state_update_url,
-        :body => {"video" => video.parent_video.show_response.to_yaml}
-      )
+        :state => video.status,
+        :body => {"video" => video.parent_video.show_response.to_yaml},
+        :retry_count => 0,
+        :last_retried_at => nil,
+        :sent_at => nil
+      }
+      if existing = first(:uri => notification[:uri])
+        existing.update(notification)
+      else
+        create(notification)
+      end
     end
 
     def add_program_error(msg)
