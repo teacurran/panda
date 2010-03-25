@@ -34,7 +34,7 @@ dependency 'dm-migrations'
 dependency 'dm-types'
 dependency 'do_sqlite3'
 
-dependency 'mhs-rvideo', :require_as => 'rvideo'
+dependency 'mhs-rvideo', '= 0.9.7', :require_as => 'rvideo'
 dependency 'aws-s3', :require_as => 'aws/s3'
 
 # Dependencies in lib - not autoloaded in time so require them explicitly

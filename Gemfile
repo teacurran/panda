@@ -14,4 +14,4 @@ gem "dm-types", "= 0.10.2"
 
 gem "do_sqlite3", "= 0.10.1"
 
-
+gem "mhs-rvideo", "= 0.9.7"
