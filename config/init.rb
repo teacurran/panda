@@ -43,6 +43,7 @@ require 'simple_db'
 require 'local_store'
 
 Merb::BootLoader.after_app_loads do
+  Merb.logger.info "Loading database for #{Merb.environment.to_sym.inspect} environment..."
   DataMapper.setup(:default, YAML.load_file("config/database.yml")[Merb.environment.to_sym])
   Notification.auto_upgrade!
 
