@@ -1,7 +1,13 @@
 namespace :deploy do
   desc "Install rubygems needed for .. EVERTHING"
   task :install_gems do
-    sudo "echo . && cd #{current_path} && sudo bundle install"
+    run <<-BASH
+      if [ `which bundle` ]; then 
+        cd #{current_path} && bundle install ; 
+      else  
+        echo 'Please install bundler 0.9.7 rubygem' ;
+      fi
+    BASH
   end
 
   desc "Sets up S3 bucket, SDB domains, video player, admin user, and encoding Profile"
