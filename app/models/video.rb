@@ -613,9 +613,6 @@ class Video < SimpleDB::Base
       end
       
       self.upload_to_store
-      self.generate_thumbnail_selection
-      self.clipping.set_as_default
-      self.upload_thumbnail_selection
       
       self.status = "success"
       self.encoded_at = Time.now
