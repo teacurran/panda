@@ -3,7 +3,7 @@ namespace :deploy do
   task :install_gems do
     run <<-BASH
       if [ `which bundle` ]; then 
-        cd #{current_path} && bundle install ; 
+        cd #{current_path} && bundle check || bundle install ; 
       else  
         echo 'Please install bundler 0.9.7 rubygem' ;
       fi
