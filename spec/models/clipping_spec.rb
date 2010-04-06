@@ -106,7 +106,7 @@ describe Clipping do
       @clipping_file = 'foo'
       @clipping.stub!(:public_filepath).and_return(@clipping_file)
       @inspector = mock(RVideo::Inspector)
-      RVideo::Inspector.stub!(:new).with(:file => @video_file).and_return(@inspector)
+      RVideo::Inspector.stub!(:new).with(:file => @video_file, :ffmpeg_binary => $FFMPEG).and_return(@inspector)
       File.stub!(:exists?).and_return(true)
     end
     
@@ -122,7 +122,7 @@ describe Clipping do
       @video.should_receive(:tmp_filepath).twice.and_return(@video_file)
       @clipping.should_receive(:public_filepath).and_return(@clipping_file)
       
-      RVideo::Inspector.should_receive(:new).with(:file => @video_file).and_return(@inspector)
+      RVideo::Inspector.should_receive(:new).with(:file => @video_file, :ffmpeg_binary => $FFMPEG).and_return(@inspector)
       @inspector.should_receive(:capture_frame).with("40%", @clipping_file)
       
       @clipping.capture

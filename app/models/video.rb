@@ -335,7 +335,7 @@ class Video < SimpleDB::Base
   def read_metadata
     Merb.logger.info "#{self.key}: Reading metadata of video file"
     
-    inspector = RVideo::Inspector.new(:file => self.tmp_filepath)
+    inspector = RVideo::Inspector.new(:file => self.tmp_filepath, :ffmpeg_binary => $FFMPEG)
     
     raise FormatNotRecognised unless inspector.valid? and inspector.video?
     

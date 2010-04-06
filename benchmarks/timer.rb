@@ -16,7 +16,7 @@ Benchmark.bm do |x|
   x.report {
     n.times { |i|
       positions.each { |p|
-        t = RVideo::Inspector.new(:file => 'foo.mpg')
+        t = RVideo::Inspector.new(:file => 'foo.mpg', :ffmpeg_binary => $FFMPEG)
         t.capture_frame("#{p}%", "bar_#{i}_#{p}.jpg")
       }
     }
@@ -24,7 +24,7 @@ Benchmark.bm do |x|
   
   x.report {
     n.times { |i|
-      t = RVideo::Inspector.new(:file => 'foo.mpg')
+      t = RVideo::Inspector.new(:file => 'foo.mpg', :ffmpeg_binary => $FFMPEG)
       positions.each { |p|
         t.capture_frame("#{p}%", "bar2_#{i}_#{p}.jpg")
       }
