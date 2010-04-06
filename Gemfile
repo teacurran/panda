@@ -16,4 +16,4 @@ gem "do_sqlite3", "= 0.10.1"
 
 gem "mhs-rvideo", "= 0.9.7"
 
-gem "immortalize", "> 0.2.1"
+gem "immortalize", ">= 0.2.1"
