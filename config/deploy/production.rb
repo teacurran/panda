@@ -5,5 +5,7 @@ set(:domain) {
 }
 ssh_options[:port] = 45001
 set :branch, "master"
-# For merb this will make little difference for this project...
-set :merb_env, 'production'
+
+set :immortalize_cmd, "/opt/ruby-enterprise-1.8.7-2010.01/bin/immortalize" # note 2010.01
+set :merb_env, 'staging' # For merb this will make little difference for this project...
+set :merb_cmd, "/opt/ruby-enterprise-1.8.7-2010.01/bin/merb"
