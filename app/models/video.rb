@@ -115,7 +115,7 @@ class Video < SimpleDB::Base
     self.query("['status' = 'original'] intersection ['created_at' != ''] sort 'created_at' desc", :load_attrs => true) # TODO: Don't throw an exception if attrs for a record in the search can't be found - it probably means its just been deleted
   end
 
-  def self.each_successfull_encoding_since(datetime=nil, &block)
+  def self.each_successful_encoding_since(datetime=nil, &block)
     self.each("['status' = 'success'] intersection ['created_at' >= '#{datetime.strftime("%Y-%M-%D")}']", &block)
   end
   def self.each_successful_encoding(&block)
