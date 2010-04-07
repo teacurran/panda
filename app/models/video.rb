@@ -425,12 +425,14 @@ class Video < SimpleDB::Base
       [:filename, :original_filename, :width, :height, :duration].each do |k|
         r[:video][k] = self.send(k)
       end
+    end
+
+    # Only include the screenshot and thumbnail for the original video
+    if self.status == 'original'
       r[:video][:screenshot]  = self.clipping.filename(:screenshot)
       r[:video][:thumbnail]   = self.clipping.filename(:thumbnail)
-    end
     
-    # If the video is a parent, also return the data for all its encodings
-    if self.status == 'original'
+      # If the video is a parent, also return the data for all its encodings
       r[:video][:encodings] = self.encodings.map {|e| e.show_response}
     end
     
