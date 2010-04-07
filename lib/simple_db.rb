@@ -99,7 +99,17 @@ class SimpleDB
       self.new(key, self.domain.get_attributes(key).attributes, false)
     end
     
-    # TODO: support next token
+    def self.each(expr="", query_options={})
+      raise ArgumentError, "must include a block!" unless block_given?
+      result_set = self.domain.query(query_options.merge({:expr => expr}))
+      begin
+        result_set.each do |r|
+          v = self.new(r.key, r.attributes, false)
+          yield v
+        end
+      end while result_set.instance_variable_get(:@next_token) != "" && result_set = self.domain.query(query_options.merge({:expr => expr, :next_token => result_set.instance_variable_get(:@next_token)}))
+    end
+
     def self.query(expr="", query_options={})
       result = []
       self.domain.query(query_options.merge({:expr => expr})).each do |i|
