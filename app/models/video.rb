@@ -116,7 +116,7 @@ class Video < SimpleDB::Base
   end
 
   def self.each_successful_encoding_since(datetime=nil, &block)
-    self.each("['status' = 'success'] intersection ['created_at' >= '#{datetime.strftime("%Y-%M-%D")}']", &block)
+    self.each("['status' = 'success'] and ['created_at' >= '#{datetime.strftime("%Y-%M-%D")}']", &block)
   end
   def self.each_successful_encoding(&block)
     self.each("['status' = 'success']", &block)
