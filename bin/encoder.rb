@@ -14,16 +14,18 @@ Merb.logger.info "Starting encoder @ #{Time.now} in env #{Merb.env}"
 
 loop do
   begin
-    sleep 3
     Merb.logger.debug "Checking for messages... #{Time.now}"
     Video.encode_next(
       :processing => lambda { |video|
+        sleep 4 # Wait a bit for SDB
         Notification.add_video(video)
       },
       :error => lambda { |video|
+        sleep 4 # Wait a bit for SDB
         Notification.add_video(video)
       },
       :success => lambda { |video|
+        sleep 4 # Wait a bit for SDB
         Notification.add_video(video)
       }
     )
