@@ -52,7 +52,21 @@ Merb::BootLoader.after_app_loads do
   
   unless Merb.environment == "test"
     require "config" / "aws"
-    Panda::Setup.create_sdb_domains # This can run many times, it doesn't re-create them.
+
+    # SimpleDb isn't always available to establish a connection, so rather than fail on the first
+    # attempt, try to connect at least 3 times first 
+    tries = 0
+    loop do
+      begin
+        Panda::Setup.create_sdb_domains # This can run many times, it doesn't re-create them.
+        break
+      rescue Amazon::SDB::ServerError => ex
+        raise ex if tries == 3
+      end
+      tries += 1
+      sleep 0.25
+    end
+
     # Create an encoding profile. More can be found at the first url at the top of this document.
     # Using new().save form (explicitly setting the record-key) allows us to run this as many
     # times as we want and it just creates the same record.
