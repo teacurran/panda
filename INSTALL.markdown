@@ -11,7 +11,7 @@ Another possibly helpful resource:
 
 ## Download and checkout Panda itself
 
-    git clone git://github.com/dyn/panda.git
+    git clone git://github.com/rl/panda.git
     cd panda
     # git checkout origin/stable
     git checkout -b origin/auto-install

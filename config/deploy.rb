@@ -6,7 +6,7 @@ set :default_stage, 'staging'
 require 'capistrano/ext/multistage'
 
 set :application, "rw-panda"
-set :repository,  "git@github.com:dyn/panda.git"
+set :repository,  "git@github.com:rl/panda.git"
 set(:deploy_to) { "/home/#{user}/public_html/#{application}" }
 set :deploy_via, :remote_cache
 
