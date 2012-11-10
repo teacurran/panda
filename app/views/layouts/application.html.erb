@@ -7,7 +7,7 @@
     <script type="text/javascript" charset="utf-8" src="/javascripts/jquery.js"></script>
     <script type="text/javascript" charset="utf-8" src="/javascripts/swfobject2.js"></script>
 	  
-  	<%= catch_content :head %>
+	  <%= yield(:head) %>
   </head>
   <body>
 	<div id="container">
@@ -27,7 +27,10 @@
 		</div>
 	
 		<div id="main">
-		    <%= catch_content :for_layout %>
+
+			<%= render 'layouts/messages' %>
+			<%= yield %>
+
 		</div>
 	</div>
   </body>

@@ -1,16 +1,18 @@
 class User < AWS::Record::Base
-  set_domain config.sdb_users_domain
-  properties :password, :email, :salt, :crypted_password, :api_key, :updated_at, :created_at
+
+  set_domain_name Panda::Application.config.sdb_users_domain
+  string_attr :username
+  string_attr :password
+  string_attr :email
+  string_attr :salt
+  string_attr :crypted_password
+  string_attr :api_key
+  string_attr :updated_at
+  string_attr :created_at
+
   attr_accessor :password, :password_confirmation
   
-  def login
-    self.new_record ? '' : self.key
-  end
-  
-  def login=(v)
-    self.key = v
-  end
-  
+
   def self.authenticate(login, password)
     begin
       u = self.find(login) # Login is the key of the SimpleDB object

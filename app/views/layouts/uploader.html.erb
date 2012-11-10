@@ -5,9 +5,10 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="/stylesheets/uploader.css" type="text/css" media="screen" charset="utf-8" />
     <%= javascript_include_tag 'jquery', 'jquery.form', 'jquery.nginxUploadProgress', 'auto_upload' %>
-	<%= catch_content :head %>
+	  <%= yield(:head) %>
   </head>
   <body>
-    <%= catch_content :for_layout %>
+		<%= render 'layouts/messages' %>
+		<%= yield %>
   </body>
 </html>
