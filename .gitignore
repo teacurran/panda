@@ -18,3 +18,7 @@ public/store
 public/tmp
 config/error_messages.yml
 *.sqlite
+.idea/*
+atlassian-ide-plugin.xml
+panda.iml
+.bundle/*

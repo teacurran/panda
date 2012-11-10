@@ -42,7 +42,7 @@ class Clipping
   end
   
   def resize
-    constrain_to_height = Panda::Config[:thumbnail_height_constrain].to_f
+    constrain_to_height = config.thumbnail_height_constrain.to_f
     
     height = constrain_to_height
     width = (@video.width.to_f/@video.height.to_f) * height

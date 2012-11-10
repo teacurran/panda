@@ -1,4 +1,4 @@
-class Video < SimpleDB::Base
+class Video < AWS::Record::Base
   class VideoError < StandardError; end
   class NotValid < VideoError; end
   class NoFileSubmitted < VideoError; end
@@ -8,7 +8,7 @@ class Video < SimpleDB::Base
 
   include LocalStore
   
-  set_domain Panda::Config[:sdb_videos_domain]
+  set_domain config.sdb_videos_domain
   properties :filename, :original_filename, :parent, :status, :duration, :container, :width, :height, :video_codec, :video_bitrate, :fps, :audio_codec, :audio_bitrate, :audio_sample_rate, :profile, :profile_title, :player, :queued_at, :started_encoding_at, :encoding_time, :encoded_at, :updated_at, :created_at, :thumbnail_position
 
   # Generally you'll want to call like this:
@@ -30,7 +30,7 @@ class Video < SimpleDB::Base
     sleep 4
     if video = Video.next_job
       # Wait longer for the file to arrive on S3
-      sleep 5 if Panda::Config[:videos_store] == :s3
+      sleep 5 if config.videos_store == 'S3'
       begin
         video.status = "processing"
         video.save
@@ -184,7 +184,7 @@ class Video < SimpleDB::Base
   end
   
   def state_update_url
-    Panda::Config[:state_update_url].gsub(/\:video_file_id/,self.key)
+    config.state_update_url.gsub(/\:video_file_id/,self.key)
   end
   
   def duration_str
@@ -261,7 +261,7 @@ class Video < SimpleDB::Base
   
   # Returns configured number of 'middle points', for example [25,50,75]
   def thumbnail_percentages
-    n = Panda::Config[:choose_thumbnail]
+    n = config.choose_thumbnail
     
     return [50] if n == false
     
@@ -580,7 +580,7 @@ class Video < SimpleDB::Base
       tmp_mp4box_filepath = "/tmp/#{self.filename}"
       FileUtils.rm(tmp_mp4box_filepath) if File.exists?(tmp_mp4box_filepath) # rm, otherwise we end up with multiple video streams when we encode a few times!!
 
-      FileUtils.cd(Panda::Config[:private_tmp_path]) do #so any temp files get put in the right directory
+      FileUtils.cd(config.private_tmp_path) do #so any temp files get put in the right directory
         %x(MP4Box -add #{temp_video_output_file}#video #{tmp_mp4box_filepath})
         %x(MP4Box -add #{temp_audio_output_file}#audio #{tmp_mp4box_filepath})
         %x(MP4Box -inter 500 #{tmp_mp4box_filepath})

@@ -22,7 +22,7 @@ class Notification
     def pending_notifications
       all(
         :sent_at => nil,
-        :retry_count.lte => Panda::Config[:notification_retries].to_i
+        :retry_count.lte => config.notification_retries.to_i
       ).select {|n| n.retry? }
     end
     
@@ -49,7 +49,7 @@ class Notification
     def add_program_error(msg)
       create(
         :mode => :email,
-        :uri => Panda::Config[:notification_email],
+        :uri => config.notification_email,
         :body => {:message => msg}
       )
     end
@@ -63,7 +63,7 @@ class Notification
       else
         self.retry_count += 1
         self.last_retried_at = Time.now
-        if retry_count >= Panda::Config[:notification_retries].to_i
+        if retry_count >= config.notification_retries.to_i
           # Send a notification of the failure ONLY AFTER we've retried enough times.
           send("notify_#{mode}_failure")
         end

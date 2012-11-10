@@ -6,7 +6,7 @@ class Videos < Application
   ERROR_MESSAGES = YAML.load_file(Merb.root / 'config' / 'error_messages.yml')
 
   def index
-    provides :html, :xml, :yaml
+    respond_to :html, :xml, :yaml
     
     @videos = Video.all
     
@@ -14,7 +14,7 @@ class Videos < Application
   end
 
   def show
-    provides :html, :xml, :yaml
+    respond_to :html, :xml, :yaml
     
     case content_type
     when :html
@@ -46,19 +46,19 @@ class Videos < Application
   # Use: HQ
   def destroy
     @video.obliterate!
-    redirect "/videos"
+    redirect_to "/videos"
   end
 
   # Use: HQ, API
   def create
-    provides :html, :xml, :yaml
+    respond_to :html, :xml, :yaml
     
     @video = Video.create_empty
     Merb.logger.info "#{@video.key}: Created video"
     
     case content_type
     when :html
-      redirect "/videos/upload_form"
+      redirect_to "/videos/upload_form"
     when :xml
       headers.merge!({'Location'=> "/videos/#{@video.key}"})
       @video.create_response.to_simple_xml
@@ -88,7 +88,7 @@ class Videos < Application
       @video.finish_processing_and_queue_encodings
       response_data = {:status => '200', :video_file_id => @video.key, :video_filename => @video.original_filename}
       if params[:return_to]
-        redirect return_to_with_params(response_data)
+        redirect_to return_to_with_params(response_data)
       else
         render iframe_params(:location => url_with_params(params[:success_url], response_data))
       end
@@ -136,7 +136,7 @@ class Videos < Application
   # TODO: Why do we need this method?
   def add_to_queue
     @video.add_to_queue
-    redirect "/videos/#{@video.key}"
+    redirect_to "/videos/#{@video.key}"
   end
   
 private
@@ -160,7 +160,7 @@ private
 
   def render_error(code)
     if params[:return_to]
-      redirect return_to_with_params(error_hash(code))
+      redirect_to return_to_with_params(error_hash(code))
     else
       render_iframe_error(code)
     end

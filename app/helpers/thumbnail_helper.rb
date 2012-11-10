@@ -1,5 +1,3 @@
-module Merb
-  module ThumbnailHelper
+module ThumbnailHelper
 
-  end
-end # Merb
+end

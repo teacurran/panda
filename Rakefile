@@ -1,46 +1,7 @@
-require 'rubygems'
-Gem.clear_paths
-Gem.path.unshift(File.join(File.dirname(__FILE__), "gems"))
+#!/usr/bin/env rake
+# Add your own tasks in files placed in lib/tasks ending in .rake,
+# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
-require 'rake'
-require 'rake/rdoctask'
-require 'rake/testtask'
-require 'spec/rake/spectask'
-require 'fileutils'
-require 'merb-core'
+require File.expand_path('../config/application', __FILE__)
 
-gem "activesupport", "= 2.3.5"
-gem "rubigen", "= 1.5.4"
-require 'rubigen'
-
-include FileUtils
-
-# Load the basic runtime dependencies; this will include 
-# any plugins and therefore plugin rake tasks.
-init_env = ENV['MERB_ENV'] || 'rake'
-Merb.load_dependencies(:environment => init_env)
-     
-# Get Merb plugins and dependencies
-Merb::Plugins.rakefiles.each { |r| require r } 
-
-desc "start runner environment"
-task :merb_env do
-  Merb.start_environment(:environment => init_env, :adapter => 'runner')
-  require 'panda'
-end
-
-##############################################################################
-# ADD YOUR CUSTOM TASKS BELOW
-##############################################################################
-
-desc "Add new files to subversion"
-task :svn_add do
-   system "svn status | grep '^\?' | sed -e 's/? *//' | sed -e 's/ /\ /g' | xargs svn add"
-end
-
-RAILS_ROOT = Merb.root
-
-Dir.glob("lib/tasks/*.rake").each do |rakefile|
-  puts "Adding Rake tasks from #{rakefile}"
-  load rakefile
-end
+Panda::Application.load_tasks

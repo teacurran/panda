@@ -1,19 +1,60 @@
-source :gemcutter
+source 'https://rubygems.org'
 
-gem "activesupport", "= 2.3.5"
-gem "rubigen", "= 1.5.4"
-gem "merb-assets", "= 1.0.15"
-gem "merb-mailer", "= 1.0.15"
-gem "merb_helpers", "= 0.9.7"
-gem "uuid", "= 2.1.0"
+gem 'rails', '3.2.8'
 
-gem "amazon_sdb", "= 0.6.7"
-gem "dm-core", "= 0.10.2"
-gem "dm-migrations", "= 0.10.2"
-gem "dm-types", "= 0.10.2"
+gem 'sqlite3'
+gem 'do_sqlite3'
+gem 'aws-sdk'
 
-gem "do_sqlite3", "= 0.10.1"
+# thin webserver
+gem 'thin'
 
-gem "mhs-rvideo", "= 0.9.7"
 
-gem "immortalize", ">= 0.2.1"
+# needed for koala if we are runnign on ruby 1.8
+platform :ruby_18 do
+  #gem "system_timer", "~> 1.2.4"
+end
+
+
+group :development do
+  gem 'heroku_san'
+end
+
+group :stage do
+end
+
+group :production do
+end
+
+# Gems used only for assets and not required
+# in production environments by default.
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+
+  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
+  # gem 'therubyracer', :platforms => :ruby
+
+  gem 'uglifier', '>= 1.0.3'
+end
+
+gem 'cucumber'
+
+# below is from merb project - figure out what ones we need.
+#gem "rubigen"
+
+#gem "merb-assets"
+#gem "merb-mailer"
+#gem "merb_helpers"
+
+gem "uuid"
+
+#gem "amazon_sdb"
+gem "dm-core"
+gem "dm-migrations"
+gem "dm-types"
+
+
+gem "mhs-rvideo"
+
+#gem "immortalize"
