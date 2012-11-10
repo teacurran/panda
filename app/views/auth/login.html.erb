@@ -1,6 +1,6 @@
 <%= notice %>
 <%= form_for :user, :action => "/login", :method => :post do |f| %>
-	<p><%= f.text_field :username, :label => "Username" %></p>
+	<p><%= f.text_field :login, :label => "Username" %></p>
 	<p><%= f.password_field :password, :label => "Password" %></p>
 	<%= f.submit "Login" %>
 <% end %>

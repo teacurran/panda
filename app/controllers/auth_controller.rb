@@ -11,7 +11,8 @@ class AuthController < ActionController::Base
         redirect_to "/"
       else
         @user.login = params[:user][:login] # The login is the key of our SDB record
-        @notice = "Your username or password was incorrect."
+        flash[:error] = "Your username or password was incorrect."
+
       end
     end
     

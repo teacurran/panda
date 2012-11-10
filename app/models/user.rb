@@ -1,7 +1,6 @@
 class User < AWS::Record::Base
 
   set_domain_name Panda::Application.config.sdb_users_domain
-  string_attr :username
   string_attr :password
   string_attr :email
   string_attr :salt
@@ -12,11 +11,18 @@ class User < AWS::Record::Base
 
   attr_accessor :password, :password_confirmation
   
+  def login
+    id
+  end
+
+  def login=(v)
+    id = v
+  end
 
   def self.authenticate(login, password)
     begin
       u = self.find(login) # Login is the key of the SimpleDB object
-    rescue Amazon::SDB::RecordNotFoundError
+    rescue
       return nil
     else
       puts "#{u.crypted_password} | #{encrypt(password, u.salt)}"
